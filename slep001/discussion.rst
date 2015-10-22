@@ -280,7 +280,7 @@ readability of the code easier.
   - pipe_fit
   - fit_filter
 
-* Method to apply on new data (not alway available)
+* Method to apply on new data (not always available)
   - transform_pipe
   - pipe_transform
   - transform_filter
@@ -288,8 +288,24 @@ readability of the code easier.
 Benefits
 .........
 
+* Many usecases listed above will be implemented scikit-learn without a
+  meta-estimator, and thus will be easy to use (eg in a pipeline). Many
+  of these are patterns that we should be encouraging.
+
+* The API being more versatile, it will be easier to create
+  application-specific code or framework wrappers (ala DaskLearn) that
+  are scikit-learn compatible, and thus that can be used with the
+  parameter-selection framework. This will be especially true for ETL
+  (extract transform and load) pattern.
+
 Limitations
 ............
 
+* Introducing new methods, and a new type of estimator object:. There are
+  probably a total of **3 new methods** that will get introduced by this
+  enhancement: fit_pipe, transform_pipe, and partial_fit_pipe
+
+* Cannot solve all possible cases, and thus we will not get rid of
+  meta-estimators.
 
 
