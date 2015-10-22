@@ -10,7 +10,11 @@ Transformers that modify their target
         X_transform = estimator.transform(X)
         estimator.fit(X, y=None).transform(X) == estimator.fit_transform(X, y)
 
-    Many usecases require modifying y. How do we support this?
+    Within a chain or processing sequence of estimators, many usecases
+    require modifying y. How do we support this?
+    
+    Doing many of these things is possible "by hand". The question is:
+    how to avoid writing custom connecting logic.
 
 .. sectnum::
 
@@ -137,14 +141,24 @@ conceptual difficulty
    "data processing pipeline", but we use "heap" to avoid confusion with
    the pipeline object.
 
-   Stacks combining many steps of pipelines and meta-estimators become
+   Heaps combining many steps of pipelines and meta-estimators become
    very hard to inspect and manipulate, both for the user, and for
    pipeline-management (aka "heap-management") code. Currently, these
    difficulties are mostly in user code, so we don't see them too much in
    scikit-learn. Here are concrete examples
 
-   #. Trying to retrieve coefficients from a models estimated in a
-      "heap". Solving this problem requires 
+   #. Trying to retrieve coefficients from a model estimated in a
+      "heap". Eg: 
+      
+      * you know there is a lasso in your stack and you want to
+        get it's coef (in whatever space that resides?):
+        `pipeline.named_steps['lasso'].coef_` is possible.
+
+      * you want to retrieve the coef of the last step:
+        `pipeline.steps[-1][1].coef_` is possible.
+
+      With meta estimators this is tricky.
+      Solving this problem requires 
       https://github.com/scikit-learn/scikit-learn/issues/2562#issuecomment-27543186
       (this enhancement proposal is not advocating to solve the problem
       above, but pointing it out as an illustration)
@@ -154,19 +168,22 @@ conceptual difficulty
       that there was mostly one object to modify to do the dispatching,
       the Pipeline object.
 
-   #. A future, out-of-core "conductor" object to fit a "stack" in out of
+   #. A future, out-of-core "conductor" object to fit a "heap" in out of
       core by connecting it to a data-store would need to have a
-      representation of the stack. For instance, when chaining random
+      representation of the heap. For instance, when chaining random
       projections with Birch coresets and finally SGD, the user would
       need to specify that random projections are stateless, birch needs
       to do one pass of the data, and SGD a few. Given this information,
       the conductor could orchestrate pull the data from the data source,
       and sending it to the various steps. Such an object is much harder
       to implement if the various steps are to be combined in a heap.
+      Note that the scikit-learn pipeline can only implement a linear
+      "chain" like set of processing. For instance a One vs All will
+      never be able to be implemented in a scikit-learn pipeline.
 
-      Note that this is not a problem in non out-of-core settings, in the
-      sense that the BirchCoreSet meta-estimator would take care of doing
-      a pass on the data before feeding it to its sub estimator.
+      This is not a problem in non out-of-core settings, in the sense
+      that the BirchCoreSet meta-estimator would take care of doing a
+      pass on the data before feeding it to its sub estimator.
 
 In conclusion, meta-estimators are harder to comprehend (problem 1) and
 write (problem 2).
@@ -183,9 +200,9 @@ Option B: transformer-like that modify y
     1. Changing the semantics of transformers to modify y and return
        something more complex than a data matrix X
 
-    2. Introducing a new type of object
+    2. Introducing new methods (and a new type of object)
 
-    Their is an emerging consensus for option 2.
+    There is an emerging consensus for option 2.
 
 Proposal
 .........
@@ -229,13 +246,22 @@ Design questions
    For some usecases, test time needs to modify the number of samples
    (for instance data loading from a file). However, these will by
    construction a problem for eg cross-val-score, as they need to
-   generate a y_true. It is thus unclear that the data-loading usecases
-   can be fully integrated in the CV framework (which is not an argument
-   against enabling them).
+   generate a y_true. Indeed, the problem is the following:
 
-   For our CV framework, we need the number of samples to remain constant
-   (to have correspondence between y_pred and _true). This is an argument
-   for:
+   - To measure an error, we need y_true at the level of
+     'cross_val_score' or GridSearch
+ 
+   - y_true is created inside the pipeline by the data-loading object.
+
+   It is thus unclear that the data-loading usecases can be fully
+   integrated in the CV framework (which is not an argument against
+   enabling them).
+
+   |
+
+   For our CV framework, we need the number of samples to remain
+   constant: for each y_pred, we need a corresponding y_true. This is an
+   argument for:
     
    #. Accepting both transform and transform_pipe
 
@@ -270,20 +296,21 @@ In term of name choice, the rational would be to have method names that
 are close to 'fit' and 'transform', to make discoverability and
 readability of the code easier.
 
-* Name of the object:
+* Name of the object (referred in the docs):
   - TransformPipe
   - PipeTransformer
-  - FilterTransform
+  - TransModifier
 
 * Method to fit and apply on training 
   - fit_pipe
   - pipe_fit
   - fit_filter
+  - fit_modify
 
 * Method to apply on new data (not always available)
   - transform_pipe
   - pipe_transform
-  - transform_filter
+  - trans_modify
 
 Benefits
 .........
@@ -301,7 +328,7 @@ Benefits
 Limitations
 ............
 
-* Introducing new methods, and a new type of estimator object:. There are
+* Introducing new methods, and a new type of estimator object. There are
   probably a total of **3 new methods** that will get introduced by this
   enhancement: fit_pipe, transform_pipe, and partial_fit_pipe
 
