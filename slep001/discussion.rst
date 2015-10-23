@@ -195,7 +195,7 @@ estimator API to have a less pressing need for meta-estimators.
 Option B: transformer-like that modify y
 ------------------------------------------
 
-.. note:: Two variants of this option exist:
+.. topic:: **Two variants**
 
     1. Changing the semantics of transformers to modify y and return
        something more complex than a data matrix X
@@ -203,6 +203,20 @@ Option B: transformer-like that modify y
     2. Introducing new methods (and a new type of object)
 
     There is an emerging consensus for option 2.
+
+.. topic:: **`transform` modifying y**
+
+   Option 1 above could be implementing by allowing transform to modify
+   y. However, the return signature of transform would be unclear. 
+   
+   Do we modify all transformers to return a y (y=None for unsupervised
+   transformers that are not given y?). This sounds like leading to code
+   full of surprised and difficult to maintain from the user perspective.
+
+   We would loose the contract that the number of samples is unchanged by
+   a transformer. This contract is very useful (eg for model selection:
+   measuring error for each sample).
+
 
 Proposal
 .........
