@@ -206,7 +206,7 @@ Option B: transformer-like that modify y
 
 .. topic:: **`transform` modifying y**
 
-   Option 1 above could be implementing by allowing transform to modify
+   Variant 1 above could be implementing by allowing transform to modify
    y. However, the return signature of transform would be unclear. 
    
    Do we modify all transformers to return a y (y=None for unsupervised
@@ -217,6 +217,7 @@ Option B: transformer-like that modify y
    a transformer. This contract is very useful (eg for model selection:
    measuring error for each sample).
 
+   For these reasons, we feel new methods are necessary.
 
 Proposal
 .........
