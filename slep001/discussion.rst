@@ -223,90 +223,109 @@ Option B: transformer-like that modify y
 Proposal
 .........
 
-Introduce a `TransformPipe` type of object with the following API
+Introduce a `TransModifier` type of object with the following API
 (names are discussed below):
 
-* `X_new, y_new = estimator.fit_pipe(X, y)`
+* `X_new, y_new = estimator.fit_modify(X, y)`
 
-* `X_new, y_new = estimator.transform_pipe(X, y)`
+* `X_new, y_new = estimator.trans_modify(X, y)`
 
 Or:
 
-* `X_new, y_new, sample_props = estimator.fit_pipe(X, y)`
+* `X_new, y_new, sample_props = estimator.fit_modify(X, y)`
 
-* `X_new, y_new, sample_props = estimator.transform_pipe(X, y)`
+* `X_new, y_new, sample_props = estimator.trans_modify(X, y)`
 
 Contracts (these are weaker contracts than the transformer:
 
-* Neither `fit_pipe` nor `transform_pipe` are guarantied to keep the
+* Neither `fit_modify` nor `trans_modify` are guarantied to keep the
   number of samples unchanged.
 
-* transform_pipe is not equivalent to .fit_pipe.transform
+* `fit_modify` may not exist (questionnable)
 
-Design questions
-....................
+Design questions and difficulties
+..................................
 
-#. Should there be a fit method?
+Should there be a fit method?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   In such estimators, it may not be a good idea to call fit rather than
-   fit_pipe (for instance in coreset).
+In such estimators, it may not be a good idea to call fit rather than
+fit_modify (for instance in coreset).
 
 
-#. At test time, how does a pipeline use such an object?
+How does a pipeline use such an object?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   #. Should there be a transform method used at test time?
+In particular at test time?
 
-   #. What to do with objects that implement both `transform` and
-      `transform_pipe`?
+#. Should there be a transform method used at test time?
 
-   For some usecases, test time needs to modify the number of samples
-   (for instance data loading from a file). However, these will by
-   construction a problem for eg cross-val-score, as they need to
-   generate a y_true. Indeed, the problem is the following:
+#. What to do with objects that implement both `transform` and
+   `trans_modify`?
 
-   - To measure an error, we need y_true at the level of
-     'cross_val_score' or GridSearch
+**Creating y in a pipeline makes error measurement harder** For some
+usecases, test time needs to modify the number of samples (for instance
+data loading from a file). However, these will by construction a problem
+for eg cross-val-score, as in supervised settings, these expect a y_true.
+Indeed, the problem is the following:
+
+- To measure an error, we need y_true at the level of
+  `cross_val_score` or `GridSearchCV`
+
+- y_true is created inside the pipeline by the data-loading object.
+
+It is thus unclear that the data-loading usecases can be fully
+integrated in the CV framework (which is not an argument against
+enabling them).
+
+|
+
+For our CV framework, we need the number of samples to remain
+constant: for each y_pred, we need a corresponding y_true. 
+
+|
+
+**Proposal 1**: use transform at `predict` time.
  
-   - y_true is created inside the pipeline by the data-loading object.
+#. Objects implementing both `transform` and `trans_modify` are valid
 
-   It is thus unclear that the data-loading usecases can be fully
-   integrated in the CV framework (which is not an argument against
-   enabling them).
+#. The pipeline's `predict` method use `transform` on its intermediate
+   steps
 
-   |
+The different semantics of `trans_modify` and `transform` can be very useful,
+as `transform` keeps untouched the notion of sample, and `y_true`.
 
-   For our CV framework, we need the number of samples to remain
-   constant: for each y_pred, we need a corresponding y_true. This is an
-   argument for:
-    
-   #. Accepting both transform and transform_pipe
+|
 
-   #. Having the pipeline 'predict' use 'transform' on its
-      intermediate steps
+**Proposal 2** Modify the scoring framework
 
-   One option is to modify the scoring framework to be able to handle
-   these things, the scoring gets the output of the chain of
-   transform_pipe for y.
-   
-#. How do we deal with sample weights and other sample properties
+One option is to modify the scoring framework to be able to handle
+these things, the scoring gets the output of the chain of
+trans_modify for y. This should rely on clever code in the `score` method
+of pipeline. Maybe it should be controlled by a keyword argument on the
+pipeline, and turned off by default.
 
-   This discussion feeds in the `sample_props` discussion (that should
-   be discussed in a different enhancement proposal).
+ 
+How do we deal with sample weights and other sample properties?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   The suggestion is to have the sample properties as a dictionary of
-   arrays `sample_props`.
+This discussion feeds in the `sample_props` discussion (that should
+be discussed in a different enhancement proposal).
 
-   **Example usecase** useful to think about sample properties: coresets:
-   given (X, y) return (X_new, y_new, weights) with a much smaller number
-   of samples.
+The suggestion is to have the sample properties as a dictionary of
+arrays `sample_props`.
 
-   This example is interesting because it shows that PipeTransforms can
-   legitimately create sample properties.
+**Example usecase** useful to think about sample properties: coresets:
+given (X, y) return (X_new, y_new, weights) with a much smaller number
+of samples.
 
-   **Proposed solution**:
+This example is interesting because it shows that TransModifiers can
+legitimately create sample properties.
 
-   * PipeTransforms always return (X_new, y_new, sample_props) where
-     sample_props can be an empty dictionary.
+**Proposed solution**:
+
+TransModifiers always return (X_new, y_new, sample_props) where
+sample_props can be an empty dictionary.
 
 
 Naming suggestions
@@ -317,20 +336,20 @@ are close to 'fit' and 'transform', to make discoverability and
 readability of the code easier.
 
 * Name of the object (referred in the docs):
+  - TransModifier
   - TransformPipe
   - PipeTransformer
-  - TransModifier
 
 * Method to fit and apply on training 
+  - fit_modify
   - fit_pipe
   - pipe_fit
   - fit_filter
-  - fit_modify
 
-* Method to apply on new data (not always available)
+* Method to apply on new data
+  - trans_modify
   - transform_pipe
   - pipe_transform
-  - trans_modify
 
 Benefits
 .........
@@ -350,7 +369,7 @@ Limitations
 
 * Introducing new methods, and a new type of estimator object. There are
   probably a total of **3 new methods** that will get introduced by this
-  enhancement: fit_pipe, transform_pipe, and partial_fit_pipe
+  enhancement: fit_modify, trans_modify, and partial_fit_modify.
 
 * Cannot solve all possible cases, and thus we will not get rid of
   meta-estimators.
