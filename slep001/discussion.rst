@@ -211,7 +211,7 @@ Option B: transformer-like that modify y
    
    Do we modify all transformers to return a y (y=None for unsupervised
    transformers that are not given y?). This sounds like leading to code
-   full of surprised and difficult to maintain from the user perspective.
+   full of surprises and difficult to maintain from the user perspective.
 
    We would loose the contract that the number of samples is unchanged by
    a transformer. This contract is very useful (eg for model selection:
