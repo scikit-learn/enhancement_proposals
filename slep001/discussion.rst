@@ -63,6 +63,7 @@ Examples of usecases targetted
 #. Data loading / conversion
 
    #. Pandas in => (X, y) out
+   #. Images in => patches out
    #. Filename in => (X, y) with multiple samples (very useful in
       combination with online learning)
    #. Database query => (X, y) out
@@ -282,6 +283,10 @@ Design questions
 
    #. Having the pipeline 'predict' use 'transform' on its
       intermediate steps
+
+   One option is to modify the scoring framework to be able to handle
+   these things, the scoring gets the output of the chain of
+   transform_pipe for y.
    
 #. How do we deal with sample weights and other sample properties
 
@@ -350,4 +355,10 @@ Limitations
 * Cannot solve all possible cases, and thus we will not get rid of
   meta-estimators.
 
+TODO
+====
+
+* Implement an example doing outlier filtering
+
+* Implement an example doing data downsampling
 
