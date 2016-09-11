@@ -313,9 +313,10 @@ Subestimator types
 
 Subestimator type contains information about the way a pipeline
 should process a step with that subestimator.
-Subestimator type can be specified
 
-1. By wrapping estimator with subtype constructor call:
+Subestimator type can be specified:
+
+* By wrapping estimator with subtype constructor call:
     * when creating pipeline::
     
         Pipeline([
@@ -331,13 +332,13 @@ Subestimator type can be specified
         pipe.add_estimator('name', predictor(estimator))
         pipe.steps.replace('name', transformer(fitted(estimator)))
         pipe.steps['name'] = fitted(predictor(estimator))
-3. Using `pipe.add_*` methods::
+* Using `pipe.add_*` methods::
 
     pipe.add_transformer('transformer', Transformer())
     pipe.add_predictor('predictor', Predictor())
     pipe.add_label_transformer('l_transformer', LabelTransformer())
     pipe.add_label_predictor('l_predictor', LabelPredictor())
-2. Using special handler methods::
+* Using special handler methods::
 
     pipe.add_estimator('name1', EstimatorA()).mark_transformer()
     pipe.steps.add('name2', EstimatorB()).mark_predictor()
