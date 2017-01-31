@@ -100,26 +100,24 @@ The following are rough implementations for some existing transformers::
 Problem cases
 =============
 
-1d input
---------
+1d input / output
+-----------------
 
 The input to a transformer may be a 1-dimensional array-like. This is often the
 case for feature extractors, which may take a list of dicts, a list of strings
 or a list of files, for instance. In this case, ``get_feature_dependence``
 should spoof the existence of a single input feature, returning a matrix of
-shape ``(1, n_output_features)``
+shape ``(1, n_output_features)``.
+
+While not included in scikit-learn repository, transformers may translate one
+1-d array (or Series) into another 1-d array.  It would be appropriate in this
+context for ``get_feature_dependence`` to return ``array([[1]])``.
 
 Pandas DataFrame input
 ----------------------
 
 The input features should correspond to columns in the case that a
 transformer is designed to take a Pandas DataFrame as input.
-
-Non-array output format
------------------------
-
-There is no convention established for transformers that output something
-other than 2d (sparse) array-like.
 
 Constituent transformers lack this feature
 ------------------------------------------
