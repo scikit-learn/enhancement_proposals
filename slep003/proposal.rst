@@ -60,6 +60,7 @@ The following are rough implementations for some existing transformers::
 
     class StandardScaler:
         def get_feature_dependence(self):
+            # A diagonal matrix
             n_features = len(self.scale_)
             # csr_matrix constructed with (data, indices, indptr)
             return csr_matrix((np.ones(n_features), np.arange(n_features),
@@ -71,6 +72,7 @@ The following are rough implementations for some existing transformers::
 
     class SelectorMixin:
         def get_feature_dependence(self):
+            # One nonzero element per row
             mask = self._get_support_mask()
             idx = np.flatnonzero(mask)
             return csr_matrix((np.ones(idx.shape), idx, np.arange(len(idx) + 1)),
@@ -78,6 +80,7 @@ The following are rough implementations for some existing transformers::
 
     class Pipeline:
         def get_feature_dependence(self):
+            # Dot product of constituent dependency matrices
             D = None
             for name, trans in self.steps:
                 if trans is not None:
@@ -89,6 +92,7 @@ The following are rough implementations for some existing transformers::
 
     class FeatureUnion:
         def get_feature_dependence(self):
+            # Concatenation of constituent dependency matrices
             Ds = [trans.get_feature_dependence()
                   for _, trans in self.transformer_list
                   if trans is not None]
