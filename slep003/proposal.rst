@@ -46,6 +46,8 @@ Thus:
   produces.
 * by calling this method on the consitutent transformers of a ``FeatureUnion``
   can determine from the shapes which features derive from which transformer.
+* it is easy to inspect a transformer to see how many input features it
+  requires, making it easy to invent default feature names for transformation.
 * models can be compressed by first identifying features unused among the most
   informative features for a downstream classifier
 * determining and storing all feature names/descriptions within a pipeline may
