@@ -18,6 +18,10 @@ Probably related PR:
     https://github.com/scikit-learn/scikit-learn/pull/3886)
 - [Categorical split for decision tree #3346](
     https://github.com/scikit-learn/scikit-learn/pull/3346)
+    
+Google doc of the sample_prop discussion done during the sklearn day in paris
+the 7th June 2017:
+https://docs.google.com/document/d/1k8d4vyw87gWODiyAyQTz91Z1KOnYr6runx-N074qIBY/edit
 
 # 1. Requirement
 
@@ -257,3 +261,93 @@ Thus, these functions receive as `weights` and `groups` properties :
 | grid.score      | `weights`          | `None`      |
 | grid.split      | `weights`          | `gs_groups` |
 | cross_val_score | `weights`          | `cv_groups` |
+
+
+# 4. Alternative propositions for sample_props (06.17.17)
+The meta-estimator says which columns of sample_props they wanted to use.
+```python
+p = make_pipeline(
+     PCA(n_components=10),
+     SVC(C=10).with(<method>_<thing_the_method_knows>=<column_name>)
+)
+p.fit(X, y, sample_props={column_name=value})
+```
+
+For example :
+```python
+p = make_pipeline(
+    PCA(n_components=10),
+    SVC(C=10).with(fit_weights='weights', score_weights='weights')
+)
+p.fit(X, y, sample_props={"weights": w})
+```
+
+**Other proposals**:
+- Olivier suggests to modify `.with(...)` by `.sample_props_mapping(...)`.
+- Gael suggests to change the `.with(...)` by a property `with_props=...` like :
+```python
+p = make_pipeline(
+    PCA(n_components=10),
+    SVC(C=10),
+    with_props={
+        'svc':(<method>_<thing_the_method_knows>=<column_name>)}
+)
+```
+
+## 4.1 GridSearch + Pipeline case
+Let's consider the case of a `GridSearch` working with a `Pipeline`. 
+How we definer the `sample_props` on that case ?
+
+### Alternative 1
+Pass through everything in `GridSearchCV`:
+```python
+pipe = make_pipeline(
+    PCA(), SVC(), 
+    with_props={pca__fit_weight: 'my_weights'}})
+GridSearchCV(
+    pipe, cv=my_cv, 
+    with_props={'cv__groups': "my_groups", '*':'*')
+```
+
+A more complex example with this solution:
+```python
+pipe = make_pipeline(
+    make_union(
+        CountVectorizer(analyzer='word').with(fit_weight='my_weight'),
+        CountVectorizer(analyzer='char').with(fit_weight='my_weight')), 
+    SVC())
+ 
+GridSearchCV(
+    pipe, 
+    cv=my_cv.with(groups='my_groups'), score_weight='my_weight')
+```
+
+### Alternative 2
+Grid search manage the `sample_props` of all internal variable.
+```python
+pipe = make_pipeline(PCA(), SVC())
+GridSearchCV(
+    pipe, cv=my_cv, 
+    with_props={
+        'cv__groups': "my_groups", 
+        'estimator__pca__fit_weight': "my_weights"),
+        })
+```
+
+A more complex example with this solution:
+```python
+pipe = make_pipeline(
+    make_union(
+        CountVectorizer(analyzer='word'), 
+        CountVectorizer(analyzer='char')), 
+    SVC())
+GridSearchCV(
+    pipe, cv=my_cv, 
+    with_props={
+        'cv__groups': "my_groups", 
+        'estimator__featureunion__countvectorizer-1__fit_weight': "my_weights",
+        'estimator__featureunion__countvectorizer-2__fit_weight': "my_weights",
+        'score_weight': "my_weights",
+    }
+)
+```
