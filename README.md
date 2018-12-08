@@ -1,6 +1,4 @@
-=====================================
-Scikit-learn enhancement proposals
-=====================================
+# Scikit-learn enhancement proposals
 
 This repository is for structured discussions about large modifications
 or additions to scikit-learn.
