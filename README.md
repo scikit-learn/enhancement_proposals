@@ -10,4 +10,14 @@ possible solution. It should be a summary of the key points that drive
 the decision, and ideally converge to a draft of an API or object to be
 implemented in scikit-learn.
 
+# Proposals
 
+## In Process
+
+* [slep-001](slep001/proposal.html)
+
+## Accepted
+
+## Rejected
+
+## Template
