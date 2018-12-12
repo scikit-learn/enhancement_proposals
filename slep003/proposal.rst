@@ -1,3 +1,5 @@
+.. _slep_003:
+
 ======================================
 Consistent inspection for transformers
 ======================================
@@ -8,9 +10,8 @@ Consistent inspection for transformers
     consistently with
     ``get_feature_dependence() -> boolean (n_outputs, n_inputs)``
 
-.. sectnum::
-
-   :depth: 3
+.. contents:: Table of contents
+   :depth: 2
 
 Goals
 =====

@@ -1,3 +1,5 @@
+.. _slep_002:
+
 =================
 Dynamic pipelines
 =================
@@ -5,8 +7,6 @@ Dynamic pipelines
 .. topic:: **Summary**
 
     Create and manipulate pipelines with ease.
-
-.. sectnum::
 
 .. contents:: Table of contents
    :depth: 3

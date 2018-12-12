@@ -1,3 +1,5 @@
+.. _slep_001:
+
 =====================================
 Transformers that modify their target
 =====================================
@@ -16,13 +18,11 @@ Transformers that modify their target
     Doing many of these things is possible "by hand". The question is:
     how to avoid writing custom connecting logic.
 
-.. sectnum::
-
 .. contents:: Table of contents
    :depth: 2
 
 Rational
-==========
+========
 
 Summary of the contract of transformers
 ----------------------------------------
@@ -86,10 +86,10 @@ data-processing pipeline becomes rich, the more the data grow, the more
 the usecases above become important.
 
 Enhancements proposed
-=======================
+=====================
 
 Option A: meta-estimators
----------------------------
+-------------------------
 
 Proposal
 ........
@@ -194,7 +194,7 @@ powerful pattern. The discussion here is about extending a bit the
 estimator API to have a less pressing need for meta-estimators.
 
 Option B: transformer-like that modify y
-------------------------------------------
+----------------------------------------
 
 .. topic:: **Two variants**
 
@@ -244,10 +244,10 @@ Contracts (these are weaker contracts than the transformer:
 * `fit_modify` may not exist (questionnable)
 
 Design questions and difficulties
-..................................
+.................................
 
 Should there be a fit method?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In such estimators, it may not be a good idea to call fit rather than
 fit_modify (for instance in coreset).
@@ -352,7 +352,7 @@ readability of the code easier.
   - pipe_transform
 
 Benefits
-.........
+........
 
 * Many usecases listed above will be implemented scikit-learn without a
   meta-estimator, and thus will be easy to use (eg in a pipeline). Many
@@ -365,7 +365,7 @@ Benefits
   (extract transform and load) pattern.
 
 Limitations
-............
+...........
 
 * Introducing new methods, and a new type of estimator object. There are
   probably a total of **3 new methods** that will get introduced by this
@@ -380,4 +380,3 @@ TODO
 * Implement an example doing outlier filtering
 
 * Implement an example doing data downsampling
-
