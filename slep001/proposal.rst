@@ -14,7 +14,7 @@ Transformers that modify their target
 
     Within a chain or processing sequence of estimators, many usecases
     require modifying y. How do we support this?
-    
+
     Doing many of these things is possible "by hand". The question is:
     how to avoid writing custom connecting logic.
 
@@ -71,7 +71,7 @@ Examples of usecases targetted
 #. Aggregate statistics over multiple samples
 
    #. Windowing-like functions on time-series
-  
+
    In a sense, these are dodgy with scikit-learn's cross-validation API
    that knows nothing about sample structure. But the refactor of the CV
    API is really helping in this regard.
@@ -135,7 +135,7 @@ conceptual difficulty
    an almost case-by-case basis, and for the advanced user, that needs to
    maintain a set of case-specific code
 
-#. The "estimator heap" problem. 
+#. The "estimator heap" problem.
 
    Here the word heap is used to denote the multiple pipelines and
    meta-estimators. It corresponds to what we would naturally call a
@@ -149,17 +149,17 @@ conceptual difficulty
    scikit-learn. Here are concrete examples
 
    #. Trying to retrieve coefficients from a model estimated in a
-      "heap". Eg: 
-      
+      "heap". Eg:
+
       * you know there is a lasso in your stack and you want to
         get it's coef (in whatever space that resides?):
-        `pipeline.named_steps['lasso'].coef_` is possible.
+        ``pipeline.named_steps['lasso'].coef_`` is possible.
 
       * you want to retrieve the coef of the last step:
-        `pipeline.steps[-1][1].coef_` is possible.
+        ``pipeline.steps[-1][1].coef_`` is possible.
 
       With meta estimators this is tricky.
-      Solving this problem requires 
+      Solving this problem requires
       https://github.com/scikit-learn/scikit-learn/issues/2562#issuecomment-27543186
       (this enhancement proposal is not advocating to solve the problem
       above, but pointing it out as an illustration)
@@ -205,11 +205,11 @@ Option B: transformer-like that modify y
 
     There is an emerging consensus for option 2.
 
-.. topic:: **`transform` modifying y**
+.. topic:: **``transform`` modifying y**
 
    Variant 1 above could be implementing by allowing transform to modify
-   y. However, the return signature of transform would be unclear. 
-   
+   y. However, the return signature of transform would be unclear.
+
    Do we modify all transformers to return a y (y=None for unsupervised
    transformers that are not given y?). This sounds like leading to code
    full of surprises and difficult to maintain from the user perspective.
@@ -223,25 +223,25 @@ Option B: transformer-like that modify y
 Proposal
 .........
 
-Introduce a `TransModifier` type of object with the following API
+Introduce a ``TransModifier`` type of object with the following API
 (names are discussed below):
 
-* `X_new, y_new = estimator.fit_modify(X, y)`
+* ``X_new, y_new = estimator.fit_modify(X, y)``
 
-* `X_new, y_new = estimator.trans_modify(X, y)`
+* ``X_new, y_new = estimator.trans_modify(X, y)``
 
 Or:
 
-* `X_new, y_new, sample_props = estimator.fit_modify(X, y)`
+* ``X_new, y_new, sample_props = estimator.fit_modify(X, y)``
 
-* `X_new, y_new, sample_props = estimator.trans_modify(X, y)`
+* ``X_new, y_new, sample_props = estimator.trans_modify(X, y)``
 
 Contracts (these are weaker contracts than the transformer:
 
-* Neither `fit_modify` nor `trans_modify` are guarantied to keep the
+* Neither ``fit_modify`` nor ``trans_modify`` are guarantied to keep the
   number of samples unchanged.
 
-* `fit_modify` may not exist (questionnable)
+* ``fit_modify`` may not exist (questionnable)
 
 Design questions and difficulties
 .................................
@@ -260,8 +260,8 @@ In particular at test time?
 
 #. Should there be a transform method used at test time?
 
-#. What to do with objects that implement both `transform` and
-   `trans_modify`?
+#. What to do with objects that implement both ``transform`` and
+   ``trans_modify``?
 
 **Creating y in a pipeline makes error measurement harder** For some
 usecases, test time needs to modify the number of samples (for instance
@@ -270,7 +270,8 @@ for eg cross-val-score, as in supervised settings, these expect a y_true.
 Indeed, the problem is the following:
 
 - To measure an error, we need y_true at the level of
-  `cross_val_score` or `GridSearchCV`
+  `sklearn.model_selection.cross_val_score` or
+  `sklearn.model_selection.GridSearchCV`
 
 - y_true is created inside the pipeline by the data-loading object.
 
@@ -281,19 +282,19 @@ enabling them).
 |
 
 For our CV framework, we need the number of samples to remain
-constant: for each y_pred, we need a corresponding y_true. 
+constant: for each y_pred, we need a corresponding y_true.
 
 |
 
-**Proposal 1**: use transform at `predict` time.
- 
-#. Objects implementing both `transform` and `trans_modify` are valid
+**Proposal 1**: use transform at ``predict`` time.
 
-#. The pipeline's `predict` method use `transform` on its intermediate
+#. Objects implementing both ``transform`` and ``trans_modify`` are valid
+
+#. The pipeline's ``predict`` method use ``transform`` on its intermediate
    steps
 
-The different semantics of `trans_modify` and `transform` can be very useful,
-as `transform` keeps untouched the notion of sample, and `y_true`.
+The different semantics of ``trans_modify`` and ``transform`` can be very useful,
+as ``transform`` keeps untouched the notion of sample, and ``y_true``.
 
 |
 
@@ -301,19 +302,19 @@ as `transform` keeps untouched the notion of sample, and `y_true`.
 
 One option is to modify the scoring framework to be able to handle
 these things, the scoring gets the output of the chain of
-trans_modify for y. This should rely on clever code in the `score` method
+trans_modify for y. This should rely on clever code in the ``score`` method
 of pipeline. Maybe it should be controlled by a keyword argument on the
 pipeline, and turned off by default.
 
- 
+
 How do we deal with sample weights and other sample properties?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This discussion feeds in the `sample_props` discussion (that should
+This discussion feeds in the ``sample_props`` discussion (that should
 be discussed in a different enhancement proposal).
 
 The suggestion is to have the sample properties as a dictionary of
-arrays `sample_props`.
+arrays ``sample_props``.
 
 **Example usecase** useful to think about sample properties: coresets:
 given (X, y) return (X_new, y_new, weights) with a much smaller number
@@ -340,7 +341,7 @@ readability of the code easier.
   - TransformPipe
   - PipeTransformer
 
-* Method to fit and apply on training 
+* Method to fit and apply on training
   - fit_modify
   - fit_pipe
   - pipe_fit

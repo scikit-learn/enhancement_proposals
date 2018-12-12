@@ -265,7 +265,7 @@ different routes definitions :
     cross_val_score(grid, X, y, cv=LeaveOneLabelOut(),
                     sample_props={'cv__groups': groups,
                                   'split__groups': gs_groups,
-                                  'weights': weights})                              
+                                  'weights': weights})
 
 With this code, the ``sample_props`` sent to each function of
 ``GridSearchCV`` and ``cross_val_score`` will be:
@@ -351,10 +351,10 @@ Pass through everything in ``GridSearchCV``:
 .. code:: python
 
     pipe = make_pipeline(
-        PCA(), SVC(), 
+        PCA(), SVC(),
         with_props={pca__fit_weight: 'my_weights'}})
     GridSearchCV(
-        pipe, cv=my_cv, 
+        pipe, cv=my_cv,
         with_props={'cv__groups': "my_groups", '*':'*')
 
 A more complex example with this solution:
@@ -364,11 +364,11 @@ A more complex example with this solution:
     pipe = make_pipeline(
         make_union(
             CountVectorizer(analyzer='word').with(fit_weight='my_weight'),
-            CountVectorizer(analyzer='char').with(fit_weight='my_weight')), 
+            CountVectorizer(analyzer='char').with(fit_weight='my_weight')),
         SVC())
-     
+
     GridSearchCV(
-        pipe, 
+        pipe,
         cv=my_cv.with(groups='my_groups'), score_weight='my_weight')
 
 Alternative 2
@@ -380,9 +380,9 @@ Grid search manage the ``sample_props`` of all internal variable.
 
     pipe = make_pipeline(PCA(), SVC())
     GridSearchCV(
-        pipe, cv=my_cv, 
+        pipe, cv=my_cv,
         with_props={
-            'cv__groups': "my_groups", 
+            'cv__groups': "my_groups",
             'estimator__pca__fit_weight': "my_weights"),
             })
 
@@ -392,13 +392,13 @@ A more complex example with this solution:
 
     pipe = make_pipeline(
         make_union(
-            CountVectorizer(analyzer='word'), 
-            CountVectorizer(analyzer='char')), 
+            CountVectorizer(analyzer='word'),
+            CountVectorizer(analyzer='char')),
         SVC())
     GridSearchCV(
-        pipe, cv=my_cv, 
+        pipe, cv=my_cv,
         with_props={
-            'cv__groups': "my_groups", 
+            'cv__groups': "my_groups",
             'estimator__featureunion__countvectorizer-1__fit_weight': "my_weights",
             'estimator__featureunion__countvectorizer-2__fit_weight': "my_weights",
             'score_weight': "my_weights",
