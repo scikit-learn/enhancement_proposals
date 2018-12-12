@@ -18,6 +18,12 @@ implemented in scikit-learn.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Template:
+
+   slep_template
+
+.. toctree::
+   :maxdepth: 1
    :numbered:
    :caption: Proposals:
 
