@@ -26,7 +26,8 @@ Design
 Imports
 -------
 
-In addition to `Pipeline` class some additional wrappers are proposed as part of public API::
+In addition to :class:`sklearn.pipeline.Pipeline` class some additional
+wrappers are proposed as part of public API::
 
     from sklearn.pipeline import (Pipeline, fitted, transformer, predictor
                                   label_transformer, label_predictor,
