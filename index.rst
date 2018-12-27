@@ -21,11 +21,6 @@ implemented in scikit-learn.
    :numbered:
    :caption: Under review
 
-   slep001/proposal
-   slep002/proposal
-   slep003/proposal
-   slep004/proposal
-
 .. toctree::
    :maxdepth: 1
    :numbered:
@@ -35,6 +30,11 @@ implemented in scikit-learn.
    :maxdepth: 1
    :numbered:
    :caption: Delayed review
+
+   slep001/proposal
+   slep002/proposal
+   slep003/proposal
+   slep004/proposal
 
 .. toctree::
    :maxdepth: 1
