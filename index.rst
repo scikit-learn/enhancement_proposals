@@ -18,16 +18,31 @@ implemented in scikit-learn.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Template:
-
-   slep_template
-
-.. toctree::
-   :maxdepth: 1
    :numbered:
-   :caption: Proposals:
+   :caption: Under review
 
    slep001/proposal
    slep002/proposal
    slep003/proposal
    slep004/proposal
+
+.. toctree::
+   :maxdepth: 1
+   :numbered:
+   :caption: Accepted
+
+.. toctree::
+   :maxdepth: 1
+   :numbered:
+   :caption: Delayed review
+
+.. toctree::
+   :maxdepth: 1
+   :numbered:
+   :caption: Rejected
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Template
+
+   slep_template
