@@ -1,4 +1,4 @@
-Accpeted SLEPs
+Accepted SLEPs
 ==============
 
 Nothing here
