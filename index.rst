@@ -17,32 +17,35 @@ decision, and ideally converge to a draft of an API or object to be
 implemented in scikit-learn.
 
 .. toctree::
-   :maxdepth: 1
-   :numbered:
-   :caption: Under review
+    :maxdepth: 1
+    :caption: Under review
+
+    under_review
 
 .. toctree::
-   :maxdepth: 1
-   :numbered:
-   :caption: Accepted
+    :maxdepth: 1
+    :caption: Accepted
+
+    accepted
 
 .. toctree::
-   :maxdepth: 1
-   :numbered:
-   :caption: Delayed review
+    :maxdepth: 1
+    :numbered:
+    :caption: Delayed review
 
-   slep001/proposal
-   slep002/proposal
-   slep003/proposal
-   slep004/proposal
-
-.. toctree::
-   :maxdepth: 1
-   :numbered:
-   :caption: Rejected
+    slep001/proposal
+    slep002/proposal
+    slep003/proposal
+    slep004/proposal
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Template
+    :maxdepth: 1
+    :caption: Rejected
 
-   slep_template
+    rejected
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Template
+
+    slep_template
