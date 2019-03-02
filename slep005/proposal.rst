@@ -71,6 +71,18 @@ To handle outlier rejector in ``Pipeline``, we enforce the following:
   ``fit_transform(X)`` / ``transform(X)``.
 * ``fit_predict(X)`` (i.e., clustering methods) should not be called if an
   outlier rejector is in the pipeline.
+* We propose that resamplers are only applied during fit time. Specifically, the pipeline will act as follows:
+===================== ================================
+Method                Resamplers applied               
+===================== ================================
+``fit``               Yes
+``fit_transform``     Yes
+``transform``         Yes
+``fit_resample``      Yes
+``predict``           No
+``score``             No
+``fit_predict``       not supported 
+===================== ================================
 
 Backward compatibility
 ----------------------
