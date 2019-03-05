@@ -91,7 +91,7 @@ There is no backward incompatibilities with the current API.
 Discussion
 ----------
 
-* https://github.com/scikit-learn/scikit-learn/pull/13269{
+* https://github.com/scikit-learn/scikit-learn/pull/13269
 
 References and Footnotes
 ------------------------
