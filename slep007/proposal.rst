@@ -4,7 +4,7 @@
 Feature Names
 =============
 
-`scikit-learn/#13307 <https://github.com/scikit-learn/scikit-learn/pull/13307`_
+`scikit-learn/#13307 <https://github.com/scikit-learn/scikit-learn/pull/13307>`_
 proposes a solution to support and propagate feature names through a pipeline.
 
 However, the generated feature names can become long. This is to confirm how
