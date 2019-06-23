@@ -68,7 +68,7 @@ Backwards compatibility
 Forwards compatibility
    Is the solution going to make users' code more
    brittle with future changes? (For example, will a user's pipeline change
-   behaviour radicaly when sample_weight is implemented on some estimator)
+   behaviour radically when sample_weight is implemented on some estimator)
 Introspection
    If sensible to do so (e.g. for improved efficiency), can a
    meta-estimator identify whether its base estimator (recursively) would
@@ -79,7 +79,7 @@ Keyword arguments vs. a single argument
 ---------------------------------------
 
 Currently, sample properties are provided as keyword arguments to a `fit`
-method. In redevloping sample properties, we can instead accept a single
+method. In redeveloping sample properties, we can instead accept a single
 parameter (named `props` or `sample_props` or `etc`, for example) which maps
 string keys to arrays of the same length (a "DataFrame-like").
 
@@ -97,21 +97,36 @@ Advantages of multiple keyword arguments:
 
 * succinct
 * possible to maintain backwards compatible support for sample_weight, etc.
-* we do not need to consider supporting estimators that don't expect a new
+* we do not need to handle cases for whether or not some estimator expects a
   `props` argument.
 
 Advantages of a single argument:
 
-* we are able to remove the constraint that all kwargs to `fit` are
-  sample-aligned, so that we can add further functionality (`with_warm_start`
-  has been proposed, for instance).
-* we are able to redefine the handling of weights etc. without being concerned
-  by backwards compatibility.
+* we are able to consider kwargs to `fit` that are not sample-aligned, so that
+  we can add further functionality (`with_warm_start` has been proposed, for
+  instance).
+* we are able to redefine the default routing of weights etc. without being
+  concerned by backwards compatibility.
 
-Use case setup
---------------
+Test case setup
+---------------
 
+Case A
+~~~~~~
 
+Cross-validate a ``LogisticRegressionCV(cv=GroupKFold(), scoring='accuracy')``
+with weighted scoring.
+
+Case B
+~~~~~~
+
+Extend Case A to apply a feature selector in a ``Pipeline``.
+
+Case C
+~~~~~~
+
+Extend Case A to apply an arbitrary SLEP005 resampler in the pipelie, which
+rewrites ``sample_weight`` and ``groups``.
 
 Solution 1
 ----------
@@ -123,3 +138,25 @@ Solution 2
 ----------
 
 discusss capability-based routing (i.e. pass sample_weight if supported) with a check in each meta-estimator that each gets passed somewhere; or pass-everything
+
+
+Backward compatibility
+----------------------
+
+Discussion
+----------
+
+References and Footnotes
+------------------------
+
+.. [1] Each SLEP must either be explicitly labeled as placed in the public
+   domain (see this SLEP as an example) or licensed under the `Open
+   Publication License`_.
+.. _Open Publication License: https://www.opencontent.org/openpub/
+
+
+Copyright
+---------
+
+This document has been placed in the public domain. [1]_
+
