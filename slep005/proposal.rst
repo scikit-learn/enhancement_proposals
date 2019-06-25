@@ -4,7 +4,7 @@
 Resampler API
 =============
 
-:Author: Oliver Raush (oliverrausch99@gmail.com),
+:Author: Oliver Rausch (oliverrausch99@gmail.com),
          Christos Aridas (char@upatras.gr),
          Guillaume Lemaitre (g.lemaitre58@gmail.com)
 :Status: Draft
@@ -18,53 +18,57 @@ Abstract
 We propose the inclusion of a new type of estimator: resampler. The
 resampler will change the samples in ``X`` and ``y``. In short:
 
-* resamplers will reduce or augment the number of samples in ``X`` and
-  ``y``;
-* ``Pipeline`` should treat them as a separate type of estimator.
+* resamplers will reduce and/or augment the number of samples in ``X`` and
+  ``y`` during ``fit``, but will perform no changes during ``predict``.
+* a new verb/method that all resamplers must implement is introduced: ``fit_resample``.
+* A new meta-estimator, ``ResampledTrainer``, that allows for the composition of
+  resamplers and estimators is proposed.
+
 
 Motivation
 ----------
 
-Sample reduction or augmentation are part of machine-learning
-pipeline. The current scikit-learn API does not offer support for such
+Sample reduction or augmentation are common parts of machine-learning
+pipelines. The current scikit-learn API does not offer support for such
 use cases.
 
-Two possible use cases are currently reported:
+Usecases
+........
 
-* sample rebalancing to correct bias toward class with large cardinality;
-* outlier rejection to fit a clean dataset.
-   
+* sample rebalancing to correct bias toward class with large cardinality
+* outlier rejection to fit a clean dataset
+* representing a dataset by generating centroids of clustering methods.
+* adding unlabeled samples to a dataset during semi-supervised fit time for
+  cross validation (simply passing a semi-supervised dataset to cross validation
+  methods doesn't work since the cross validation will treat the label -1 as a
+  separate class). Alternative approach is a new cv splitter.
+
 Implementation
 --------------
+API and Constraints
+...................
+Resamplers implement a method ``fit_resample(X, y)``, a pure function which
+returns ``Xt, yt`` corresponding to the resampled dataset, where samples may
+have been added and/or removed.
 
-To handle outlier rejector in ``Pipeline``, we enforce the following:
+Resamplers cannot be transformers, that is, a resampler cannot implement
+``fit_transform`` or ``transform``. Similarly, transformers cannot implement ``fit_resample``.
 
-* an estimator cannot implement both ``fit_resample(X, y)`` and
-  ``fit_transform(X)`` / ``transform(X)``. If both are implemented,
-  ``Pipeline`` will not be able to know which of the two methods to
-  call.
-* resamplers are only applied during ``fit``. Otherwise, scoring will
-  be harder. Specifically, the pipeline will act as follows:
-  
-  ===================== ================================
-  Method                Resamplers applied               
-  ===================== ================================
-  ``fit``               Yes
-  ``fit_transform``     Yes
-  ``fit_resample``      Yes
-  ``transform``         No
-  ``predict``           No
-  ``score``             No
-  ``fit_predict``       not supported 
-  ===================== ================================
+Resamplers may not change the order, meaning or format of features (This is left
+to Transformers).
 
-* ``fit_predict(X)`` (i.e., clustering methods) should not be called
-  if an outlier rejector is in the pipeline. The output will be of
-  different size than ``X`` breaking metric computation.
-* in a supervised scheme, resampler will need to validate which type
-  of target is passed. Up to our knowledge, supervised are used for
-  binary and multiclass classification.
-  
+ResampledTrainer
+................
+This metaestimator composes a resampler and a predictor. It
+behaves as follows:
+
+ ``fit(X, y)``: resample ``X, y`` with the resampler, then fit on the resampled
+  dataset.
+* ``predict(X)``: simply predict on ``X`` with the predictor.
+* ``score(X)``: simply score on ``X`` with the predictor.
+
+See PR #13269 for an implementation.
+
 Alternative implementation
 ..........................
 
@@ -76,13 +80,12 @@ perform resampling. However, the current limitations are:
 * ``sample_weight`` can be applied at both fit and predict time;
 * ``sample_weight`` need to be passed and modified within a
   ``Pipeline``.
-  
+
 Current implementation
 ......................
 
-* Outlier rejection are implemented in:
-  https://github.com/scikit-learn/scikit-learn/pull/13269
-  
+https://github.com/scikit-learn/scikit-learn/pull/13269
+
 Backward compatibility
 ----------------------
 
