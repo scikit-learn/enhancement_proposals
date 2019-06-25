@@ -32,16 +32,17 @@ Sample reduction or augmentation are common parts of machine-learning
 pipelines. The current scikit-learn API does not offer support for such
 use cases.
 
-Usecases
-........
+Possible Usecases
+.................
 
 * sample rebalancing to correct bias toward class with large cardinality
 * outlier rejection to fit a clean dataset
 * representing a dataset by generating centroids of clustering methods.
-* adding unlabeled samples to a dataset during semi-supervised fit time for
-  cross validation (simply passing a semi-supervised dataset to cross validation
-  methods doesn't work since the cross validation will treat the label -1 as a
-  separate class). Alternative approach is a new cv splitter.
+* currently semi-supervised learning is not supported by scoring-based
+  functions like ``cross_val_score``, ``GridSearchCV`` or ``validation_curve``
+  since the scorers will regard "unlabeled" as a separate class. A resampler
+  could add the unlabeled samples to the dataset during fit time to solve this
+  (note that this can also be solved by a new cv splitter).
 
 Implementation
 --------------
