@@ -43,6 +43,7 @@ Possible Usecases
   since the scorers will regard "unlabeled" as a separate class. A resampler
   could add the unlabeled samples to the dataset during fit time to solve this
   (note that this can also be solved by a new cv splitter).
+* Dataset augmentation (very common in vision problems)
 
 Implementation
 --------------
@@ -55,8 +56,10 @@ have been added and/or removed.
 Resamplers cannot be transformers, that is, a resampler cannot implement
 ``fit_transform`` or ``transform``. Similarly, transformers cannot implement ``fit_resample``.
 
-Resamplers may not change the order, meaning or format of features (This is left
-to Transformers).
+Resamplers may not change the order, meaning, dtype or format of features (this is left
+to transformers).
+
+Resamplers should also resample any kwargs that are array-like and have the same `shape[0]` as `X` and `y`.
 
 ResampledTrainer
 ................
@@ -69,6 +72,41 @@ behaves as follows:
 * ``score(X)``: simply score on ``X`` with the predictor.
 
 See PR #13269 for an implementation.
+
+Modifying Pipeline
+..................
+As an alternative to ``ResampledTrainer``, ``Pipeline`` could be modified to
+accomodate resamplers.
+The functionality is described in terms of the head (all stages except the last)
+and the tail (the last stage) of the ``Pipeline``. Note that we assume
+resamplers and transformers are exclusive so that the pipeline can decide which
+method to call. Further note that ``Xt, yt`` are the outputs of the stage, and
+``X, y`` are the inputs to the stage.
+
+``fit``:
+  head for resamplers: `Xt, yt = est.fit_resample(X, y)`
+  head for transformers: `Xt, yt = est.fit_transform(X, y)`
+  tail for transformers and predictors: `est.fit(X, y)`
+  tail for resamplers: `pass`
+
+``fit_transform``:
+  Equivalent to `fit(X, y).transform(X)` overall
+
+``predict``
+  head for resamplers: `Xt = X`
+  head for transformers: `Xt = est.transform(X)`
+  tail for predictors: `return est.predict(X)`
+  tail for transformers and resamplers: `error`
+
+``transform``
+  head for resamplers: `Xt = X`
+  head for transformers: `Xt = est.transform(X)`
+  tail for predictors and resamplers: `error`
+  tail for transformers: `return est.transform(X)`
+
+``score``
+  see predict
+
 
 Alternative implementation
 ..........................
