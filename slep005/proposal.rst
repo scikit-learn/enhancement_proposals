@@ -73,9 +73,7 @@ behaves as follows:
 
 See PR #13269 for an implementation.
 
-Example Usage
-"""""""""""""
-::
+Example Usage::
     est = ResamplingTrainer(RandomUnderSampler(), SVC())
     est = make_pipeline(
         StandardScaler(),
