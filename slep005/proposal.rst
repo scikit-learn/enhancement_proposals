@@ -73,6 +73,19 @@ behaves as follows:
 
 See PR #13269 for an implementation.
 
+Example Usage
+"""""""""""""
+::
+    est = ResamplingTrainer(RandomUnderSampler(), SVC())
+    est = make_pipeline(
+        StandardScaler(),
+        ResamplingTrainer(Birch(), make_pipeline(SelectKBest(), SVC()))
+    )
+    est = ResamplingTrainer(
+        RandomUnderSampler(),
+        make_pipeline(StandardScaler(), SelectKBest(), SVC()),
+    )
+
 Modifying Pipeline
 ..................
 As an alternative to ``ResampledTrainer``, ``Pipeline`` could be modified to
@@ -107,6 +120,12 @@ method to call. Further note that ``Xt, yt`` are the outputs of the stage, and
 ``score``
   see predict
 
+Example Usage::
+    est = make_pipeline(RandomUnderSampler(), SVC())
+    est = make_pipeline(StandardScaler(), Birch(), SelectKBest(), SVC())
+    est = make_pipeline(
+        RandomUnderSampler(), StandardScaler(), SelectKBest(), SVC()
+    )
 
 Alternative implementation
 ..........................
