@@ -114,25 +114,25 @@ method to call. Further note that ``Xt, yt, kwt`` are the outputs of the stage, 
 ``X, y, **kw`` are the inputs to the stage.
 
 ``fit``:
-  head for resamplers: ``Xt, yt, kwt = est.fit_resample(X, y, **kw)``.
-  head for transformers: ``Xt, yt = est.fit_transform(X, y, **kw)``.
-  tail for transformers and predictors: ``est.fit(X, y, **kw)``.
-  tail for resamplers: ``pass``.
+* head for resamplers: ``Xt, yt, kwt = est.fit_resample(X, y, **kw)``.
+* head for transformers: ``Xt, yt = est.fit_transform(X, y, **kw)``.
+* tail for transformers and predictors: ``est.fit(X, y, **kw)``.
+* tail for resamplers: ``pass``.
 
 ``fit_transform``:
-  Equivalent to ``fit(X, y).transform(X)`` overall.
+* Equivalent to ``fit(X, y).transform(X)`` overall.
 
 ``predict``
-  head for resamplers: ``Xt = X``
-  head for transformers: ``Xt = est.transform(X)``
-  tail for predictors: ``return est.predict(X)``
-  tail for transformers and resamplers: ``error``
+* head for resamplers: ``Xt = X``
+* head for transformers: ``Xt = est.transform(X)``
+* tail for predictors: ``return est.predict(X)``
+* tail for transformers and resamplers: ``error``
 
 ``transform``
-  head for resamplers: ``Xt = X``
-  head for transformers: ``Xt = est.transform(X)``
-  tail for predictors and resamplers: ``error``
-  tail for transformers: ``return est.transform(X)``
+* head for resamplers: ``Xt = X``
+* head for transformers: ``Xt = est.transform(X)``
+* tail for predictors and resamplers: ``error``
+* tail for transformers: ``return est.transform(X)``
 
 ``score``
   see predict
