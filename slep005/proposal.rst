@@ -18,11 +18,15 @@ Abstract
 We propose the inclusion of a new type of estimator: resampler. The
 resampler will change the samples in ``X`` and ``y``. In short:
 
-* resamplers will reduce and/or augment the number of samples in ``X`` and
-  ``y`` during ``fit``, but will perform no changes during ``predict``.
-* a new verb/method that all resamplers must implement is introduced: ``fit_resample``.
-* A new meta-estimator, ``ResampledTrainer``, that allows for the composition of
-  resamplers and estimators is proposed.
+* a new verb/method that all resamplers must implement is introduced:
+  ``fit_resample``.
+* resamplers are able to reduce and/or augment the number of samples in
+  ``X`` and ``y`` during ``fit``, but will perform no changes during
+  ``predict``.
+* to facilitate this behavior a new meta-estimator (``ResampledTrainer``) that
+  allows for the composition of resamplers and estimators is proposed.
+  Alternatively we propose changes to ``Pipeline`` that also enable similar
+  compositions.
 
 
 Motivation
@@ -35,34 +39,41 @@ use cases.
 Possible Usecases
 .................
 
-* sample rebalancing to correct bias toward class with large cardinality
-* outlier rejection to fit a clean dataset
-* representing a dataset by generating centroids of clustering methods.
-* currently semi-supervised learning is not supported by scoring-based
+* Sample rebalancing to correct bias toward class with large cardinality
+  outlier rejection to fit a clean dataset.
+* Sample reduction e.g. representing a dataset by its k-means centroids.
+* Currently semi-supervised learning is not supported by scoring-based
   functions like ``cross_val_score``, ``GridSearchCV`` or ``validation_curve``
   since the scorers will regard "unlabeled" as a separate class. A resampler
   could add the unlabeled samples to the dataset during fit time to solve this
-  (note that this can also be solved by a new cv splitter).
-* Dataset augmentation (very common in vision problems)
+  (note that this could also be solved by a new cv splitter).
+* NaNRejector (drop all samples that contain nan).
+* Dataset augmentation (like is commonly done in DL).
 
 Implementation
 --------------
+
 API and Constraints
 ...................
-Resamplers implement a method ``fit_resample(X, y)``, a pure function which
-returns ``Xt, yt`` corresponding to the resampled dataset, where samples may
-have been added and/or removed.
 
-Resamplers cannot be transformers, that is, a resampler cannot implement
-``fit_transform`` or ``transform``. Similarly, transformers cannot implement ``fit_resample``.
+* Resamplers implement a method ``fit_resample(X, y, **kwargs)``, a pure function which
+  returns ``Xt, yt, kwargs`` corresponding to the resampled dataset, where
+  samples may have been added and/or removed.
+* An estimator may only implement either ``fit_transform`` or ``fit_resample``.
+* Resamplers may not change the order, meaning, dtype or format of features
+  (this is left to transformers).
+* Resamplers should also resample any kwargs.
 
-Resamplers may not change the order, meaning, dtype or format of features (this is left
-to transformers).
+Composition
+-----------
 
-Resamplers should also resample any kwargs that are array-like and have the same `shape[0]` as `X` and `y`.
+An key part of the proposal is the introduction of a way of composing resamplers
+with predictors. We present two options: ``ResampledTrainer`` and modifications
+to ``Pipeline``.
 
 ResampledTrainer
 ................
+
 This metaestimator composes a resampler and a predictor. It
 behaves as follows:
 
@@ -73,7 +84,10 @@ behaves as follows:
 
 See PR #13269 for an implementation.
 
-Example Usage::
+Example Usage:
+
+.. code-block:: python
+
     est = ResamplingTrainer(RandomUnderSampler(), SVC())
     est = make_pipeline(
         StandardScaler(),
@@ -83,6 +97,11 @@ Example Usage::
         RandomUnderSampler(),
         make_pipeline(StandardScaler(), SelectKBest(), SVC()),
     )
+    clf = ResampledTrainer(
+        NaNRejector(), # removes samples containing NaN
+        ResampledTrainer(RandomUnderSampler(),
+            make_pipeline(StandardScaler(), SGDClassifier()))
+    )
 
 Modifying Pipeline
 ..................
@@ -91,17 +110,17 @@ accomodate resamplers.
 The functionality is described in terms of the head (all stages except the last)
 and the tail (the last stage) of the ``Pipeline``. Note that we assume
 resamplers and transformers are exclusive so that the pipeline can decide which
-method to call. Further note that ``Xt, yt`` are the outputs of the stage, and
-``X, y`` are the inputs to the stage.
+method to call. Further note that ``Xt, yt, kwt`` are the outputs of the stage, and
+``X, y, **kw`` are the inputs to the stage.
 
 ``fit``:
-  head for resamplers: `Xt, yt = est.fit_resample(X, y)`
-  head for transformers: `Xt, yt = est.fit_transform(X, y)`
-  tail for transformers and predictors: `est.fit(X, y)`
-  tail for resamplers: `pass`
+  head for resamplers: `Xt, yt, kwt = est.fit_resample(X, y, **kw)`.
+  head for transformers: `Xt, yt = est.fit_transform(X, y, **kw)`.
+  tail for transformers and predictors: `est.fit(X, y, **kw)`.
+  tail for resamplers: `pass`.
 
 ``fit_transform``:
-  Equivalent to `fit(X, y).transform(X)` overall
+  Equivalent to `fit(X, y).transform(X)` overall.
 
 ``predict``
   head for resamplers: `Xt = X`
@@ -118,12 +137,19 @@ method to call. Further note that ``Xt, yt`` are the outputs of the stage, and
 ``score``
   see predict
 
-Example Usage::
+Example Usage:
+
+.. code-block:: python
+
     est = make_pipeline(RandomUnderSampler(), SVC())
     est = make_pipeline(StandardScaler(), Birch(), SelectKBest(), SVC())
     est = make_pipeline(
         RandomUnderSampler(), StandardScaler(), SelectKBest(), SVC()
     )
+    est = make_pipeline(
+        NaNRejector(), RandomUnderSampler(), StandardScaler(), SGDClassifer()
+    )
+
 
 Alternative implementation
 ..........................
