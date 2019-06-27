@@ -140,7 +140,7 @@ transform
 
 score
 ~~~~~
-  see predict
+* see predict
 
 Example Usage:
 
