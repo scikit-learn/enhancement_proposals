@@ -56,18 +56,20 @@ Implementation
 API and Constraints
 ...................
 
-* Resamplers implement a method ``fit_resample(X, y, **kwargs)``, a pure function which
-  returns ``Xt, yt, kwargs`` corresponding to the resampled dataset, where
-  samples may have been added and/or removed.
-* An estimator may only implement either ``fit_transform`` or ``fit_resample``.
+* Resamplers implement a method ``fit_resample(X, y, **kwargs)``, a pure
+  function which returns ``Xt, yt, kwargs`` corresponding to the resampled
+  dataset, where samples may have been added and/or removed.
+* An estimator may only implement either ``fit_transform`` or ``fit_resample``
+  if support for ``Resamplers`` in ``Pipeline`` is enabled.
 * Resamplers may not change the order, meaning, dtype or format of features
   (this is left to transformers).
-* Resamplers should also resample any kwargs.
+* Resamplers should also handled (e.g. resample, generate anew, etc.) any
+  kwargs.
 
 Composition
 -----------
 
-An key part of the proposal is the introduction of a way of composing resamplers
+A key part of the proposal is the introduction of a way of composing resamplers
 with predictors. We present two options: ``ResampledTrainer`` and modifications
 to ``Pipeline``.
 
