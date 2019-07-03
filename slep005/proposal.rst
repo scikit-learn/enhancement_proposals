@@ -60,7 +60,8 @@ API and Constraints
   function which returns ``Xt, yt, kwargs`` corresponding to the resampled
   dataset, where samples may have been added and/or removed.
 * An estimator may only implement either ``fit_transform`` or ``fit_resample``
-  if support for ``Resamplers`` in ``Pipeline`` is enabled.
+  if support for ``Resamplers`` in ``Pipeline`` is enabled
+  (see Sect. "Limitations").
 * Resamplers may not change the order, meaning, dtype or format of features
   (this is left to transformers).
 * Resamplers should also handled (e.g. resample, generate anew, etc.) any
@@ -136,13 +137,13 @@ Limitations
 
 .. rubric:: Prohibiting ``transform`` on resamplers
 
-It may be problematic for a resampler to provide ``transform`` if Pipelines
+It may be problematic for a resampler to provide ``transform`` if ``Pipeline``s
 support resampling:
 
 1. It is unclear what to do at test time if a resampler has a transform
    method.
-2. Adding fit_resample to the API of an an existing transformer may
-   drastically change its behaviour in a Pipeline.
+2. Adding ``fit_resample`` to the API of an an existing transformer may
+   drastically change its behaviour in a ``Pipeline``.
 
 For this reason, it may be best to reject resamplers supporting ``transform``
 from being used in a Pipeline.
@@ -152,31 +153,32 @@ from being used in a Pipeline.
 Providing a ``transform`` method on a Pipeline that contains a resampler
 presents several problems:
 
-1. A resampling Pipeline needs to use a special code path for ``fit_transform``
-   that would call ``fit(X, y, **kw).transform(X)`` on the Pipeline.
-   Ordinarily a Pipeline would pass the transformed data to ``fit_transform``
-   of the left step. If the Pipeline contains a resampler, it rather needs to
-   fit the Pipeline excluding the last step, then transform the original
-   training data until the last step, then fit_transform the last step. This
-   means special code paths for pipelines containing resamplers; the effect of
-   the resampler is not localised in terms of code maintenance.
-2. As a result of issue 1, appending a step to the transformation Pipeline
+1. A resampling ``Pipeline`` needs to use a special code path for
+   ``fit_transform`` that would call ``fit(X, y, **kw).transform(X)`` on the
+   ``Pipeline``.  Ordinarily a ``Pipeline`` would pass the transformed data to
+   ``fit_transform`` of the left step. If the ``Pipeline`` contains a
+   resampler, it rather needs to fit the ``Pipeline`` excluding the last step,
+   then transform the original training data until the last step, then
+   ``fit_transform`` the last step. This means special code paths for pipelines
+   containing resamplers; the effect of the resampler is not localised in terms
+   of code maintenance.
+2. As a result of issue 1, appending a step to the transformation ``Pipeline``
    means that the transformer which was previously last, and previously trained
    on the full dataset, will now be trained on the resampled dataset.
-3. As a result of issue 1, the last step cannot be 'passthrough' as in other
-   transformer pipelines.
+3. As a result of issue 1, the last step cannot be ``'passthrough'`` as in
+   other transformer pipelines.
 
 For this reason, it may be best to disable ``fit_transform`` and ``transform``
-on the Pipeline. A resampling Pipeline would therefore not be usable as a
+on the Pipeline. A resampling ``Pipeline`` would therefore not be usable as a
 transformation within a ``FeatureUnion`` or ``ColumnTransformer``. Thus the
 ``ResampledTrainer`` would be strictly more expressive than a resampling
-Pipeline.
+``Pipeline``.
 
 .. rubric:: Handling ``fit`` parameters
 
 Sample props or weights cannot be routed to steps downstream of a resampler in
-a Pipeline, unless they too are resampled. It's very unclear how this would
-work with Pipeline's current prefix-based fit parameter routing.
+a ``Pipeline``, unless they too are resampled. It's very unclear how this would
+work with ``Pipeline``'s current prefix-based fit parameter routing.
 
 TODO: propose solutions
 
