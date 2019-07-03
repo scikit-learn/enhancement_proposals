@@ -39,8 +39,8 @@ use cases.
 Possible Usecases
 .................
 
-* Sample rebalancing to correct bias toward class with large cardinality
-  outlier rejection to fit a clean dataset.
+* Sample rebalancing to correct bias toward class with large cardinality.
+* Outlier rejection to fit a clean dataset.
 * Sample reduction e.g. representing a dataset by its k-means centroids.
 * Currently semi-supervised learning is not supported by scoring-based
   functions like ``cross_val_score``, ``GridSearchCV`` or ``validation_curve``
@@ -168,8 +168,8 @@ perform resampling. However, the current limitations are:
 * ``sample_weight`` is not available for all estimators;
 * ``sample_weight`` will implement only simple resampling (only when resampling
   uses original samples);
-* ``sample_weight`` need to be passed and modified within a
-  ``Pipeline``.
+* ``sample_weight`` needs to be passed and modified within a
+  ``Pipeline``, which isn't possible without something like resamplers.
 
 Current implementation
 ......................
