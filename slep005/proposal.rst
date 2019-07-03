@@ -163,8 +163,8 @@ Alternatively ``sample_weight`` could be used as a placeholder to
 perform resampling. However, the current limitations are:
 
 * ``sample_weight`` is not available for all estimators;
-* ``sample_weight`` will implement only sample reductions;
-* ``sample_weight`` can be applied at both fit and predict time;
+* ``sample_weight`` will implement only simple resampling (only when resampling
+  uses original samples);
 * ``sample_weight`` need to be passed and modified within a
   ``Pipeline``.
 
