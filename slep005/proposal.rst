@@ -8,7 +8,6 @@ Resampler API
          Christos Aridas (char@upatras.gr),
          Guillaume Lemaitre (g.lemaitre58@gmail.com)
 :Status: Draft
-:Type: Standards Track
 :Created: created on, in 2019-03-01
 :Resolution: <url>
 
@@ -16,7 +15,8 @@ Abstract
 --------
 
 We propose the inclusion of a new type of estimator: resampler. The
-resampler will change the samples in ``X`` and ``y``. In short:
+resampler will change the samples in ``X`` and ``y`` and return both
+``Xt`` and ``yt``. In short:
 
 * a new verb/method that all resamplers must implement is introduced:
   ``fit_resample``.
@@ -85,6 +85,7 @@ behaves as follows:
 See PR #13269 for an implementation.
 
 Example Usage:
+~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -105,6 +106,7 @@ Example Usage:
 
 Modifying Pipeline
 ..................
+
 As an alternative to ``ResampledTrainer``, ``Pipeline`` could be modified to
 accomodate resamplers.
 The functionality is described in terms of the head (all stages except the last)
@@ -115,10 +117,10 @@ method to call. Further note that ``Xt, yt, kwt`` are the outputs of the stage, 
 
 fit
 ~~~
-* head for resamplers: ``Xt, yt, kwt = est.fit_resample(X, y, **kw)``.
-* head for transformers: ``Xt, yt = est.fit_transform(X, y, **kw)``.
-* tail for transformers and predictors: ``est.fit(X, y, **kw)``.
-* tail for resamplers: ``pass``.
+* head for resamplers: ``Xt, yt, kwt = est.fit_resample(X, y, **kw)``
+* head for transformers: ``Xt, yt = est.fit_transform(X, y, **kw)``
+* tail for transformers and predictors: ``est.fit(X, y, **kw)``
+* tail for resamplers: ``pass``
 
 fit_transform
 ~~~~~~~~~~~~~
@@ -143,6 +145,7 @@ score
 * see predict
 
 Example Usage:
+~~~~~~~~~~~~~~
 
 .. code-block:: python
 
