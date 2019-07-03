@@ -4,7 +4,7 @@
 Resampler API
 =============
 
-:Author: Oliver Raush (oliverrausch99@gmail.com),
+:Author: Oliver Rausch (oliverrausch99@gmail.com),
          Christos Aridas (char@upatras.gr),
          Guillaume Lemaitre (g.lemaitre58@gmail.com)
 :Status: Draft
@@ -18,53 +18,144 @@ Abstract
 We propose the inclusion of a new type of estimator: resampler. The
 resampler will change the samples in ``X`` and ``y``. In short:
 
-* resamplers will reduce or augment the number of samples in ``X`` and
-  ``y``;
-* ``Pipeline`` should treat them as a separate type of estimator.
+* a new verb/method that all resamplers must implement is introduced:
+  ``fit_resample``.
+* resamplers are able to reduce and/or augment the number of samples in
+  ``X`` and ``y`` during ``fit``, but will perform no changes during
+  ``predict``.
+* to facilitate this behavior a new meta-estimator (``ResampledTrainer``) that
+  allows for the composition of resamplers and estimators is proposed.
+  Alternatively we propose changes to ``Pipeline`` that also enable similar
+  compositions.
+
 
 Motivation
 ----------
 
-Sample reduction or augmentation are part of machine-learning
-pipeline. The current scikit-learn API does not offer support for such
+Sample reduction or augmentation are common parts of machine-learning
+pipelines. The current scikit-learn API does not offer support for such
 use cases.
 
-Two possible use cases are currently reported:
+Possible Usecases
+.................
 
-* sample rebalancing to correct bias toward class with large cardinality;
-* outlier rejection to fit a clean dataset.
-   
+* Sample rebalancing to correct bias toward class with large cardinality
+  outlier rejection to fit a clean dataset.
+* Sample reduction e.g. representing a dataset by its k-means centroids.
+* Currently semi-supervised learning is not supported by scoring-based
+  functions like ``cross_val_score``, ``GridSearchCV`` or ``validation_curve``
+  since the scorers will regard "unlabeled" as a separate class. A resampler
+  could add the unlabeled samples to the dataset during fit time to solve this
+  (note that this could also be solved by a new cv splitter).
+* NaNRejector (drop all samples that contain nan).
+* Dataset augmentation (like is commonly done in DL).
+
 Implementation
 --------------
 
-To handle outlier rejector in ``Pipeline``, we enforce the following:
+API and Constraints
+...................
 
-* an estimator cannot implement both ``fit_resample(X, y)`` and
-  ``fit_transform(X)`` / ``transform(X)``. If both are implemented,
-  ``Pipeline`` will not be able to know which of the two methods to
-  call.
-* resamplers are only applied during ``fit``. Otherwise, scoring will
-  be harder. Specifically, the pipeline will act as follows:
-  
-  ===================== ================================
-  Method                Resamplers applied               
-  ===================== ================================
-  ``fit``               Yes
-  ``fit_transform``     Yes
-  ``fit_resample``      Yes
-  ``transform``         No
-  ``predict``           No
-  ``score``             No
-  ``fit_predict``       not supported 
-  ===================== ================================
+* Resamplers implement a method ``fit_resample(X, y, **kwargs)``, a pure function which
+  returns ``Xt, yt, kwargs`` corresponding to the resampled dataset, where
+  samples may have been added and/or removed.
+* An estimator may only implement either ``fit_transform`` or ``fit_resample``.
+* Resamplers may not change the order, meaning, dtype or format of features
+  (this is left to transformers).
+* Resamplers should also resample any kwargs.
 
-* ``fit_predict(X)`` (i.e., clustering methods) should not be called
-  if an outlier rejector is in the pipeline. The output will be of
-  different size than ``X`` breaking metric computation.
-* in a supervised scheme, resampler will need to validate which type
-  of target is passed. Up to our knowledge, supervised are used for
-  binary and multiclass classification.
-  
+Composition
+-----------
+
+An key part of the proposal is the introduction of a way of composing resamplers
+with predictors. We present two options: ``ResampledTrainer`` and modifications
+to ``Pipeline``.
+
+ResampledTrainer
+................
+
+This metaestimator composes a resampler and a predictor. It
+behaves as follows:
+
+* ``fit(X, y)``: resample ``X, y`` with the resampler, then fit on the resampled
+  dataset.
+* ``predict(X)``: simply predict on ``X`` with the predictor.
+* ``score(X)``: simply score on ``X`` with the predictor.
+
+See PR #13269 for an implementation.
+
+Example Usage:
+
+.. code-block:: python
+
+    est = ResamplingTrainer(RandomUnderSampler(), SVC())
+    est = make_pipeline(
+        StandardScaler(),
+        ResamplingTrainer(Birch(), make_pipeline(SelectKBest(), SVC()))
+    )
+    est = ResamplingTrainer(
+        RandomUnderSampler(),
+        make_pipeline(StandardScaler(), SelectKBest(), SVC()),
+    )
+    clf = ResampledTrainer(
+        NaNRejector(), # removes samples containing NaN
+        ResampledTrainer(RandomUnderSampler(),
+            make_pipeline(StandardScaler(), SGDClassifier()))
+    )
+
+Modifying Pipeline
+..................
+As an alternative to ``ResampledTrainer``, ``Pipeline`` could be modified to
+accomodate resamplers.
+The functionality is described in terms of the head (all stages except the last)
+and the tail (the last stage) of the ``Pipeline``. Note that we assume
+resamplers and transformers are exclusive so that the pipeline can decide which
+method to call. Further note that ``Xt, yt, kwt`` are the outputs of the stage, and
+``X, y, **kw`` are the inputs to the stage.
+
+fit
+~~~
+* head for resamplers: ``Xt, yt, kwt = est.fit_resample(X, y, **kw)``.
+* head for transformers: ``Xt, yt = est.fit_transform(X, y, **kw)``.
+* tail for transformers and predictors: ``est.fit(X, y, **kw)``.
+* tail for resamplers: ``pass``.
+
+fit_transform
+~~~~~~~~~~~~~
+* Equivalent to ``fit(X, y).transform(X)`` overall.
+
+predict
+~~~~~~~
+* head for resamplers: ``Xt = X``
+* head for transformers: ``Xt = est.transform(X)``
+* tail for predictors: ``return est.predict(X)``
+* tail for transformers and resamplers: ``error``
+
+transform
+~~~~~~~~~
+* head for resamplers: ``Xt = X``
+* head for transformers: ``Xt = est.transform(X)``
+* tail for predictors and resamplers: ``error``
+* tail for transformers: ``return est.transform(X)``
+
+score
+~~~~~
+* see predict
+
+Example Usage:
+
+.. code-block:: python
+
+    est = make_pipeline(RandomUnderSampler(), SVC())
+    est = make_pipeline(StandardScaler(), Birch(), SelectKBest(), SVC())
+    est = make_pipeline(
+        RandomUnderSampler(), StandardScaler(), SelectKBest(), SVC()
+    )
+    est = make_pipeline(
+        NaNRejector(), RandomUnderSampler(), StandardScaler(), SGDClassifer()
+    )
+
+
 Alternative implementation
 ..........................
 
@@ -76,13 +167,12 @@ perform resampling. However, the current limitations are:
 * ``sample_weight`` can be applied at both fit and predict time;
 * ``sample_weight`` need to be passed and modified within a
   ``Pipeline``.
-  
+
 Current implementation
 ......................
 
-* Outlier rejection are implemented in:
-  https://github.com/scikit-learn/scikit-learn/pull/13269
-  
+https://github.com/scikit-learn/scikit-learn/pull/13269
+
 Backward compatibility
 ----------------------
 

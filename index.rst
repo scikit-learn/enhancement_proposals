@@ -10,6 +10,7 @@
     :caption: Under review
 
     under_review
+    slep005/proposal
 
 .. toctree::
     :maxdepth: 1
@@ -26,7 +27,6 @@
     slep002/proposal
     slep003/proposal
     slep004/proposal
-    slep005/proposal
 
 .. toctree::
     :maxdepth: 1
