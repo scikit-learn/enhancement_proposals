@@ -41,7 +41,7 @@ Supersedes `SLEP004
 <https://github.com/scikit-learn/enhancement_proposals/tree/master/slep004>`_
 with greater depth of desiderata and options.
 
-TODO: more
+TODO: more. ndawe's work.
 
 Desiderata
 ----------
@@ -89,7 +89,7 @@ Keyword arguments::
 
 Single argument::
 
-    >>> gs.fit(X, y, prop={'groups': groups, 'sample_weight': sample_weight})
+    >>> gs.fit(X, y, prop={'groups': groups, 'weight': weight})
 
 While drafting this document, we will assume the latter notation for clarity.
 
@@ -103,8 +103,8 @@ Advantages of multiple keyword arguments:
 Advantages of a single argument:
 
 * we are able to consider kwargs to `fit` that are not sample-aligned, so that
-  we can add further functionality (`with_warm_start` has been proposed, for
-  instance).
+  we can add further functionality (some that have been proposed:
+  `with_warm_start`, `feature_names_in`, `feature_meta`).
 * we are able to redefine the default routing of weights etc. without being
   concerned by backwards compatibility.
 
@@ -115,24 +115,32 @@ Case A
 ~~~~~~
 
 Cross-validate a ``LogisticRegressionCV(cv=GroupKFold(), scoring='accuracy')``
-with weighted scoring.
+with weighted scoring and weighted fitting.
 
 Case B
 ~~~~~~
 
-Extend Case A to apply a feature selector in a ``Pipeline``.
+Cross-validate a ``LogisticRegressionCV(cv=GroupKFold(), scoring='accuracy')``
+with weighted scoring and unweighted fitting.
 
 Case C
 ~~~~~~
 
-Extend Case A to apply an arbitrary SLEP005 resampler in the pipelie, which
+Extend Case A to apply an unweighted univariate feature selector in a
+``Pipeline``.
+
+Case D
+~~~~~~
+
+Extend Case A to apply an arbitrary SLEP005 resampler in a pipeline, which
 rewrites ``sample_weight`` and ``groups``.
 
-Solution 1
-----------
+Solution 1: Pass everything
+---------------------------
 
-Pass everything
+This proposal passes all props to all estimators, splitters, scorers, etc.
 
+If different components required different props
 
 Solution 2
 ----------
