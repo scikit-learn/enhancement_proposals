@@ -31,6 +31,20 @@ Desirable features we do not currently support include:
   instance to index grouped samples that are to be treated as a single sequence
   in prediction.
 
+Definitions
+-----------
+
+consumer
+    An estimator, scorer, splitter, etc., that receives and can make use of
+    one or more passed props.
+key
+    A label passed along with sample prop data to indicate how it should be
+    interpreted (e.g. "weight").
+router
+    An estimator or function that passes props on to some other router or
+    consumer, while either consuming props itself or delivering props to
+    more than one immediate destination.
+
 History
 -------
 
@@ -40,6 +54,19 @@ solutions at the February 2019 development sprint in Paris.
 Supersedes `SLEP004
 <https://github.com/scikit-learn/enhancement_proposals/tree/master/slep004>`_
 with greater depth of desiderata and options.
+
+Related issues and pull requests include:
+
+-  `Consistent API for attaching properties to samples
+   #4497 <https://github.com/scikit-learn/scikit-learn/issues/4497>`__
+-  `Acceptance of sample\_weights in pipeline.score
+   #7723 <https://github.com/scikit-learn/scikit-learn/pull/7723>`__
+-  `Establish global error state like np.seterr
+   #4660 <https://github.com/scikit-learn/scikit-learn/issues/4660>`__
+-  `Should cross-validation scoring take sample-weights into account?
+   #4632 <https://github.com/scikit-learn/scikit-learn/issues/4632>`__
+-  `Sample properties
+   #4696 <https://github.com/scikit-learn/scikit-learn/issues/4696>`__
 
 TODO: more. ndawe's work.
 
@@ -107,6 +134,8 @@ Advantages of a single argument:
   `with_warm_start`, `feature_names_in`, `feature_meta`).
 * we are able to redefine the default routing of weights etc. without being
   concerned by backwards compatibility.
+* we can consider the use of keys that are not limited to strings or valid
+  identifiers (and hence are not limited to using ``_`` as a delimiter).
 
 Test case setup
 ---------------
@@ -138,14 +167,40 @@ rewrites ``sample_weight`` and ``groups``.
 Solution 1: Pass everything
 ---------------------------
 
-This proposal passes all props to all estimators, splitters, scorers, etc.
+This proposal passes all props to all consumers (estimators, splitters,
+scorers, etc). The consumer would optionally use props it is familiar with by
+name and disregard other props.
 
-If different components required different props
+We may consider providing syntax for the user to control the interpretation of
+incoming props:
 
-Solution 2
-----------
+* to require that some prop is provided (for an estimator where that prop is
+  otherwise optional)
+* to disregard some provided prop
+* to treat a particular prop key as having a certain meaning (e.g. locally
+  interpreting 'scoring_sample_weight' as 'sample_weight').
 
-discusss capability-based routing (i.e. pass sample_weight if supported) with a check in each meta-estimator that each gets passed somewhere; or pass-everything
+These constraints would be checked by calling a helper at the consumer.
+
+Issues (TODO: clean)
+
+* Error handling: if a prop is optional in a consumer, no error will be
+  raised for misspelling. An introspection API might change this, allowing a
+  meta-estimator to check if all props are to be used.
+* Forwards compatibility: newly supporting a prop in a consumer will change
+  behaviour. Other than a ChangedBehaviorWarning I don't see any way around
+  this.
+* Introspection: not inherently supported. Would need an API like
+  ``get_prop_support(names: List[str]) -> Dict[str, Literal["supported", "required", "ignored"]]``.
+
+Solution 2: specify routes at call
+----------------------------------
+
+
+Solution 3: specify routes on metaestimators
+--------------------------------------------
+
+The metaestimators
 
 
 Backward compatibility
