@@ -139,7 +139,7 @@ In [2]: func(
 
 However, with the decorator, `ipython` shows:
 
-```
+```python
 In [2]: func( 
   a=                             ArithmeticError                 
   abs()                          ascii()                         
