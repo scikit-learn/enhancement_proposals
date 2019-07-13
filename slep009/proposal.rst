@@ -25,6 +25,7 @@ At the moment `sklearn` accepts most of the arguments both as positional and
 keyword arguments. For example, both the following are valid:
 
 .. code-block:: python
+
     # positional arguments
     clf = svm.SVC(.1, 'rbf')
     # keyword arguments
@@ -38,6 +39,7 @@ Using keyword arguments has a few benefits:
   error-prone than positional arguments. Compare these examples:
 
 .. code-block:: python
+
     cls = cluster.OPTICS(
         min_samples=5, max_eps=inf, metric=’minkowski’, p=2,
         metric_params=None, cluster_method=’xi’, eps=None, xi=0.05,
@@ -65,6 +67,7 @@ error if the function is called with positional arguments. Examples (borrowing
 from the PR):
 
 .. code-block:: python
+
     @warn_args
     def dbscan(X, eps=0.5, *, min_samples=4, metric='minkowski'):
         pass
@@ -83,6 +86,7 @@ Calling `LogisticRegression('l2', True)` will result with a
 `DeprecationWarning`:
 
 .. code-block:: bash
+
     Should use keyword args: dual=True
 
 
@@ -95,12 +99,14 @@ Challenges
 The official supported way to have keyword only arguments is:
 
 .. code-block:: python
+
     def func(arg1, arg2, *, arg3, arg4)
 
 Which means the function can only be called with `arg3` and `arg4` specified
 as keyword arguments:
 
 .. code-block:: python
+
     func(1, 2, arg3=3, arg4=4)
 
 The feature was discussed and the related PEP
@@ -112,6 +118,7 @@ seeing the syntax. For instance, for the above function, defined in VSCode,
 the hint would be shown as:
 
 .. code-block:: python
+
                func(arg1, arg2, *, arg3, arg4)
 
                param arg3
@@ -123,6 +130,7 @@ the `arg3`'s turn. But it doesn't say it is a keyword only argument.
 `ipython` would show:
 
 .. code-block:: python
+
     In [1]: def func(arg1, arg2, *, arg3, arg4): pass               
 
     In [2]: func( 
@@ -135,6 +143,7 @@ the `arg3`'s turn. But it doesn't say it is a keyword only argument.
 However, with the decorator, `ipython` shows:
 
 .. code-block:: python
+
     In [2]: func( 
       a=                             ArithmeticError                 
       abs()                          ascii()                         
