@@ -149,3 +149,9 @@ In [2]: func(
 
 The parameters are still all there, but a bit more hidden and in a different
 order. The hint shown by VSCode seems unaffected.
+
+Notes
+-----
+
+Some conversations with the users of `sklearn` who have been using the package
+for a while, shows the feedback is positive for this change.
