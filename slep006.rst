@@ -1,5 +1,5 @@
 ==================================
-SLEP006: Propagating feature names
+SLEP008: Propagating feature names
 ==================================
 
 :Author: Andreas Mueller, Joris Van den Bossche
@@ -22,11 +22,11 @@ Motivating example
 ^^^^^^^^^^^^^^^^^^
 
 We've been making it easier to build complex workflows with the
-ColumnTransformer and we expect it will find wide adoption. However, using it
+``ColumnTransformer`` and we expect it will find wide adoption. However, using it
 results in very opaque models, even more so than before.
 
 We have a great usage example in the gallery that applies a classifier to the
-titanic data set. This is a very simple standard use case, but it still close to
+titanic data set. This is a very simple standard use case, but it is still close to
 impossible to inspect the names of the features that went into the final
 estimator, for example to match this with the coefficients or feature
 importances.
@@ -111,9 +111,9 @@ Name of the "update feature names" method?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Currently, a few transformers already have a ``get_feature_names`` method (more
-specifically the vectorizers, PolynomialFeatures and OneHotEncoder). Moreover,
+specifically the vectorizers, PolynomialFeatures, OneHotEncoder and ColumnTransformer). Moreover,
 in some cases this method already does exactly what we need (accepting
-``input_features`` and returning the transformed ones).
+``input_features`` and returning the transformed ones). This is the case for ``PolynomialFeatures`` and ``OneHotEncoder``, while the other estimators don't take input features.
 
 However, there are some downsides about this name: for ``Pipeline`` and
 meta-estimators (and potentially also other transformers, see question below),
@@ -144,7 +144,7 @@ An example code snippet::
 
     >>> clf.named_steps['classifier'].input_feature_names_
 
-With pipeline slicing, this could become::
+Or more concisely:
 
     >>> clf['classifier'].input_feature_names_
     >>> clf[-1].input_feature_names_
@@ -220,7 +220,7 @@ The clear cases on how to transform input to output features are:
 
 - Transformers that pass through (One-to-one), e.g. StandardScaler
 - Transformers that generate new features, e.g. OneHotEncoder, Vectorizers
-- Transformers that output a subset of the original features (SelectKBest?)
+- Transformers that output a subset of the original features (``SelectKBest``, ``SimpleImputer``)
 
 But, what to do with:
 
@@ -305,7 +305,7 @@ Pipeline setting the ``input_feature_names_`` attribute on each step.
    the final step of this sliced pipeline (which will be the input feature
    names for the last step of the pipeline, in this example).
   
-   This is what was implemented in https://github.com/scikit-learn/scikit-learn/pull/12627. 
+   This is what was implemented in `#12627 <https://github.com/scikit-learn/scikit-learn/pull/12627>`_. 
   
    The main drawback of this more limited proposal is the user interface: the
    user needs to manually slice the pipeline and call ``get_feature_names()``
