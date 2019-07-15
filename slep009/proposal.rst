@@ -160,16 +160,16 @@ The main question is, which functions/methods should follow this pattern. We
 have a few categories here:
 
 - The ``__init__`` parameters
-  - all arguments
-  - less commonly used arguments only (For instance, ``C`` and ``kernel`` in
+  * all arguments
+  * less commonly used arguments only (For instance, ``C`` and ``kernel`` in
     ``SVC`` could be positional, the rest keyword only).
 - Main methods of the API, _i.e._ ``fit``, ``transform``, etc.
-  - all arguments
-  - less commonly used arguments only (For instance, ``X`` and ``y`` in
+  * all arguments
+  * less commonly used arguments only (For instance, ``X`` and ``y`` in
     ``fit`` could be positional, the rest keyword only).
 - Functions
-  - all arguments
-  - less commonly used arguments only (For instance, ``score_func`` in
+  * all arguments
+  * less commonly used arguments only (For instance, ``score_func`` in
     ``make_scorer`` could be positional, the rest keyword only).
 
 The change can also be a gradual one in the span of two or three releases. But
