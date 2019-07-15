@@ -82,8 +82,8 @@ from the PR):
             self.dual = dual
 
 
-Calling `LogisticRegression('l2', True)` will result with a
-`DeprecationWarning`:
+Calling ``LogisticRegression('l2', True)`` will result with a
+``DeprecationWarning``:
 
 .. code-block:: bash
 
@@ -114,8 +114,8 @@ The feature was discussed and the related PEP
 introduced in Python 3.0, in 2006. However, partly due to the fact that the
 Scipy/PyData was supporting Python 2 until recently, the feature (among other
 Python 3 features) has seen limited adoption and the users may not be used to
-seeing the syntax. For instance, for the above function, defined in VSCode,
-the hint would be shown as:
+seeing the syntax. For instance, for the above function, defined in VSCode, the
+hint would be shown as (these outputs are without the usage of the decorator):
 
 .. code-block:: python
 
@@ -125,7 +125,7 @@ the hint would be shown as:
     func(1, 2, |)
 
 The good news is that the IDE understands the syntax and tells the user it's
-the `arg3`'s turn. But it doesn't say it is a keyword only argument.
+the ``arg3``'s turn. But it doesn't say it is a keyword only argument.
 
 `ipython` would show:
 
@@ -140,12 +140,12 @@ the `arg3`'s turn. But it doesn't say it is a keyword only argument.
       arg1=                          ascii()                         
       arg2=                          AssertionError                  
 
-However, with the decorator, `ipython` shows:
+However, with the decorator, ``ipython`` shows:
 
 .. code-block:: python
 
     In [2]: func( 
-      a=                             ArithmeticError                 
+      arg1=                          ArithmeticError                 
       abs()                          ascii()                         
       all()                          AssertionError                 >
       any()                          AttributeError                  
@@ -153,8 +153,37 @@ However, with the decorator, `ipython` shows:
 The parameters are still all there, but a bit more hidden and in a different
 order. The hint shown by VSCode seems unaffected.
 
+Scope
+-----
+
+The main question is, which functions/methods should follow this pattern. We
+have a few categories here:
+
+- The ``__init__`` parameters
+  - all arguments
+  - less commonly used arguments only (For instance, ``C`` and ``kernel`` in
+    ``SVC`` could be positional, the rest keyword only).
+- Main methods of the API, _i.e._ ``fit``, ``transform``, etc.
+  - all arguments
+  - less commonly used arguments only (For instance, ``X`` and ``y`` in
+    ``fit`` could be positional, the rest keyword only).
+- Functions
+  - all arguments
+  - less commonly used arguments only (For instance, ``score_func`` in
+    ``make_scorer`` could be positional, the rest keyword only).
+
+The change can also be a gradual one in the span of two or three releases. But
+I'm not sure if that's a better idea than telling people they should do keyword
+only, always, once.
+
 Notes
 -----
 
 Some conversations with the users of `sklearn` who have been using the package
 for a while, shows the feedback is positive for this change.
+
+It is also worth noting that ``matplotlib`` has introduced a decorator for this
+purpose in versoin 3.1, and the related PRs can be found
+[here](https://github.com/matplotlib/matplotlib/pull/14130) and
+[here](https://github.com/matplotlib/matplotlib/pull/14130).
+
