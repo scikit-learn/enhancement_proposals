@@ -21,8 +21,8 @@ change. The original issue starting the discussion is located
 Motivation
 ----------
 
-At the moment `sklearn` accepts most of the arguments both as positional and
-keyword arguments. For example, both the following are valid:
+At the moment `sklearn` accepts all arguments both as positional and
+keyword arguments. For example, both of the following are valid:
 
 .. code-block:: python
 
@@ -34,8 +34,8 @@ keyword arguments. For example, both the following are valid:
 
 Using keyword arguments has a few benefits:
 
-- it is more readable
-- for models which accept many parameters, especially numerical, it is less
+- It is more readable.
+- For models which accept many parameters, especially numerical, it is less
   error-prone than positional arguments. Compare these examples:
 
 .. code-block:: python
@@ -50,51 +50,16 @@ Using keyword arguments has a few benefits:
                          True, None, ’auto’, 30, None)
 
 
-- it allows us to add new parameters closer the other relevant parameters,
-  instead of adding new ones at the end of the list. Right now all new
-  parameters are added at the end for backward compatibility. We may even get
-  some sections support in numpydoc, and have sections in the documentation for
-  the parameters.
+- It allows adding new parameters closer the other relevant parameters,
+  instead of adding new ones at the end of the list without breaking backward
+  compatibility. Right now all new parameters are added at the end of the
+  signature. Once we move to a keyword only argument list, we can change their
+  order and put related parameters together. Assuming at some point numpydoc
+  would support sections for parameters, these groups of parameters would be
+  in different sections for the documentation to be more readable.
 
 Solution
 --------
-
-A proposed solution is available at
-[#13311](https://github.com/scikit-learn/scikit-learn/pull/13311), which
-deprecates the usage of positional arguments for most arguments on certain
-functions. It uses a decorator, and removing the decorator would result in an
-error if the function is called with positional arguments. Examples (borrowing
-from the PR):
-
-.. code-block:: python
-
-    @warn_args
-    def dbscan(X, eps=0.5, *, min_samples=4, metric='minkowski'):
-        pass
-
-
-    class LogisticRegression:
-
-        @warn_args
-        def __init__(self, penalty='l2', *, dual=False):
-
-            self.penalty = penalty
-            self.dual = dual
-
-
-Calling ``LogisticRegression('l2', True)`` will result with a
-``DeprecationWarning``:
-
-.. code-block:: bash
-
-    Should use keyword args: dual=True
-
-
-Once the deprecation period is over, we'd remove the decorator and calling
-the function/method with the positional arguments after `*` would fail.
-
-Challenges
-----------
 
 The official supported way to have keyword only arguments is:
 
@@ -140,6 +105,83 @@ the ``arg3``'s turn. But it doesn't say it is a keyword only argument.
       arg1=                          ascii()                         
       arg2=                          AssertionError                  
 
+Challenges
+----------
+
+
+
+Scope
+-----
+
+An important open question is which functions/methods and/or parameters should
+follow this pattern, and which parameters should be keyword only. We can
+identify the following categories and the corresponding options we have for
+each of them:
+
+- The ``__init__`` parameters
+  * All arguments
+  * Less commonly used arguments only (For instance, ``C`` and ``kernel`` in
+  ``SVC`` could be positional, the rest keyword only).
+- Main methods of the API, *i.e.* ``fit``, ``transform``, etc.
+  * All arguments
+  * Less commonly used arguments only (For instance, ``X`` and ``y`` in
+  ``fit`` could be positional, the rest keyword only).
+- All other methods, *e.g.* ``SpectralBiclustering.get_submatrix``
+  * All arguments (and this being the only option since these methods are more
+  ad-hoc).
+- Functions
+  * All arguments
+  * Less commonly used arguments only (For instance, ``score_func`` in
+  ``make_scorer`` could be positional, the rest keyword only).
+
+The term *commonly used* here can either refer to the parameters which are used
+across the library, such as ``X`` and ``y``, or a parameter which is often used
+when that method is used, such as ``C`` for ``SVC``. In the spirit of having a
+similar interface across the library, we can go with the first definition, and
+define the positional parameters independent of the estimator/function.
+
+The change can also be a gradual one in the span of two or three releases,
+*i.e.* we can start by changing the ``__init__``s, and continue later with the
+other ones. But that may cause more confusion, and changing all the above
+categories together may be a better option.
+
+Deprecation Path
+----------------
+
+A proposed solution is available at
+[#13311](https://github.com/scikit-learn/scikit-learn/pull/13311), which
+deprecates the usage of positional arguments for most arguments on certain
+functions and methods. It uses a decorator, and removing the decorator would
+result in an error if the function is called with positional arguments.
+Examples (borrowing from the PR):
+
+.. code-block:: python
+
+    @warn_args
+    def dbscan(X, eps=0.5, *, min_samples=4, metric='minkowski'):
+        pass
+
+
+    class LogisticRegression:
+
+        @warn_args
+        def __init__(self, penalty='l2', *, dual=False):
+
+            self.penalty = penalty
+            self.dual = dual
+
+
+Calling ``LogisticRegression('l2', True)`` will result with a
+``DeprecationWarning``:
+
+.. code-block:: bash
+
+    Should use keyword args: dual=True
+
+
+Once the deprecation period is over, we'd remove the decorator and calling
+the function/method with the positional arguments after `*` would fail.
+
 However, with the decorator, ``ipython`` shows:
 
 .. code-block:: python
@@ -153,29 +195,6 @@ However, with the decorator, ``ipython`` shows:
 The parameters are still all there, but a bit more hidden and in a different
 order. The hint shown by VSCode seems unaffected.
 
-Scope
------
-
-The main question is, which functions/methods should follow this pattern. We
-have a few categories here:
-
-- The ``__init__`` parameters
-  * all arguments
-  * less commonly used arguments only (For instance, ``C`` and ``kernel`` in
-    ``SVC`` could be positional, the rest keyword only).
-- Main methods of the API, _i.e._ ``fit``, ``transform``, etc.
-  * all arguments
-  * less commonly used arguments only (For instance, ``X`` and ``y`` in
-    ``fit`` could be positional, the rest keyword only).
-- Functions
-  * all arguments
-  * less commonly used arguments only (For instance, ``score_func`` in
-    ``make_scorer`` could be positional, the rest keyword only).
-
-The change can also be a gradual one in the span of two or three releases. But
-I'm not sure if that's a better idea than telling people they should do keyword
-only, always, once.
-
 Notes
 -----
 
@@ -184,6 +203,6 @@ for a while, shows the feedback is positive for this change.
 
 It is also worth noting that ``matplotlib`` has introduced a decorator for this
 purpose in versoin 3.1, and the related PRs can be found
-[here](https://github.com/matplotlib/matplotlib/pull/14130) and
+[here](https://github.com/matplotlib/matplotlib/pull/13601) and
 [here](https://github.com/matplotlib/matplotlib/pull/14130).
 
