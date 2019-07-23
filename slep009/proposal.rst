@@ -10,7 +10,7 @@ SLEP009: Keyword-only arguments
 :Created: 2019-07-13
 
 Abstract
---------
+########
 
 This proposal discusses the path to gradually forcing users to pass arguments,
 or most of them, as keyword arguments only. It talks about the status-quo, and
@@ -19,7 +19,7 @@ change. The original issue starting the discussion is located
 [here](https://github.com/scikit-learn/scikit-learn/issues/12805).
 
 Motivation
-----------
+##########
 
 At the moment `sklearn` accepts all arguments both as positional and
 keyword arguments. For example, both of the following are valid:
@@ -59,7 +59,7 @@ Using keyword arguments has a few benefits:
   in different sections for the documentation to be more readable.
 
 Solution
---------
+########
 
 The official supported way to have keyword only arguments is:
 
@@ -75,12 +75,38 @@ as keyword arguments:
     func(1, 2, arg3=3, arg4=4)
 
 The feature was discussed and the related PEP
-([PEP3102](https://www.python.org/dev/peps/pep-3102/)) was accepted and
-introduced in Python 3.0, in 2006. However, partly due to the fact that the
-Scipy/PyData was supporting Python 2 until recently, the feature (among other
-Python 3 features) has seen limited adoption and the users may not be used to
-seeing the syntax. For instance, for the above function, defined in VSCode, the
-hint would be shown as (these outputs are without the usage of the decorator):
+`PEP3102 <https://www.python.org/dev/peps/pep-3102/>`_ was accepted and
+introduced in Python 3.0, in 2006.
+
+For the change to happen in ``sklearn``, we would need to add the ``*`` where
+we want all the parameters after which to be passed as keyword only.
+
+Considerations
+##############
+
+We can identify the following main challenges: familiarity of the users with
+the syntax, and its support by different IDEs.
+
+Syntax
+------
+
+Partly due to the fact that the Scipy/PyData has been supporting Python 2 until
+recently, the feature (among other Python 3 features) has seen limited adoption
+and the users may not be used to seeing the syntax.
+
+However, some other teams are already moving towards using the syntax, such as
+``matplotlib`` which has introduced the syntax with a deprecation cycle using a
+decorator for this purpose in version 3.1, and the related PRs can be found
+[here](https://github.com/matplotlib/matplotlib/pull/13601) and
+[here](https://github.com/matplotlib/matplotlib/pull/14130). Soon users will be
+familiar with the syntax.
+
+IDE Support
+-----------
+
+Many users rely on autocomplete and parameter hints of the IDE while coding.
+Here is how the hint looks like in two different IDEs. For instance, for the
+above function, defined in VSCode, the hint would be shown as:
 
 .. code-block:: python
 
@@ -92,7 +118,7 @@ hint would be shown as (these outputs are without the usage of the decorator):
 The good news is that the IDE understands the syntax and tells the user it's
 the ``arg3``'s turn. But it doesn't say it is a keyword only argument.
 
-`ipython` would show:
+`ipython`, however, suggests all parameters be given with the keyword anyway:
 
 .. code-block:: python
 
@@ -105,13 +131,8 @@ the ``arg3``'s turn. But it doesn't say it is a keyword only argument.
       arg1=                          ascii()                         
       arg2=                          AssertionError                  
 
-Challenges
-----------
-
-
-
 Scope
------
+#####
 
 An important open question is which functions/methods and/or parameters should
 follow this pattern, and which parameters should be keyword only. We can
@@ -148,12 +169,13 @@ categories together may be a better option.
 Deprecation Path
 ----------------
 
-A proposed solution is available at
+For a smooth transition, we need an easy deprecation path. Similar to the
+decorators developed in ``matplotlib``, a proposed solution is available at
 [#13311](https://github.com/scikit-learn/scikit-learn/pull/13311), which
-deprecates the usage of positional arguments for most arguments on certain
-functions and methods. It uses a decorator, and removing the decorator would
-result in an error if the function is called with positional arguments.
-Examples (borrowing from the PR):
+deprecates the usage of positional arguments on selected functions and methods.
+With the decorator, the user sees a warning if they pass the designated
+keyword-only arguments as positional, and removing the decorator would result
+in an error. Examples (borrowing from the PR):
 
 .. code-block:: python
 
@@ -182,27 +204,8 @@ Calling ``LogisticRegression('l2', True)`` will result with a
 Once the deprecation period is over, we'd remove the decorator and calling
 the function/method with the positional arguments after `*` would fail.
 
-However, with the decorator, ``ipython`` shows:
-
-.. code-block:: python
-
-    In [2]: func( 
-      arg1=                          ArithmeticError                 
-      abs()                          ascii()                         
-      all()                          AssertionError                 >
-      any()                          AttributeError                  
-
-The parameters are still all there, but a bit more hidden and in a different
-order. The hint shown by VSCode seems unaffected.
-
 Notes
------
+#####
 
 Some conversations with the users of `sklearn` who have been using the package
 for a while, shows the feedback is positive for this change.
-
-It is also worth noting that ``matplotlib`` has introduced a decorator for this
-purpose in versoin 3.1, and the related PRs can be found
-[here](https://github.com/matplotlib/matplotlib/pull/13601) and
-[here](https://github.com/matplotlib/matplotlib/pull/14130).
-
