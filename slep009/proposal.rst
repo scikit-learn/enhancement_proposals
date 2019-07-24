@@ -50,13 +50,18 @@ Using keyword arguments has a few benefits:
                          True, None, ’auto’, 30, None)
 
 
-- It allows adding new parameters closer the other relevant parameters,
-  instead of adding new ones at the end of the list without breaking backward
+- It allows adding new parameters closer the other relevant parameters, instead
+  of adding new ones at the end of the list without breaking backward
   compatibility. Right now all new parameters are added at the end of the
   signature. Once we move to a keyword only argument list, we can change their
   order and put related parameters together. Assuming at some point numpydoc
-  would support sections for parameters, these groups of parameters would be
-  in different sections for the documentation to be more readable.
+  would support sections for parameters, these groups of parameters would be in
+  different sections for the documentation to be more readable. Also, note that
+  we have previously assumed users would pass most parameters by name and have
+  sometimes considered changes to be backwards compatible when they modified
+  the order of parameters. For example, user code relying on positional
+  arguments could break after a deprecated parameter was removed. Accepting
+  this SLEP would make this requirement explicit.
 
 Solution
 ########
@@ -79,7 +84,7 @@ The feature was discussed and the related PEP
 introduced in Python 3.0, in 2006.
 
 For the change to happen in ``sklearn``, we would need to add the ``*`` where
-we want all the parameters after which to be passed as keyword only.
+we want all subsequent parameters to be passed as keyword only.
 
 Considerations
 ##############
@@ -92,11 +97,18 @@ Syntax
 
 Partly due to the fact that the Scipy/PyData has been supporting Python 2 until
 recently, the feature (among other Python 3 features) has seen limited adoption
-and the users may not be used to seeing the syntax.
+and the users may not be used to seeing the syntax. The similarity between the
+following two definitions may also be confusing to some users:
+
+.. code-block:: python
+
+    def f(arg1, *arg2, arg3): pass # variable length arguments at arg2 
+
+    def f(arg1, *, arg3): pass # no arguments accepted at *
 
 However, some other teams are already moving towards using the syntax, such as
 ``matplotlib`` which has introduced the syntax with a deprecation cycle using a
-decorator for this purpose in version 3.1, and the related PRs can be found
+decorator for this purpose in version 3.1. The related PRs can be found
 [here](https://github.com/matplotlib/matplotlib/pull/13601) and
 [here](https://github.com/matplotlib/matplotlib/pull/14130). Soon users will be
 familiar with the syntax.
@@ -203,9 +215,3 @@ Calling ``LogisticRegression('l2', True)`` will result with a
 
 Once the deprecation period is over, we'd remove the decorator and calling
 the function/method with the positional arguments after `*` would fail.
-
-Notes
-#####
-
-Some conversations with the users of `sklearn` who have been using the package
-for a while, shows the feedback is positive for this change.
