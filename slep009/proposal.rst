@@ -16,7 +16,7 @@ This proposal discusses the path to gradually forcing users to pass arguments,
 or most of them, as keyword arguments only. It talks about the status-quo, and
 the motivation to introduce the change. It shall cover the pros and cons of the
 change. The original issue starting the discussion is located
-[here](https://github.com/scikit-learn/scikit-learn/issues/12805).
+`here <https://github.com/scikit-learn/scikit-learn/issues/12805>`_.
 
 Motivation
 ##########
@@ -108,9 +108,9 @@ following two definitions may also be confusing to some users:
 
 However, some other teams are already moving towards using the syntax, such as
 ``matplotlib`` which has introduced the syntax with a deprecation cycle using a
-decorator for this purpose in version 3.1. The related PRs can be found
-[here](https://github.com/matplotlib/matplotlib/pull/13601) and
-[here](https://github.com/matplotlib/matplotlib/pull/14130). Soon users will be
+decorator for this purpose in version 3.1. The related PRs can be found `here
+<https://github.com/matplotlib/matplotlib/pull/13601>`_ and `here
+<https://github.com/matplotlib/matplotlib/pull/14130>`_. Soon users will be
 familiar with the syntax.
 
 IDE Support
@@ -148,35 +148,32 @@ Scope
 
 An important open question is which functions/methods and/or parameters should
 follow this pattern, and which parameters should be keyword only. We can
-identify the following categories and the corresponding options we have for
-each of them:
+identify the following categories of functions/methods:
 
-- The ``__init__`` parameters
-  * All arguments
-  * Less commonly used arguments only (For instance, ``C`` and ``kernel`` in
-  ``SVC`` could be positional, the rest keyword only).
+- ``__init__``s
 - Main methods of the API, *i.e.* ``fit``, ``transform``, etc.
-  * All arguments
-  * Less commonly used arguments only (For instance, ``X`` and ``y`` in
-  ``fit`` could be positional, the rest keyword only).
 - All other methods, *e.g.* ``SpectralBiclustering.get_submatrix``
-  * All arguments (and this being the only option since these methods are more
-  ad-hoc).
 - Functions
-  * All arguments
-  * Less commonly used arguments only (For instance, ``score_func`` in
-  ``make_scorer`` could be positional, the rest keyword only).
 
-The term *commonly used* here can either refer to the parameters which are used
-across the library, such as ``X`` and ``y``, or a parameter which is often used
-when that method is used, such as ``C`` for ``SVC``. In the spirit of having a
-similar interface across the library, we can go with the first definition, and
-define the positional parameters independent of the estimator/function.
+With regard to the common methods of the API, the decision for these methods
+should be the same throughout the library in order to keep a consistent
+interface to the user.
 
-The change can also be a gradual one in the span of two or three releases,
-*i.e.* we can start by changing the ``__init__``s, and continue later with the
-other ones. But that may cause more confusion, and changing all the above
-categories together may be a better option.
+This proposal suggests making only *most commonly* used parameters positional.
+The *most commonly* used parameters are defined per method or function, to be
+defined as either of the following two ways:
+
+- The set defined and agreed upon by the core developers, which should cover
+  the *easy* cases.
+- A set identified as being in the top 95% of the use cases, using some
+  automated analysis such as `this one
+  <https://odyssey.readthedocs.io/en/latest/tutorial.html>`_ or `this one
+  <https://github.com/Quansight-Labs/python-api-inspect>`_.
+
+This way we would minimize the number of warnings the users would receive,
+which minimizes the friction cause by the change. This SLEP does not define
+these parameter sets, and the respective decisions shall be made in their
+corresponding pull requests.
 
 Deprecation Path
 ----------------
@@ -215,3 +212,7 @@ Calling ``LogisticRegression('l2', True)`` will result with a
 
 Once the deprecation period is over, we'd remove the decorator and calling
 the function/method with the positional arguments after `*` would fail.
+
+The final decorator solution shall make sure it is well understood by most
+commonly used IDEs and editors such as IPython, Jupiter Lab, Emacs, vim,
+VSCode, and PyCharm.
