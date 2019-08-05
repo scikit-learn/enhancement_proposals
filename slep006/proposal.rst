@@ -208,6 +208,7 @@ a prop named 'weights' to a step named 'spam' in a Pipeline, you might use
 `my_pipe.fit(X, y, props={'spam__weights': my_weights})`.
 
 Issues:
+
 * This gets tricky or impossible where the available routes change
   mid-fit, such as where a grid search considers estimators with different
   structures.
@@ -225,6 +226,7 @@ a GridSearchCV has children including `estimator`, `cv` and (each element of)
 `scoring`.
 
 Disadvantages:
+
 * Routing may be hard to get one's head around, especially since the prop
   support belongs to the child estimator but the parent is responsible for the
   routing.
@@ -248,20 +250,108 @@ parameter `request_weight`. `make_scorer` would have a similar mechanism for
 enabling weighted scoring.
 
 Benefits:
+
 * This will not need to affect legacy estimators, since no props will be
   passed.
 * This does not require defining a new syntax for routing.
 * The implementation changes in meta-estimators may be easy to provide via a
   helper or two (perhaps even `call_with_props(method, target, props)`).
 * Easy to reconfigure what props an estimator gets in a grid search.
+* Could make use of existing `**fit_params` syntax rather than introducing new
+  `props` argument to `fit`.
 
 Disadvantages:
+
 * This will require modifying every estimator that may want props, as well as
   all meta-estimators. We could provide a mixin or similar to add prop-request
   support to a legacy estimator; or `BaseEstimator` could have a
   `set_props_request` method (instead of the `request_props` constructor
   parameter approach) such that all legacy base estimators are
   automatically equipped.
+* If the parameter request does not correspond to a `get_params` parameter,
+  `clone` will have to ensure that this request is cloned as well as
+  parameters.
+
+Possible public syntax:
+
+* `BaseEstimator` will have methods `set_props_request` and `get_props_request`
+* `make_scorer` will have a `request_props` parameter to set props required by
+  the scorer.
+* `get_props_request` will return a dict. It maps the prop name that the user
+  passes to the prop name that the estimator expects.
+* `set_props_request` will accept either such a dict or a sequence `s` to be
+  interpreted as the identity mapping for all elements in `s`
+  (`{x: x for x in s}`). It will return `self` to enable chaining.
+* `Group*` CV splitters will by default request the 'groups' prop, but its
+  mapping can be changed with their `set_props_request` method.
+
+(TODO: this might look more persuasive using ``**fit_params`` rather than a
+prop param.)
+
+Test cases::
+
+    from sklearn.model_selection import GroupKFold, cross_validate
+    from sklearn.feature_selection import SelectKBest
+    from sklearn.pipeline import make_pipeline
+    from sklearn.linear_model import LogisticRegressionCV
+    from sklearn.metrics import accuracy
+
+    # Case A:
+    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+    lr = LogisticRegressionCV(
+        cv=GroupKFold(),
+        scoring=weighted_acc,
+    ).set_props_request(['sample_weight'])
+    cross_validate(lr, X, y,
+                   props={'sample_weight': my_weights, 'groups': my_groups},
+                   scoring=weighted_acc)
+
+    # Case B variant 1:
+    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+    lr = LogisticRegressionCV(
+        cv=GroupKFold(),
+        scoring=weighted_acc,
+    )
+    cross_validate(lr, X, y,
+                   props={'sample_weight': my_weights, 'groups': my_groups},
+                   scoring=weighted_acc)
+
+    # Case B variant 2:
+    weighted_acc = make_scorer(accuracy, request_props=['scoring_weight'])
+    lr = LogisticRegressionCV(
+        cv=GroupKFold(),
+        scoring=weighted_acc,
+    ).set_props_request(['fitting_weight'])
+    cross_validate(lr, X, y,
+                   props={
+                        'scoring_weight': my_weights,
+                        'fitting_weight': None,
+                        'groups': my_groups,
+                   scoring=weighted_acc)
+
+    # Case C:
+    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+    lr = LogisticRegressionCV(
+        cv=GroupKFold(),
+        scoring=weighted_acc,
+    ).set_props_request(['sample_weight'])
+    sel = SelectKBest()
+    pipe = make_pipeline(sel, lr)
+    cross_validate(pipe, X, y,
+                   props={'sample_weight': my_weights, 'groups': my_groups},
+                   scoring=weighted_acc)
+
+    # Case D:
+    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+    lr = LogisticRegressionCV(
+        cv=GroupKFold(),
+        scoring=weighted_acc,
+    ).set_props_request(['sample_weight'])
+    pipe = ResamplingTrainer(Resampler(), lr)
+    cross_validate(pipe, X, y,
+                   props={'sample_weight': my_weights, 'groups': my_groups},
+                   scoring=weighted_acc)
+
 
 Proposal
 --------
