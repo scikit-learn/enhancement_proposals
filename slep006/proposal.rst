@@ -164,6 +164,11 @@ Case D
 Extend Case A to apply an arbitrary SLEP005 resampler in a pipeline, which
 rewrites ``sample_weight`` and ``groups``.
 
+Case E
+~~~~~~
+
+Different weights for scoring and for fitting in Case A.
+
 Solution 1: Pass everything
 ---------------------------
 
@@ -193,14 +198,75 @@ Issues (TODO: clean)
 * Introspection: not inherently supported. Would need an API like
   ``get_prop_support(names: List[str]) -> Dict[str, Literal["supported", "required", "ignored"]]``.
 
-Solution 2: specify routes at call
+Solution 2: Specify routes at call
 ----------------------------------
 
+Similar to the legacy behavior of fit parameters in
+:class:`sklearn.pipeline.Pipeline`, this requires the user to specify the
+path for each "prop" to follow when calling `fit`.  For example, to pass
+a prop named 'weights' to a step named 'spam' in a Pipeline, you might use
+`my_pipe.fit(X, y, props={'spam__weights': my_weights})`.
 
-Solution 3: specify routes on metaestimators
+Issues:
+* This gets tricky or impossible where the available routes change
+  mid-fit, such as where a grid search considers estimators with different
+  structures.
+* This may not work if a meta-estimator were to have the role of changing a
+  prop, e.g. a meta-estimator that passes `sample_weights` corresponding to
+  balanced classes onto its base estimator.  The meta-estimator would need a
+  list of destinations to pass props to.
+
+Solution 3: Specify routes on metaestimators
 --------------------------------------------
 
-The metaestimators
+Each meta-estimator is given a routing specification which it must follow in
+passing only the required parameters to each of its children. In this context,
+a GridSearchCV has children including `estimator`, `cv` and (each element of)
+`scoring`.
+
+Disadvantages:
+* Routing may be hard to get one's head around, especially since the prop
+  support belongs to the child estimator but the parent is responsible for the
+  routing.
+* Need to design an API for specifying routings.
+* Be
+
+Solution 4: Each child requests
+-------------------------------
+
+Here the meta-estimator provides only what its each of its children requests.
+The meta-estimator would also need to request, on behalf of its children,
+any prop that its descendants require.
+
+Each object in a situation that could receive props would have a method like
+`_get_prop_requests()` which would return a list of prop names (or perhaps a
+mapping for more sophisticated use-cases). Group* CV splitters would default to
+returning `['groups']`, for example.  Estimators supporting weighted fitting
+may return `[]` by default, but may have a parameter `request_props` which
+may be set to `['weight']` if weight is sought, or perhaps just boolean
+parameter `request_weight`. `make_scorer` would have a similar mechanism for
+enabling weighted scoring.
+
+Benefits:
+* This will not need to affect legacy estimators, since no props will be
+  passed.
+* This does not require defining a new syntax for routing.
+* The implementation changes in meta-estimators may be easy to provide via a
+  helper or two (perhaps even `call_with_props(method, target, props)`).
+* Easy to reconfigure what props an estimator gets in a grid search.
+
+Disadvantages:
+* This will require modifying every estimator that may want props, as well as
+  all meta-estimators. We could provide a mixin or similar to add prop-request
+  support to a legacy estimator; or `BaseEstimator` could have a
+  `set_props_request` method (instead of the `request_props` constructor
+  parameter approach) such that all legacy base estimators are
+  automatically equipped.
+
+Proposal
+--------
+
+Having considered the above solutions, we propose:
 
 
 Backward compatibility
