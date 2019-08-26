@@ -173,10 +173,15 @@ Pipeline.
 .. rubric:: Handling ``fit`` parameters
 
 Sample props or weights cannot be routed to steps downstream of a resampler in
-a Pipeline, unless they too are resampled. It's very unclear how this would
-work with Pipeline's current prefix-based fit parameter routing.
-
-TODO: propose solutions
+a Pipeline, unless they too are resampled. To support this, a resampler
+would need to be passed all props that are required downstream, and
+``fit_resample`` should return resampled versions of them. Note that these
+must be distinct from parameters that affect the resampler's fitting.
+That is, consider the signature ``fit_resample(X, y=None, props=None, sample_weight=None)``.
+The ``sample_weight`` passed in should affect the resampling, but does not
+itself need to be resampled. A Pipeline would pass ``props`` including the fit
+parameters required downstream, which would be resampled and returned by
+``fit_resample``.
 
 Example Usage:
 ~~~~~~~~~~~~~~
@@ -191,6 +196,7 @@ Example Usage:
     est = make_pipeline(
         NaNRejector(), RandomUnderSampler(), StandardScaler(), SGDClassifer()
     )
+    est.fit(X,y, sgdclassifier__sample_weight=my_weight)
 
 
 Alternative implementation
