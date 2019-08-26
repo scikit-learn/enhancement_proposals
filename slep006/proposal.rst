@@ -207,6 +207,9 @@ path for each "prop" to follow when calling `fit`.  For example, to pass
 a prop named 'weights' to a step named 'spam' in a Pipeline, you might use
 `my_pipe.fit(X, y, props={'spam__weights': my_weights})`.
 
+SLEP004's syntax to override the common routing scheme falls under this
+solution.
+
 Issues:
 
 * This gets tricky or impossible where the available routes change
@@ -225,13 +228,15 @@ passing only the required parameters to each of its children. In this context,
 a GridSearchCV has children including `estimator`, `cv` and (each element of)
 `scoring`.
 
+Pull request `#9566 <https://github.com/scikit-learn/scikit-learn/pull/9566>`__
+is a partial implementation of this approach.
+
 Disadvantages:
 
 * Routing may be hard to get one's head around, especially since the prop
   support belongs to the child estimator but the parent is responsible for the
   routing.
 * Need to design an API for specifying routings.
-* Be
 
 Solution 4: Each child requests
 -------------------------------
