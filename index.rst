@@ -6,10 +6,10 @@
 .. include:: README.rst
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: Under review
 
-    under_review
+    SLEP009: Keyword-only arguments (voting until 11 Oct 2019) <slep009/proposal>
 
 .. toctree::
     :maxdepth: 1
