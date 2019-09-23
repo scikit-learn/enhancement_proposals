@@ -11,6 +11,7 @@
 
     under_review
     slep005/proposal
+    SLEP009: Keyword-only arguments (voting until 11 Oct 2019) <slep009/proposal>
 
 .. toctree::
     :maxdepth: 1
