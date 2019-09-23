@@ -5,11 +5,10 @@ SLEP009: Keyword-only arguments
 ===============================
 
 :Author: Adrin Jalali
-:Status: Draft
+:Status: Accepted
 :Type: Standards Track
 :Created: 2019-07-13
-:Vote opens: 2019-09-11
-:Vote closes: 2019-10-11
+:Vote opened: 2019-09-11
 
 Abstract
 ########
