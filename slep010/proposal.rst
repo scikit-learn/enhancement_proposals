@@ -79,3 +79,18 @@ There are other minor considerations:
   called: typically the ``SparseCoder``, where ``n_feature_in_`` is known at
   ``__init__`` from the ``dictionary`` parameter. In this case the attribute is
   set in ``__init__``.
+
+References and Footnotes
+------------------------
+
+.. [1] Each SLEP must either be explicitly labeled as placed in the public
+   domain (see this SLEP as an example) or licensed under the `Open
+   Publication License`_.
+
+.. _Open Publication License: https://www.opencontent.org/openpub/
+
+
+Copyright
+---------
+
+This document has been placed in the public domain. [1]_
