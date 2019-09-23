@@ -1,4 +1,7 @@
 SLEPs under review
 ==================
 
-Nothing here
+.. toctree::
+    :maxdepth: 1
+
+    slep010/proposal
