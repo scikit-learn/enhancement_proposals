@@ -15,7 +15,7 @@ Abstract
 This SLEP proposes the introduction of a public ``n_features_in_`` attribute
 for most estimators (where relevant). This attribute is automatically set
 when calling ``_validate_X()`` or ``_validate_X_y`` which are meant to replace
-``check_array`` and ``check_X_y`` (they are still called under the hood).
+``check_array`` and ``check_X_y`` (which are still called under the hood).
 
 Motivation
 ##########
@@ -31,7 +31,7 @@ ordering of a dataframe was changed between ``fit`` and ``predict``.
 Solution
 ########
 
-The proposed solution is to replace most calls to ``check_X()`` or
+The proposed solution is to replace most calls to ``check_array()`` or
 ``check_X_y()`` by calls to two newly created private methods::
 
     def _validate_X(self, X, check_n_features=False, **check_array_params)
@@ -60,8 +60,8 @@ Considerations
 
 The main consideration is that the addition of the common test means that
 existing estimators in downstream libraries will not pass our test suite,
-unless they update their calls to ``check_XXX`` into calls to
-``_validate_XXX``.
+unless the estimators also have the `n_features_in_` attribute (which can be
+done by updating calls to ``check_XXX`` into calls to ``_validate_XXX``).
 
 There are other minor considerations:
 
