@@ -23,11 +23,6 @@ Motivation
 Knowing the number of features that an estimator expects is useful for
 inspection purposes, as well as for input validation.
 
-The logic that is proposed here (calling a stateful method instead of a
-stateless function) is also a pre-requisit to fixing the dataframe column
-ordering issue: at the moment, there is no way to raise an error if the column
-ordering of a dataframe was changed between ``fit`` and ``predict``.
-
 Solution
 ########
 
@@ -54,6 +49,11 @@ there are exceptions (see below).
 A new common check is added: it makes sure that for most esitmators, the
 ``n_features_in_`` attribute does not exist until ``fit`` is called, and
 that its value is correct.
+
+The logic that is proposed here (calling a stateful method instead of a
+stateless function) is a pre-requisit to fixing the dataframe column
+ordering issue: at the moment, there is no way to raise an error if the
+column ordering of a dataframe was changed between ``fit`` and ``predict``.
 
 Considerations
 ##############
