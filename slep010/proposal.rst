@@ -46,7 +46,7 @@ leave it to False in ``fit()`` and set it to True in ``predict()`` or
 In most cases, the attribute exists only once ``fit`` has been called, but
 there are exceptions (see below).
 
-A new common check is added: it makes sure that for most esitmators, the
+A new common check is added: it makes sure that for most estimators, the
 ``n_features_in_`` attribute does not exist until ``fit`` is called, and
 that its value is correct.
 
@@ -77,8 +77,8 @@ There are other minor considerations:
   ``check_array`` anyway).
 - Some estimators may know the number of input features before ``fit`` is
   called: typically the ``SparseCoder``, where ``n_feature_in_`` is known at
-  ``__init__`` from the ``dictionary`` parameter. In this case the attribute is
-  set in ``__init__``.
+  ``__init__`` from the ``dictionary`` parameter. In this case the attribute
+  is a property and is available right after object instanciation.
 
 References and Footnotes
 ------------------------
