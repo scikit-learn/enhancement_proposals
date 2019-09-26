@@ -63,6 +63,13 @@ existing estimators in downstream libraries will not pass our test suite,
 unless the estimators also have the `n_features_in_` attribute (which can be
 done by updating calls to ``check_XXX`` into calls to ``_validate_XXX``).
 
+Note that we have never guaranteed any kind of backward compatibility
+regarding the test suite: see e.g. `#12328
+<https://github.com/scikit-learn/scikit-learn/pull/12328>`_, `14680
+<https://github.com/scikit-learn/scikit-learn/pull/14680>`_, or `9270
+<https://github.com/scikit-learn/scikit-learn/pull/9270>`_ which all add new
+checks.
+
 There are other minor considerations:
 
 - In most meta-estimators, the input validation is handled by the
