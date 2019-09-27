@@ -1,8 +1,8 @@
 .. _slep_010:
 
-=================================
-SLEP010: n_features_in_ attribute
-=================================
+=====================================
+SLEP010: ``n_features_in_`` attribute
+=====================================
 
 :Author: Nicolas Hug
 :Status: Under review
@@ -14,8 +14,9 @@ Abstract
 
 This SLEP proposes the introduction of a public ``n_features_in_`` attribute
 for most estimators (where relevant). This attribute is automatically set
-when calling ``_validate_X()`` or ``_validate_X_y`` which are meant to replace
-``check_array`` and ``check_X_y`` (which are still called under the hood).
+when calling new methods on ``BaseEstimator`` -- ``_validate_X()`` or
+``_validate_X_y()`` -- which are meant to replace ``check_array`` and
+``check_X_y`` in most cases, calling those under the hood.
 
 Motivation
 ##########
@@ -32,7 +33,7 @@ The proposed solution is to replace most calls to ``check_array()`` or
     def _validate_X(self, X, check_n_features=False, **check_array_params)
         ...
 
-    def _validate_X_y(self, X, check_n_features=False, **check_X_y_params)
+    def _validate_X_y(self, X, y, check_n_features=False, **check_X_y_params)
         ...
 
 The ``_validate_XXX()`` methods will call the corresponding ``check_XXX()``
@@ -51,9 +52,10 @@ A new common check is added: it makes sure that for most estimators, the
 that its value is correct.
 
 The logic that is proposed here (calling a stateful method instead of a
-stateless function) is a pre-requisit to fixing the dataframe column
-ordering issue: at the moment, there is no way to raise an error if the
-column ordering of a dataframe was changed between ``fit`` and ``predict``.
+stateless function) is a pre-requisite to fixing the dataframe column
+ordering issue: with a stateless `check_array`, there is no way to raise an
+error if the column ordering of a dataframe was changed between ``fit`` and
+``predict``.
 
 Considerations
 ##############
@@ -85,7 +87,7 @@ There are other minor considerations:
 - Some estimators may know the number of input features before ``fit`` is
   called: typically the ``SparseCoder``, where ``n_feature_in_`` is known at
   ``__init__`` from the ``dictionary`` parameter. In this case the attribute
-  is a property and is available right after object instanciation.
+  is a property and is available right after object instantiation.
 
 References and Footnotes
 ------------------------
