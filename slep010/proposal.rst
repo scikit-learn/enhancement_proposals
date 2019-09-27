@@ -82,8 +82,9 @@ There are other minor considerations:
   (the 'no_validation' tag should be True). The ``n_features_in_`` attribute
   should be set to None, though this is not enforced in the common tests.
 - Some estimators expect a non-rectangular input: the vectorizers. These
-  estimators never have a ``n_features_in_`` attribute (they never call
-  ``check_array`` anyway).
+  estimators expect dicts or lists, not a ``n_samples * n_features`` matrix.
+  ``n_features_in_`` makes no sense here and these estimators just don't have
+  the attribute.
 - Some estimators may know the number of input features before ``fit`` is
   called: typically the ``SparseCoder``, where ``n_feature_in_`` is known at
   ``__init__`` from the ``dictionary`` parameter. In this case the attribute
