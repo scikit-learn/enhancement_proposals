@@ -49,7 +49,9 @@ there are exceptions (see below).
 
 A new common check is added: it makes sure that for most estimators, the
 ``n_features_in_`` attribute does not exist until ``fit`` is called, and
-that its value is correct.
+that its value is correct. Instead of raising an exception, this check will
+raise a warning for the next two releases. This will give downstream
+packages some time to adjust (see considerations below).
 
 The logic that is proposed here (calling a stateful method instead of a
 stateless function) is a pre-requisite to fixing the dataframe column
@@ -64,6 +66,10 @@ The main consideration is that the addition of the common test means that
 existing estimators in downstream libraries will not pass our test suite,
 unless the estimators also have the `n_features_in_` attribute (which can be
 done by updating calls to ``check_XXX`` into calls to ``_validate_XXX``).
+
+The newly introduced checks will only raise a warning instead of an exception
+for the next 2 releases, so this will give more times for downstream packages
+to adjust.
 
 Note that we have never guaranteed any kind of backward compatibility
 regarding the test suite: see e.g. `#12328
