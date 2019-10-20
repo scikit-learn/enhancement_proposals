@@ -14,9 +14,9 @@ Abstract
 
 This SLEP proposes the introduction of a public ``n_features_in_`` attribute
 for most estimators (where relevant). This attribute is automatically set
-when calling new methods on ``BaseEstimator`` -- ``_validate_X()`` or
-``_validate_X_y()`` -- which are meant to replace ``check_array`` and
-``check_X_y`` in most cases, calling those under the hood.
+when calling a new method ``BaseEstimator._validate_data(X, y=None)`` which
+is meant to replace ``check_array`` and ``check_X_y`` in most cases, calling
+those under the hood.
 
 Motivation
 ##########
@@ -28,24 +28,24 @@ Solution
 ########
 
 The proposed solution is to replace most calls to ``check_array()`` or
-``check_X_y()`` by calls to two newly created private methods::
+``check_X_y()`` by calls to a newly created private method::
 
-    def _validate_X(self, X, check_n_features=False, **check_array_params)
+    def _validate_data(self, X, y=None, reset=True, **check_array_params)
         ...
 
-    def _validate_X_y(self, X, y, check_n_features=False, **check_X_y_params)
-        ...
+The ``_validate_data()`` method will call ``check_array()`` or
+``check_X_y()`` function depending on the ``y`` parameter.
 
-The ``_validate_XXX()`` methods will call the corresponding ``check_XXX()``
-functions.
+If the ``reset`` parameter is True (default), the method will set the
+``n_feature_in_`` attribute of the estimator, regardless of its potential
+previous value. This should typically be used in ``fit()``, or in the first
+``partial_fit()`` call. Passing ``reset=False`` will not set the attribute but
+instead check against it, and potentially raise an error. This should typically
+be used in ``predict()`` or ``transform()``, or on subsequent calls to
+``partial_fit``.
 
-The ``check_n_features`` parameter is False by default and can be set to True
-to raise an error when ``self.n_features_in_ != X.shape[1]``. The idea is to
-leave it to False in ``fit()`` and set it to True in ``predict()`` or
-``transform()``.
-
-In most cases, the attribute exists only once ``fit`` has been called, but
-there are exceptions (see below).
+In most cases, the ``n_features_in_`` attribute exists only once ``fit`` has
+been called, but there are exceptions (see below).
 
 A new common check is added: it makes sure that for most estimators, the
 ``n_features_in_`` attribute does not exist until ``fit`` is called, and
@@ -55,9 +55,9 @@ packages some time to adjust (see considerations below).
 
 The logic that is proposed here (calling a stateful method instead of a
 stateless function) is a pre-requisite to fixing the dataframe column
-ordering issue: with a stateless `check_array`, there is no way to raise an
-error if the column ordering of a dataframe was changed between ``fit`` and
-``predict``.
+ordering issue: with a stateless ``check_array``, there is no way to raise
+an error if the column ordering of a dataframe was changed between ``fit``
+and ``predict``.
 
 Considerations
 ##############
@@ -65,10 +65,10 @@ Considerations
 The main consideration is that the addition of the common test means that
 existing estimators in downstream libraries will not pass our test suite,
 unless the estimators also have the `n_features_in_` attribute (which can be
-done by updating calls to ``check_XXX`` into calls to ``_validate_XXX``).
+done by updating calls to ``check_XXX()`` into calls to ``_validate_data()``).
 
 The newly introduced checks will only raise a warning instead of an exception
-for the next 2 releases, so this will give more times for downstream packages
+for the next 2 releases, so this will give more time for downstream packages
 to adjust.
 
 Note that we have never guaranteed any kind of backward compatibility
