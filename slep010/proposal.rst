@@ -53,6 +53,9 @@ that its value is correct. Instead of raising an exception, this check will
 raise a warning for the next two releases. This will give downstream
 packages some time to adjust (see considerations below).
 
+Since the introduced method is private, third party libraries are
+recommended not to rely on it.
+
 The logic that is proposed here (calling a stateful method instead of a
 stateless function) is a pre-requisite to fixing the dataframe column
 ordering issue: with a stateless ``check_array``, there is no way to raise
