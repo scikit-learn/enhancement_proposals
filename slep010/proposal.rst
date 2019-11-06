@@ -13,16 +13,17 @@ Abstract
 ########
 
 This SLEP proposes the introduction of a public ``n_features_in_`` attribute
-for most estimators (where relevant). This attribute is automatically set
-when calling a new method ``BaseEstimator._validate_data(X, y=None)`` which
-is meant to replace ``check_array`` and ``check_X_y`` in most cases, calling
-those under the hood.
+for most estimators (where relevant).
 
 Motivation
 ##########
 
 Knowing the number of features that an estimator expects is useful for
-inspection purposes, as well as for input validation.
+inspection purposes. This is also useful for implementing the feature names
+propagation (`SLEP 8
+<https://github.com/scikit-learn/enhancement_proposals/pull/18>`_) . For
+example any of the scaler can easily create feature names if they know
+``n_features_in_``.
 
 Solution
 ########
@@ -60,26 +61,19 @@ The logic that is proposed here (calling a stateful method instead of a
 stateless function) is a pre-requisite to fixing the dataframe column
 ordering issue: with a stateless ``check_array``, there is no way to raise
 an error if the column ordering of a dataframe was changed between ``fit``
-and ``predict``.
+and ``predict``. This is however out os scope for this SLEP, which only focuses
+on the introduction of the ``n_features_in_`` attribute.
 
 Considerations
 ##############
 
 The main consideration is that the addition of the common test means that
 existing estimators in downstream libraries will not pass our test suite,
-unless the estimators also have the `n_features_in_` attribute (which can be
-done by updating calls to ``check_XXX()`` into calls to ``_validate_data()``).
+unless the estimators also have the ``n_features_in_`` attribute.
 
 The newly introduced checks will only raise a warning instead of an exception
 for the next 2 releases, so this will give more time for downstream packages
 to adjust.
-
-Note that we have never guaranteed any kind of backward compatibility
-regarding the test suite: see e.g. `#12328
-<https://github.com/scikit-learn/scikit-learn/pull/12328>`_, `14680
-<https://github.com/scikit-learn/scikit-learn/pull/14680>`_, or `9270
-<https://github.com/scikit-learn/scikit-learn/pull/9270>`_ which all add new
-checks.
 
 There are other minor considerations:
 
@@ -89,7 +83,7 @@ There are other minor considerations:
   ``@property``, or directly in ``fit()``.
 - Some estimators like the dummy estimators do not validate the input
   (the 'no_validation' tag should be True). The ``n_features_in_`` attribute
-  should be set to None, though this is not enforced in the common tests.
+  should be set to None, though this is not enforced in the common check.
 - Some estimators expect a non-rectangular input: the vectorizers. These
   estimators expect dicts or lists, not a ``n_samples * n_features`` matrix.
   ``n_features_in_`` makes no sense here and these estimators just don't have
