@@ -34,9 +34,10 @@ Solution
 ########
 
 The proposed solution is to add the classifier to the build which is already
-mostly prepared from the latest research papers on the topic.  It will use
-a fast algorithm which can reduce the factorial nature of the problem as per
-[2]_.
+mostly prepared from the latest research papers on the topic.  430 citations
+to the original article generally considered as introducing the topic have
+been recorded [2]_.  It will use a fast algorithm which can reduce the
+factorial nature of the problem as per [3]_.
 
 The classifier will also contain a component to deal with binarization of
 data which can be used independently, and as part of the model fitting to
@@ -58,7 +59,12 @@ References and Footnotes
 
 .. _Open Publication License: https://www.opencontent.org/openpub/
 
-.. [2] Accelerated algorithm for pattern detection in logical analysis
+.. [2] An implementation of logical analysis of data
+   E. Boros ; P.L. Hammer ; T. Ibaraki ; A. Kogan ; E. Mayoraz ; I. Muchnik
+
+.. _Available: https://ieeexplore.ieee.org/document/842268
+
+.. [3] Accelerated algorithm for pattern detection in logical analysis
    of data
    Sorin Alexe and Peter L.Hammer
    
