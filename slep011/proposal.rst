@@ -1,4 +1,4 @@
-.. _slep_010:
+.. _slep_011:
 
 =====================
 SLEP011: random state
@@ -45,7 +45,7 @@ estimator stateful accross calls to `fit`. Almost all the other issues are
 consequences of this fact.
 
 Statefulness and violation of fit idempotence
----------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Estimators should be stateless. That is, any call to `fit` should forget
 whatever happened to previous calls to `fit`, provided that no warm-start is
@@ -79,7 +79,7 @@ The estimator isn't "self contained" anymore and its behaviour is now
 dependent on some stuff that happen outside.
 
 Countless bugs
---------------
+~~~~~~~~~~~~~~
 
 Quoting @amueller from `14042
 <https://github.com/scikit-learn/scikit-learn/issues/14042>`_, many bugs
@@ -102,7 +102,7 @@ This is a typical example of many other similar bugs that we need to
 monkey-patch with potentially overly complex logic.
 
 Cloning may return a different estimator
-----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `my_clone = clone(est)` returns an *unfitted* estimator whose parameters are
 (supposed to be) the same as those that were passed when `est` was
@@ -129,7 +129,7 @@ In addition, `est` and `my_clone` are now interdependent because they share the
 same `rng` instance.
 
 Incompatibility with third-party estimators
---------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 From the snippet above in the introduction, most meta-estimators will
 directly pass down `self.random_state` to their sub-estimators. Some
@@ -138,7 +138,7 @@ or None. See e.g. `15611
 <https://github.com/scikit-learn/scikit-learn/issues/15611>`_
 
 CV-Splitters statefulness
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CV-splitters are stateful::
 
@@ -166,25 +166,23 @@ parameter, this is potentially confusing.
 
 The second inconsistency is that splitters are stateful by design, while we
 want our estimators to be stateless. Granted, splitters aren't estimators.
-But, quoting `@GaelVaroquaux,
+But, quoting `@GaelVaroquaux
 <https://github.com/scikit-learn/scikit-learn/pull/15177#issuecomment-548021786>`_,
 consistency is one thing that we are really good at.
-
 So it is important to have the splitters consistent with the estimators,
 w.r.t. the statelessness property. The current behaviour is not necessarily
-clear for users. Fixing how random_state is handled in the splitters is one
-of the entries in the `Roadmap
-<https://scikit-learn.org/dev/roadmap.html>`_.
+clear for users.
 
-Some users may rely on the current behaviour, `to implement e.g.
-bootstrapping,
+Note Fixing how random_state is handled in the splitters is one of the
+entries in the `Roadmap <https://scikit-learn.org/dev/roadmap.html>`_. Some
+users may rely on the current behaviour, `to implement e.g. bootstrapping,
 <https://github.com/scikit-learn/scikit-learn/pull/15177#issuecomment-548021786>`_.
 If we make the splitters stateless, the "old" behaviour can be easily
 reproduced by simply creating new CV instances, instead of calling `split`
-on the same instance. Instances are dead cheap to create.
+on the same instance. Instances are cheap to create.
 
 Potential bugs in custom parameter searches
--------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 (This issue is a direct consequence of the splitters being stateful.)
 
@@ -212,6 +210,9 @@ Proposed Solution
 
 We need a solution that fixes the statefulness of the estimators and the
 splitters.
+
+A toy example of the proposed solution is implemented in this `notebook
+<https://nbviewer.jupyter.org/gist/NicolasHug/1169ee253a4669ff993c947507ae2cb5>`_.
 
 The proposed solution is to store the *state* of a RandomState instance in
 `__init__`::
@@ -282,20 +283,22 @@ Advantages:
 
 Drawbacks:
 
-- we break our convention that `__init__` should only ever store attributes, as
-  they are passed in. Note however that this convention is enforced so that
-  the semantic of `__init__` and `set_params` are the same, and to enable
-  people to change public attributes without having surprising behaviour.
-  **This is still respected here.** So this isn't really an issue.
+- We break our convention that `__init__` should only ever store attributes, as
+  they are passed in. Note however that the reason we have this convention
+  is that we want the semantic of `__init__` and `set_params` are the same,
+  and we want to enable people to change public attributes without having
+  surprising behaviour. **This is still respected here.** So this isn't
+  really an issue.
 
-- there is a subtelty that occurs when passing `None`. `check_random_state`
+- There is a subtelty that occurs when passing `None`. `check_random_state`
   will return the singleton `np.random.mtrand._rand`, and we will call
   `get_state()` on the singleton. The thing is, its state won't change
   accross multiple instances unless the singleton is consumed. So if we do
   `a = Est(random_state=None); b = Est(random_state=None)`, a and b actually
   have exactly the same `random_state` attribute, since the state of the
-  singleton wasn't changed. One solution would be to consume the singleton's
-  RNG in `__init__`, with a private helper.
+  singleton wasn't changed. To circumvent this, the logic in `__init__` and
+  `set_params` involves a private helper that makes sure the singleton's RNG is
+  consumed. Please refer to the notebook.
 
 - The `__repr__()` will need to special-case the `random_state` attribute to
   avoid printing a long tuple.
@@ -310,13 +313,13 @@ Alternative solutions
 =====================
 
 Store a seed instead of a state
---------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Instead of storing a state from `get_state()`, we could store a randomly
 generated seed::
 
     def __init__(self, ..., random_state=None):
-        self.random_state = check_random_state(random_state).randint(0. BIG_INT)
+        self.random_state = check_random_state(random_state).randint(0, BIG_INT)
 
 Then instead of using `set_state` we could just use
 `rng = RandomState(seed=self.random_state)` in `fit` or `split`.
@@ -326,9 +329,8 @@ Advantages:
 - It also fixes the third-party estimators issue, since we would be passing
   self.random_state which is an int
 - It's cheaper than storing 620 ints
-- we only need to subcase `set_params()`. `get_params()` can be left as-is,
-  same for `clone`.
-
+- We don't need to artificially consume the singleton's RNG since it is
+  de-facto consumed anyway.
 
 Drawbacks:
 
@@ -340,16 +342,15 @@ Drawbacks:
 - It is not backward compatible between versions. For example if you passed
   an int in version A (say 0.22), then in version B (with the new
   behaviour), your estimator will not start with the same RNG when `fit` is
-  called the first time. Same for splitters. For this reason, storing a
-  state may be preferable.
+  called the first time. Same for splitters.
 
-Store the state in fit instead of in init
------------------------------------------
+Store the state in fit/split instead of in init
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Instead of storing the output of `get_state()` in `__init__`, we could store it
 the first time `fit()` is called. For example::
 
-    def fit(self):
+    def fit(self):  # or split()
         self._random_state = getattr(self, '_random_state', check_random_state(self.random_state).get_state())
         rng = np.random.RandomState()
         rng.set_state(self._random_state)
@@ -362,6 +363,11 @@ clearly influences all the other ones. This also introduces a private
 attribute, so we would need more intrusive changes to `set_params`,
 `get_params`, and `clone`.
 
+
+Execution
+=========
+
+That change might be a 1.0 thing.
 
 References and Footnotes
 ------------------------
