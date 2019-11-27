@@ -264,6 +264,10 @@ Advantages:
   the same instance gives the same splits. In other words, it does what we
   want.
 
+- The behaviour is clear and intuitive: the object is fully defined at init,
+  and only at init. Things that happen between init or fit *do not* influence
+  the state of the object.
+
 - It is relatively simple to implement, and not too intrusive.
 
 - Backward compatibility is preserved between scikit-learn versions. Let A
