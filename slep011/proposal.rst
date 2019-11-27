@@ -1,8 +1,8 @@
 .. _slep_011:
 
-====================================
-SLEP011: Fixing randomness behaviour
-====================================
+===================================
+SLEP011: Fixing randomness handling
+===================================
 
 :Author: Nicolas Hug
 :Status: Under review
