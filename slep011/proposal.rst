@@ -1,23 +1,23 @@
 .. _slep_011:
 
-=====================
-SLEP011: random state
-=====================
+====================================
+SLEP011: Fixing randomness behaviour
+====================================
 
 :Author: Nicolas Hug
 :Status: Under review
 :Type: Standards Track
-:Created: 2019-11-23
+:Created: 2019-11-27
 
-Current status
-==============
+How we currently handle randomness
+==================================
 
 `random_state` parameters are used commonly in estimators, and in CV
 splitters. They can be either int, RandomState instances, or None. The
 parameter is stored as an attribute in init and never changes, as per our
 convention.
 
-`fit` and `split` usually look like this::
+`fit` and `split` methods typically look like this::
 
     def fit(self, X, y):  # or split(self, X, y)
         rng = check_random_state(self.random_state)
@@ -33,16 +33,17 @@ convention.
         if x is a RandomState instance, return x
         if x is None, return numpy's RandomState singleton instance
 
-Accepting instances or None comes with different complications, listed below.
-`None` is the current default for all estimators / splitters.
-
+Accepting RandomState instances or None comes with different complications,
+listed below. `None` is the current default for all estimators / splitters.
 
 Problems with passing RandomState instances or None
 ===================================================
 
 The main issue with RandomState instances and None is that it makes the
-estimator stateful accross calls to `fit`. Almost all the other issues are
-consequences of this fact.
+estimators and the splitters stateful accross calls to `fit` or `split`. As
+a result, different calls to `fit` or `split` on the same instance yield
+different results. Almost all the other issues are consequences of this
+fact.
 
 Statefulness and violation of fit idempotence
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,7 +73,8 @@ the rng has been consumed during the first called. The statefulness property
 isn't respected either since the first call to `fit` has an impact on the
 second.
 
-The same goes with passing `None`.
+The same goes with passing `None`: you get different models every time you call
+`fit`.
 
 A related issue is that the `rng` may be consumed outside of the estimator.
 The estimator isn't "self contained" anymore and its behaviour is now
@@ -93,10 +95,10 @@ bugs have been around forever and we just haven't discovered them yet.
 The bug in `14034
 <https://github.com/scikit-learn/scikit-learn/issues/14034>`_ is that the
 validation subset for early-stopping was computed using `self.random_state`:
-in a warm-starting context, that subset may be different accross multiple
-calls to `fit`, since the RNG is getting consumed. We instead want the
-subset to be the same for all calls to `fit`. The fix was to store a private
-seed that was generated the first time `fit` is called.
+that subset is different accross multiple calls to `fit`, since the RNG is
+getting consumed. This is a problem when doing warm-start, because we want
+the subset to be the same for all calls to `fit` in this case. The fix was
+to store a private seed that was generated the first time `fit` is called.
 
 This is a typical example of many other similar bugs that we need to
 monkey-patch with potentially overly complex logic.
@@ -153,7 +155,7 @@ introduction above).
 This behaviour is inconsistent for two reasons.
 
 The first one is that if `rng` were an int, then `a` and `b` would have been
-equal. Indeed, the behaviour of the CV splitter depends on the
+equal. As a result, the behaviour of the CV splitter depends on the
 **type** of the `random_state` parameter::
 
 - int -> stateless, get the same splits each time you call split()
@@ -173,18 +175,14 @@ So it is important to have the splitters consistent with the estimators,
 w.r.t. the statelessness property. The current behaviour is not necessarily
 clear for users.
 
-Note Fixing how random_state is handled in the splitters is one of the
-entries in the `Roadmap <https://scikit-learn.org/dev/roadmap.html>`_. Some
-users may rely on the current behaviour, `to implement e.g. bootstrapping,
-<https://github.com/scikit-learn/scikit-learn/pull/15177#issuecomment-548021786>`_.
-If we make the splitters stateless, the "old" behaviour can be easily
-reproduced by simply creating new CV instances, instead of calling `split`
-on the same instance. Instances are cheap to create.
+Note that fixing how random_state is handled in the splitters is one of the
+entries in the `Roadmap <https://scikit-learn.org/dev/roadmap.html>`_.
 
 Potential bugs in custom parameter searches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-(This issue is a direct consequence of the splitters being stateful.)
+This issue is a direct consequence of the splitters being stateful. It's also
+more advanced than the rest, you may want to skip it.
 
 We have a private API for subclassing BaseSearchCV and implementing custom
 parameter search strategies. The contract is that the custom class should
@@ -193,8 +191,8 @@ call the `evaluate_candidates()` closure, were `cv.split()` will be called.
 
 Third-party developers may only *call* `evaluate_candidates()`, not change
 its content. Now, since `cv.split()` is called in `evaluate_candadates()`,
-that means that `evalute_candidates()` will potentially evaluate its
-candidates parameters **on different splits** each time it is called.
+that means that `evalute_candidates()` will evaluate the candidate
+parameters **on different splits** each time it is called.
 
 This is a quite subtle issue that third-party developers might easily
 overlook.
@@ -209,21 +207,21 @@ Proposed Solution
 =================
 
 We need a solution that fixes the statefulness of the estimators and the
-splitters.
+splitters. Most of the remaining issues would be fixed as a consequence.
 
 A toy example of the proposed solution is implemented in this `notebook
-<https://nbviewer.jupyter.org/gist/NicolasHug/1169ee253a4669ff993c947507ae2cb5>`_.
+<https://gist.github.com/NicolasHug/1169ee253a4669ff993c947507ae2cb5>`_.
+The bulk of the solution is to manipulate actual random *states*, as
+returned by `get_state()
+<https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.get_state.html#numpy.random.get_state>`_.
 
-The proposed solution is to store the *state* of a RandomState instance in
+Specifically, we would store the *state* of a RandomState instance in
 `__init__`::
 
     def __init__(self, ..., random_state=None):
         self.random_state = check_random_state(random_state).get_state()
 
-That `random_state` attribute is a tuple with about 620 integers, as returned
-by `get_state()
-<https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.random.get_state.html#numpy.random.get_state>`_.
-
+That `random_state` attribute is a tuple with about 620 integers.
 That state is then used in `fit` or in `split` as follows::
 
     def fit(self, X, y):  # or split()
@@ -231,8 +229,8 @@ That state is then used in `fit` or in `split` as follows::
         rng.set_state(self.random_state)
         # ... use rng as before
 
-Since `self.random_state` is a tuple that never changes, calling `fit` or
-`split` on the same instance always gives the same results.
+Since `self.random_state` is an immutable tuple that never changes, calling
+`fit` or `split` on the same instance always gives the same results.
 
 We want `__init__` and `set_params/get_params` to be consistent. To that end,
 we will need to special-case these methods::
@@ -293,7 +291,7 @@ Drawbacks:
 - There is a subtelty that occurs when passing `None`. `check_random_state`
   will return the singleton `np.random.mtrand._rand`, and we will call
   `get_state()` on the singleton. The thing is, its state won't change
-  accross multiple instances unless the singleton is consumed. So if we do
+  unless the singleton is consumed. So if we do
   `a = Est(random_state=None); b = Est(random_state=None)`, a and b actually
   have exactly the same `random_state` attribute, since the state of the
   singleton wasn't changed. To circumvent this, the logic in `__init__` and
@@ -306,8 +304,8 @@ Drawbacks:
 - We need to store about 620 integers. This is however negligible w.r.t. e.g.
   the size of a typical dataset
 
-- It does not fix the issue about third-party packages only accepting integers.
-  This can however be fixed in meta-estimator, independently.
+- It does not fix the issue about third-party estimators only accepting
+  integers. This can however be fixed in each meta-estimator, independently.
 
 Alternative solutions
 =====================
@@ -334,10 +332,12 @@ Advantages:
 
 Drawbacks:
 
-- We want that
-  `est.set_params(random_state=est.get_params()['random_state'])` does not
-  change `est.random_state`. With this logic, this is not possible to enforce.
-  Also, clone will not work was expected.
+- Since we draw a seed in init (and in `set_params()`), `clone` will not
+  work as expected. In particular with `my_clone = clone(est)`, my_clone and
+  est cannot have the same `random_state` attribute. This is the same for
+  `my_clone.set_params(random_state=est.get_params()['random_state'])`. The
+  seed will have to be drawn in `set_params`, thus leading to a different
+  `random_state` attribute.
 
 - It is not backward compatible between versions. For example if you passed
   an int in version A (say 0.22), then in version B (with the new
@@ -359,27 +359,38 @@ the first time `fit()` is called. For example::
 The advantage is that we respect our convention with `__init__`.
 
 However, `fit` idempotency isn't respected anymore: the first call to `fit`
-clearly influences all the other ones. This also introduces a private
-attribute, so we would need more intrusive changes to `set_params`,
-`get_params`, and `clone`.
+clearly influences all the other ones.
+
+This also introduces a private attribute, so we would need more intrusive
+changes to `set_params`, `get_params`, and `clone`.
+
+Execution and considerations
+============================
+
+Making the estimator stateless can be considered a bug fix. However, we are
+clearly changing the behaviour of the splitters, and some users may rely on
+the current behaviour, `to implement e.g. bootstrapping
+<https://github.com/scikit-learn/scikit-learn/pull/15177#issuecomment-548021786>`_.
+If we make the splitters stateless, the "old" behaviour can be easily
+reproduced by simply creating new CV instances, instead of calling `split`
+on the same instance. Instances are cheap to create.
+
+We would need a lot of outreach before introducing that change to let users
+know about it. And depending on how comfortable we are with it, this might
+be a 1.0 thing.
 
 
-Execution
-=========
+.. References and Footnotes
+.. ------------------------
 
-That change might be a 1.0 thing.
+.. .. [1] Each SLEP must either be explicitly labeled as placed in the public
+..    domain (see this SLEP as an example) or licensed under the `Open
+..    Publication License`_.
 
-References and Footnotes
-------------------------
-
-.. [1] Each SLEP must either be explicitly labeled as placed in the public
-   domain (see this SLEP as an example) or licensed under the `Open
-   Publication License`_.
-
-.. _Open Publication License: https://www.opencontent.org/openpub/
+.. .. _Open Publication License: https://www.opencontent.org/openpub/
 
 
-Copyright
----------
+.. Copyright
+.. ---------
 
-This document has been placed in the public domain. [1]_
+.. This document has been placed in the public domain. [1]_
