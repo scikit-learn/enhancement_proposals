@@ -69,6 +69,8 @@ last step is not a transformer.
 ``ColumnTransformer`` by default adds a prefix to the output feature names,
 indicating the name of the step applied on them.
 
+This is the default behavior, and it can be tuned by constructor parameters if
+the meta estimator allows it.
 
 Backward Compatibility
 ----------------------
