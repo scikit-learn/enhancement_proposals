@@ -71,13 +71,21 @@ Output Feature Names
 --------------------
 
 A fitted estimator exposes the output feature names through the
-``feature_names_out_`` attribute.
+``feature_names_out_`` attribute. Here we discuss more in detail how these
+feature names are generated. Since for most estimators there are multiple ways
+to generate feature names, this SLEP does not intend to define how exactly
+feature names are generated for all of them. It is instead a guideline on how
+they could generally be generated.
 
 One-to-one Transformers
 ***********************
 
 From the perspective of feature names, the simplest transformers are the ones
-which have the same feature names in the output as in the input.
+which have the same feature names in the output as in the input, and the
+transformation done on the data is semi-trivial. The ``StandardScaler`` can be
+one example. However, a transformer can choose to be more verbose and generate
+a more informative feature name, ``scaled(income)`` could be an example, and
+the verbosity is controlled by a parameter to the estimator.
 
 - Input provides feature names: ``feature_names_in_`` and
   ``feature_names_out_`` are the same.
@@ -89,8 +97,9 @@ Feature Selector Transformers
 
 The output feature names are the ones selected from the input, and if no
 feature names are provided, ``x0`` to ``xn`` are assumed to be their names. For
-example, if the transformer selects the first and the third features, and no
-names are provided, the ``feature_names_out_`` will be ``[x0, x2]``.
+example, if a ``SelectKBest`` transformer selects the first and the third
+features, and no names are provided, the ``feature_names_out_`` will be ``[x0,
+x2]``.
 
 Feature Generating Transformers
 *******************************
@@ -123,7 +132,9 @@ the same as the ``feature_names_out_`` of the last step, and ``None`` if the
 last step is not a transformer.
 
 ``ColumnTransformer`` by default adds a prefix to the output feature names,
-indicating the name of the step applied on them.
+indicating the name of the step applied on them. If a column is in the output
+as a part of ``passthrough``, it won't be prefixed since no operation has been
+applied on it.
 
 This is the default behavior, and it can be tuned by constructor parameters if
 the meta estimator allows it. For instance, a ``prefix=False`` may indicate
@@ -141,4 +152,6 @@ developers to implement the API.
 Notes
 -----
 
-This SLEP also applies to resamplers the same way as transformers.
+This SLEP also applies to `resamplers
+<https://github.com/scikit-learn/enhancement_proposals/pull/15>`_ the same way
+as transformers.
