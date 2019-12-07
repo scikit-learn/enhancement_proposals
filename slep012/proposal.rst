@@ -18,9 +18,12 @@ approaches we can take:
   guaranteed memory copies.
 - ``XArray``: we could accept a `pandas.DataFrame``, and use
   ``xarray.DataArray`` as the output of transformers, including feature names.
-  However, ``xarray`` depends on ``pandas``, and uses ``pandas.Series`` to
-  handle row labels and aligns rows when an operation between two
-  ``xarray.DataArray`` is done. None of these are favorable for our use-case.
+  However, ``xarray`` has a hard dependency on ``pandas``, and uses
+  ``pandas.Index`` to handle row labels and aligns rows when an operation
+  between two ``xarray.DataArray`` is done, which can be time consuming, and is
+  not the semantic expected in ``scikit-learn``; we only expect the number of
+  rows to be equal, and that the rows always correspond to one another in the
+  same order.
 
 As a result, we need to have another data structure which we'll use to transfer
 data related information (such as feature names), which is lightweight and
