@@ -9,8 +9,23 @@ SLEP011: Fixing randomness handling
 :Type: Standards Track
 :Created: 2019-11-27
 
-How we currently handle randomness
-==================================
+Abstract
+========
+
+This SLEP aims at fixing the issues related to how scikit-learn handles
+randomness of estimators and CV splitters.
+
+The proposed solution is to make estimators and splitter stateless, by
+storing the state of the `random_state` parameter that is passed in
+`__init__`.
+
+More than anything, this SLEP's goal is to *inform* the discussions related
+to randomness handling: if we end up going with the status quo (i.e. keep
+estimators and splitters stateful), then at least we are all aware of the
+price we're paying.
+
+Background: How we currently handle randomness
+==============================================
 
 `random_state` parameters are used commonly in estimators, and in CV
 splitters. They can be either int, RandomState instances, or None. The
