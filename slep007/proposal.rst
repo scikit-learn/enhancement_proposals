@@ -5,9 +5,9 @@ Feature Names
 =============
 
 ``scikit-learn`` has been making it easier to build complex workflows with the
-``ColumnTransformer`` and it has been seeing wide adoption. However, using it
-results in very opaque models, even more so than before. There is a `great
-usage example
+``ColumnTransformer`` and it has been seeing widespread adoption. However,
+using it results in very opaque models, even more so than before. There is a
+`usage example
 <https://scikit-learn.org/dev/auto_examples/compose/plot_column_transformer_mixed_types.html>`_
 in the gallery that applies a classifier to the titanic data set, which is a
 very simple standard usecase.
@@ -48,7 +48,8 @@ corresponds to the original features:
 - create new columns where each column depends on at most one input column,
   *e.g* ``OneHotEncoder``
 - Algorithms that create combinations of ``O(1)`` features, *e.g.*
-  ``PolynomialFeatures``
+  ``PolynomialFeatures`` on a fixed ``O(1)`` subset of features. The number of
+  output features doesn't have to be ``O(1)``.
 
 This proposal talks about how feature names are generated and not how they are
 propagated.
@@ -112,11 +113,11 @@ instance, a ``LogTransformer`` can do ``'age' -> 'log(age)'``, and a
 
 Transformers which generate features based on an ``O(1)`` number of features,
 may generate descriptive names as well. For instance, a
-``PolynomialTransformer`` can generate an output feature name such as ``x[0] *
-x[2] ** 3``.
+``PolynomialTransformer`` on a small subset of features can generate an output
+feature name such as ``x[0] * x[2] ** 3``.
 
 And finally, the transformers which generate features from a large set of
-features, generate feature names which has the form of ``name0`` to
+input features, generate feature names which has the form of ``name0`` to
 ``namen``, where ``name`` represents the transformer. For instance, a ``PCA``
 transformer will output ``[pca0, ..., pcan]``, ``n`` being the number of PCA
 components.
@@ -137,9 +138,9 @@ as a part of ``passthrough``, it won't be prefixed since no operation has been
 applied on it.
 
 This is the default behavior, and it can be tuned by constructor parameters if
-the meta estimator allows it. For instance, a ``prefix=False`` may indicate
-that a ``ColumnTransformer`` should not prefix the generated feature names with
-the name of the step.
+the meta estimator allows it. For instance, a ``prefix_feature_names=False``
+may indicate that a ``ColumnTransformer`` should not prefix the generated
+feature names with the name of the step.
 
 Backward Compatibility
 ----------------------
