@@ -49,7 +49,9 @@ corresponds to the original features:
   *e.g* ``OneHotEncoder``
 - Algorithms that create combinations of ``O(1)`` features, *e.g.*
   ``PolynomialFeatures`` on a fixed ``O(1)`` subset of features. The number of
-  output features doesn't have to be ``O(1)``.
+  output features doesn't have to be ``O(1)``. Note that verbosity
+  considerations and ``prefix_feature_names`` as explained later can apply
+  here.
 
 This proposal talks about how feature names are generated and not how they are
 propagated.
@@ -116,7 +118,7 @@ may generate descriptive names as well. For instance, a
 ``PolynomialTransformer`` on a small subset of features can generate an output
 feature name such as ``x[0] * x[2] ** 3``.
 
-And finally, the transformers which generate features from a large set of
+And finally, the transformers where each output feature depends on many or all
 input features, generate feature names which has the form of ``name0`` to
 ``namen``, where ``name`` represents the transformer. For instance, a ``PCA``
 transformer will output ``[pca0, ..., pcan]``, ``n`` being the number of PCA
@@ -141,6 +143,46 @@ This is the default behavior, and it can be tuned by constructor parameters if
 the meta estimator allows it. For instance, a ``prefix_feature_names=False``
 may indicate that a ``ColumnTransformer`` should not prefix the generated
 feature names with the name of the step.
+
+Examples
+--------
+
+Here we include some examples to demonstrate the behavior of output feature
+names::
+
+    100 features (no names) -> PCA(n_coponents=3)
+    feature_names_out_: [pca0, pca1, pca2]
+
+
+    100 features (no names) -> SelectKBest(k=3)
+    feature_names_out_: [x2, x17, x42]
+
+
+    [f1, ..., f100] -> SelectKBest(k=3)
+    feature_names_out_: [f2, f17, f42]
+
+
+    [cat0] -> OneHotEncoder()
+    feature_names_out_: [cat0_cat, cat0_dog, ...]
+
+
+    [f1, ..., f100] -> Pipeline(
+                           [SelectKBest(k=30),
+                            PCA(n_components=3)]
+                       )
+    feature_names_out_: [pca0, pca1, pca2]
+
+
+    [model, make, num0, ..., num100] ->
+        ColumnTransformer(
+            [('cat', Pipeline(SimpleImputer(), OneHotEncoder()),
+              ['model', 'make']),
+             ('num', Pipeline(SimpleImputer(), PCA(n_components=3)),
+              ['num0', ..., 'num100'])]
+        )
+    feature_names_out_: ['cat_model_100', 'cat_model_200', ...,
+                         'cat_make_ABC', 'cat_make_XYZ', ...,
+                         'num_pca0', 'num_pca1', 'num_pca2']
 
 Backward Compatibility
 ----------------------
