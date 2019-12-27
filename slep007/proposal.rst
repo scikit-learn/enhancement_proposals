@@ -47,11 +47,10 @@ corresponds to the original features:
 - Select a subset of columns, *e.g.* ``SelectKBest``
 - create new columns where each column depends on at most one input column,
   *e.g* ``OneHotEncoder``
-- Algorithms that create combinations of ``O(1)`` features, *e.g.*
-  ``PolynomialFeatures`` on a fixed ``O(1)`` subset of features. The number of
-  output features doesn't have to be ``O(1)``. Note that verbosity
-  considerations and ``prefix_feature_names`` as explained later can apply
-  here.
+- Algorithms that create combinations of a fixed number of features, *e.g.*
+  ``PolynomialFeatures`` on a fixed subset of features, as opposed to all of
+  them where there are many. Note that verbosity considerations and
+  ``prefix_feature_names`` as explained later can apply here.
 
 This proposal talks about how feature names are generated and not how they are
 propagated.
@@ -113,8 +112,8 @@ in this case is a sensible transformation of the input feature name. For
 instance, a ``LogTransformer`` can do ``'age' -> 'log(age)'``, and a
 ``OneHotEncoder`` could do ``'gender' -> 'gender_female', 'gender_fluid', ...`.
 
-Transformers which generate features based on an ``O(1)`` number of features,
-may generate descriptive names as well. For instance, a
+Transformers where each output feature depends on a fixed number of input
+features may generate descriptive names as well. For instance, a
 ``PolynomialTransformer`` on a small subset of features can generate an output
 feature name such as ``x[0] * x[2] ** 3``.
 
@@ -183,6 +182,30 @@ names::
     feature_names_out_: ['cat_model_100', 'cat_model_200', ...,
                          'cat_make_ABC', 'cat_make_XYZ', ...,
                          'num_pca0', 'num_pca1', 'num_pca2']
+
+However, the following examples produce a somewhat redundant feature names,
+and hence the relevance of ``prefix_feature_names=False``::
+
+    [model, make, num0, ..., num100] ->
+        make_column_transformer(
+            (OneHotEncoder(), ['model', 'make']),
+            (PCA(n_components=3), ['num0', ..., 'num100'])
+        )
+    feature_names_out_: ['ohe_model_100', 'ohe_model_200', ...,
+                         'ohe_make_ABC', 'ohe_make_XYZ', ...,
+                         'pca_pca0', 'pca_pca1', 'pca_pca2']
+
+If desired, the user can remove the prefixes::
+
+    [model, make, num0, ..., num100] ->
+        make_column_transformer(
+            (OneHotEncoder(), ['model', 'make']),
+            (PCA(n_components=3), ['num0', ..., 'num100']),
+            prefix_feature_names=False
+        )
+    feature_names_out_: ['model_100', 'model_200', ...,
+                         'make_ABC', 'make_XYZ', ...,
+                         'pca0', 'pca1', 'pca2']
 
 Backward Compatibility
 ----------------------
