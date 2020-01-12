@@ -5,7 +5,7 @@ SLEP010: ``n_features_in_`` attribute
 =====================================
 
 :Author: Nicolas Hug
-:Status: Under review
+:Status: Accepted
 :Type: Standards Track
 :Created: 2019-11-23
 

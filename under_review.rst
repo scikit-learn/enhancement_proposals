@@ -1,7 +1,11 @@
 SLEPs under review
 ==================
 
-.. toctree::
-    :maxdepth: 1
+No SLEP is currently under review.
 
-    slep010/proposal
+.. Uncomment below when a SLEP is under review
+
+.. .. toctree::
+..     :maxdepth: 1
+
+..     slepXXX/proposal
