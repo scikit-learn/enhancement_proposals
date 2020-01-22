@@ -5,7 +5,7 @@ No SLEP is currently under review.
 
 .. Uncomment below when a SLEP is under review
 
-.. .. toctree::
-..     :maxdepth: 1
+.. toctree::
+    :maxdepth: 1
 
-..     slepXXX/proposal
+    slep007/proposal
