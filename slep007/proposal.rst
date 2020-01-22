@@ -6,11 +6,114 @@ Feature Names
 
 ``scikit-learn`` has been making it easier to build complex workflows with the
 ``ColumnTransformer`` and it has been seeing widespread adoption. However,
-using it results in very opaque models, even more so than before. There is a
-`usage example
-<https://scikit-learn.org/dev/auto_examples/compose/plot_column_transformer_mixed_types.html>`_
-in the gallery that applies a classifier to the titanic data set, which is a
-very simple standard usecase.
+using it results in pipelines where it's not clear what the input features to
+the final predictor are, even more so than before. The following example
+illustrates that very well::
+
+
+    """
+    ===================================
+    Column Transformer with Mixed Types
+    ===================================
+
+    This example illustrates how to apply different preprocessing and
+    feature extraction pipelines to different subsets of features,
+    using :class:`sklearn.compose.ColumnTransformer`.
+    This is particularly handy for the case of datasets that contain
+    heterogeneous data types, since we may want to scale the
+    numeric features and one-hot encode the categorical ones.
+
+    In this example, the numeric data is standard-scaled after
+    mean-imputation, while the categorical data is one-hot
+    encoded after imputing missing values with a new category
+    (``'missing'``).
+
+    Finally, the preprocessing pipeline is integrated in a
+    full prediction pipeline using :class:`sklearn.pipeline.Pipeline`,
+    together with a simple classification model.
+    """
+
+    # Author: Pedro Morales <part.morales@gmail.com>
+    #
+    # License: BSD 3 clause
+
+    import numpy as np
+
+    from sklearn.compose import ColumnTransformer
+    from sklearn.datasets import fetch_openml
+    from sklearn.pipeline import Pipeline
+    from sklearn.impute import SimpleImputer
+    from sklearn.preprocessing import StandardScaler, OneHotEncoder
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import train_test_split, GridSearchCV
+
+    np.random.seed(0)
+
+    # Load data from https://www.openml.org/d/40945
+    X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
+
+    # Alternatively X and y can be obtained directly from the frame attribute:
+    # X = titanic.frame.drop('survived', axis=1)
+    # y = titanic.frame['survived']
+
+    # We will train our classifier with the following features:
+    # Numeric Features:
+    # - age: float.
+    # - fare: float.
+    # Categorical Features:
+    # - embarked: categories encoded as strings {'C', 'S', 'Q'}.
+    # - sex: categories encoded as strings {'female', 'male'}.
+    # - pclass: ordinal integers {1, 2, 3}.
+
+    # We create the preprocessing pipelines for both numeric and categorical data.
+    numeric_features = ['age', 'fare']
+    numeric_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='median')),
+        ('scaler', StandardScaler())])
+
+    categorical_features = ['embarked', 'sex', 'pclass']
+    categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numeric_transformer, numeric_features),
+            ('cat', categorical_transformer, categorical_features)])
+
+    # Append classifier to preprocessing pipeline.
+    # Now we have a full prediction pipeline.
+    clf = Pipeline(steps=[('preprocessor', preprocessor),
+                          ('classifier', LogisticRegression())])
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+    clf.fit(X_train, y_train)
+    print("model score: %.3f" % clf.score(X_test, y_test))
+
+
+    ###############################################################################
+    # Using the prediction pipeline in a grid search
+    ###############################################################################
+    # Grid search can also be performed on the different preprocessing steps
+    # defined in the ``ColumnTransformer`` object, together with the classifier's
+    # hyperparameters as part of the ``Pipeline``.
+    # We will search for both the imputer strategy of the numeric preprocessing
+    # and the regularization parameter of the logistic regression using
+    # :class:`sklearn.model_selection.GridSearchCV`.
+
+
+    param_grid = {
+        'preprocessor__num__imputer__strategy': ['mean', 'median'],
+        'classifier__C': [0.1, 1.0, 10, 100],
+    }
+
+    grid_search = GridSearchCV(clf, param_grid, cv=10)
+    grid_search.fit(X_train, y_train)
+
+    print(("best logistic regression from grid search: %.3f"
+           % grid_search.score(X_test, y_test)))
+
 
 However, it's impossible to interpret or even sanity-check the
 ``LogisticRegression`` instance that's produced in the example, because the
@@ -35,20 +138,21 @@ abovementioned example ``clf[-1].feature_names_in_`` and
      'cat__pclass_3']
 
 Ideally the generated feature names describe how a feature is generated at each
-stage. For instance, ``cat__sex_female`` shows that the feature has been
-through a categorical preprocessing pipeline, was originally the column
-``sex``, and has been one hot encoded and is one if it was originally
+stage of a pipeline. For instance, ``cat__sex_female`` shows that the feature
+has been through a categorical preprocessing pipeline, was originally the
+column ``sex``, and has been one hot encoded and is one if it was originally
 ``female``. However, this is not always possible or desirable especially when a
-generated column is based on many columns, for example in ``PCA``. As a rule of
-thumb, the following types of transformers may generate feature names which
-corresponds to the original features:
+generated column is based on many columns, since the generated feature names
+will be too long, for example in ``PCA``. As a rule of thumb, the following
+types of transformers may generate feature names which corresponds to the
+original features:
 
 - Leave columns unchanged, *e.g.* ``StandardScaler``
 - Select a subset of columns, *e.g.* ``SelectKBest``
 - create new columns where each column depends on at most one input column,
   *e.g* ``OneHotEncoder``
 - Algorithms that create combinations of a fixed number of features, *e.g.*
-  ``PolynomialFeatures`` on a fixed subset of features, as opposed to all of
+  ``PolynomialFeatures``, as opposed to all of
   them where there are many. Note that verbosity considerations and
   ``prefix_feature_names`` as explained later can apply here.
 
@@ -58,8 +162,9 @@ propagated.
 Scope
 -----
 
-All estimators implement a ``feature_names_in_`` API, and any estimator with
-a ``transform`` method implements a ``feature_names_out_`` API.
+All estimators implement a ``feature_names_in_`` API, and any estimator with a
+``transform`` method implements a ``feature_names_out_`` API, _i.e._ they
+expose the generated feature names via the ``feature_names_out_`` attribute.
 
 Input Feature Names
 -------------------
@@ -85,14 +190,16 @@ One-to-one Transformers
 From the perspective of feature names, the simplest transformers are the ones
 which have the same feature names in the output as in the input, and the
 transformation done on the data is semi-trivial. The ``StandardScaler`` can be
-one example. However, a transformer can choose to be more verbose and generate
-a more informative feature name, ``scaled(income)`` could be an example, and
-the verbosity is controlled by a parameter to the estimator.
+one example.
 
 - Input provides feature names: ``feature_names_in_`` and
   ``feature_names_out_`` are the same.
 - Input provides no feature names: ``feature_names_out_`` will be ``x0`` to
   ``xn``, where ``n`` is the number of features.
+
+However, a transformer can choose to be more verbose and generate a more
+informative feature name, ``scaled(income)`` could be an example, and the
+verbosity is controlled by a parameter to the estimator.
 
 Feature Selector Transformers
 *****************************
@@ -110,7 +217,8 @@ The simplest category of transformers in this section are the ones which
 generate a column based on a single given column. The generated output column
 in this case is a sensible transformation of the input feature name. For
 instance, a ``LogTransformer`` can do ``'age' -> 'log(age)'``, and a
-``OneHotEncoder`` could do ``'gender' -> 'gender_female', 'gender_fluid', ...`.
+``OneHotEncoder`` could do ``'gender' -> 'gender_female', 'gender_fluid',
+...``.
 
 Transformers where each output feature depends on a fixed number of input
 features may generate descriptive names as well. For instance, a
@@ -134,7 +242,7 @@ the same as the ``feature_names_out_`` of the last step, and ``None`` if the
 last step is not a transformer.
 
 ``ColumnTransformer`` by default adds a prefix to the output feature names,
-indicating the name of the step applied on them. If a column is in the output
+indicating the name of the step applied to them. If a column is in the output
 as a part of ``passthrough``, it won't be prefixed since no operation has been
 applied on it.
 
@@ -149,7 +257,7 @@ Examples
 Here we include some examples to demonstrate the behavior of output feature
 names::
 
-    100 features (no names) -> PCA(n_coponents=3)
+    100 features (no names) -> PCA(n_components=3)
     feature_names_out_: [pca0, pca1, pca2]
 
 
@@ -187,10 +295,10 @@ However, the following examples produce a somewhat redundant feature names,
 and hence the relevance of ``prefix_feature_names=False``::
 
     [model, make, num0, ..., num100] ->
-        make_column_transformer(
-            (OneHotEncoder(), ['model', 'make']),
-            (PCA(n_components=3), ['num0', ..., 'num100'])
-        )
+        ColumnTransformer([
+            ('ohe', OneHotEncoder(), ['model', 'make']),
+            ('pca', PCA(n_components=3), ['num0', ..., 'num100'])
+        ])
     feature_names_out_: ['ohe_model_100', 'ohe_model_200', ...,
                          'ohe_make_ABC', 'ohe_make_XYZ', ...,
                          'pca_pca0', 'pca_pca1', 'pca_pca2']
