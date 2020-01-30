@@ -14,13 +14,13 @@ Abstract
 
 This SLEP proposes a change in the decision making process. It proposes to not
 always call for a TC vote in case that no consensus is found during the vote of
-a SLEP. Instead, the TC should be appeal by the SLEP proposer.
+a SLEP. Instead, the matter goes to the TC if the proposer appeals to the TC.
 
 Motivation
 ##########
 
 Currently, the decision making process included in the governance document
-include the following statement:
+includes the following statement:
 
 "[...] If no option can gather two thirds of the votes cast, the decision is
 escalated to the TC, which in turn will use consensus seeking with the fallback
