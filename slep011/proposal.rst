@@ -34,7 +34,7 @@ Solution
 ########
 
 "[...] If no option can gather two thirds of the votes cast, the decision is
-escalated to the TC **if requested by the SLEP proposer**, which in turn will
+escalated to the TC **if the SLEP proposer would like the SLEP to be accepted**, which in turn will
 use consensus seeking with the fallback option of a simple majority vote if no
 consensus can be found within a month. [...]"
 
