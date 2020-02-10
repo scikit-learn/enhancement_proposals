@@ -242,7 +242,7 @@ the same as the ``feature_names_out_`` of the last step, and ``None`` if the
 last step is not a transformer.
 
 ``ColumnTransformer`` by default adds a prefix to the output feature names,
-indicating the name of the step applied to them. If a column is in the output
+indicating the name of the transformer applied to them. If a column is in the output
 as a part of ``passthrough``, it won't be prefixed since no operation has been
 applied on it.
 
