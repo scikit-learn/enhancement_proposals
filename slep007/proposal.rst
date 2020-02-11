@@ -1,8 +1,8 @@
  .. _slep_007:
 
-=============
-Feature Names
-=============
+===========================================
+Feature names, their generation and the API
+===========================================
 
 ``scikit-learn`` has been making it easier to build complex workflows with the
 ``ColumnTransformer`` and it has been seeing widespread adoption. However,
