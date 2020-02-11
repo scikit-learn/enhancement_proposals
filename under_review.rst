@@ -1,7 +1,7 @@
 SLEPs under review
 ==================
 
-No SLEP is currently under review.
+.. No SLEP is currently under review.
 
 .. Uncomment below when a SLEP is under review
 

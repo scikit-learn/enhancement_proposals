@@ -4,6 +4,22 @@
 Feature names, their generation and the API
 ===========================================
 
+:Author: Adrin Jalali
+:Status: Under Review
+:Type: Standards Track
+:Created: 2019-04
+
+Abstract
+########
+
+This SLEP proposes the introduction of the `feature_names_in_` attribute for
+all estimators, and the `feature_names_out_` attribute for all transformers. We
+here discuss the generation of such attributes and their propagation through
+pipelines.
+
+Motivation
+##########
+
 ``scikit-learn`` has been making it easier to build complex workflows with the
 ``ColumnTransformer`` and it has been seeing widespread adoption. However,
 using it results in pipelines where it's not clear what the input features to
@@ -88,20 +104,27 @@ original features:
 - Algorithms that create combinations of a fixed number of features, *e.g.*
   ``PolynomialFeatures``, as opposed to all of
   them where there are many. Note that verbosity considerations and
-  ``prefix_feature_names`` as explained later can apply here.
+  ``verbose_feature_names`` as explained later can apply here.
 
 This proposal talks about how feature names are generated and not how they are
 propagated.
 
 Scope
------
+#####
 
-All estimators implement a ``feature_names_in_`` API, and any estimator with a
-``transform`` method implements a ``feature_names_out_`` API, _i.e._ they
-expose the generated feature names via the ``feature_names_out_`` attribute.
+The API for input and output feature names includes a ``feature_names_in_``
+attribute for all estimators, and a ``feature_names_out_`` attribute for any
+estimator with a ``transform`` method, *i.e.* they expose the generated feature
+names via the ``feature_names_out_`` attribute.
+
+.. note:
+
+    This SLEP also applies to `resamplers
+    <https://github.com/scikit-learn/enhancement_proposals/pull/15>`_ the same
+    way as transformers.
 
 Input Feature Names
--------------------
+###################
 
 The input feature names are stored in a fitted estimator in a
 ``feature_names_in_`` attribute, and are taken from the given input data, for
@@ -109,7 +132,7 @@ instance a ``pandas`` data frame. This attribute will be ``None`` if the input
 provides no feature names.
 
 Output Feature Names
---------------------
+####################
 
 A fitted estimator exposes the output feature names through the
 ``feature_names_out_`` attribute. Here we discuss more in detail how these
@@ -117,23 +140,6 @@ feature names are generated. Since for most estimators there are multiple ways
 to generate feature names, this SLEP does not intend to define how exactly
 feature names are generated for all of them. It is instead a guideline on how
 they could generally be generated.
-
-One-to-one Transformers
-***********************
-
-From the perspective of feature names, the simplest transformers are the ones
-which have the same feature names in the output as in the input, and the
-transformation done on the data is semi-trivial. The ``StandardScaler`` can be
-one example.
-
-- Input provides feature names: ``feature_names_in_`` and
-  ``feature_names_out_`` are the same.
-- Input provides no feature names: ``feature_names_out_`` will be ``x0`` to
-  ``xn``, where ``n`` is the number of features.
-
-However, a transformer can choose to be more verbose and generate a more
-informative feature name, ``scaled(income)`` could be an example, and the
-verbosity is controlled by a parameter to the estimator.
 
 Feature Selector Transformers
 *****************************
@@ -152,7 +158,13 @@ generate a column based on a single given column. The generated output column
 in this case is a sensible transformation of the input feature name. For
 instance, a ``LogTransformer`` can do ``'age' -> 'log(age)'``, and a
 ``OneHotEncoder`` could do ``'gender' -> 'gender_female', 'gender_fluid',
-...``.
+...``. An alternative generated feature name for the transformers where each
+output feature corresponds to exactly one input feature is to leave the feature
+name unchanged. Whether or not to modify the feature name, *e.g.* ``log(x0)``
+vs. ``x0`` is controlled via the ``verbose_feature_names`` to the constructor.
+The default value of ``verbose_feature_names`` can be different depending on
+the transformer. For instance, ``StandardScaler`` can have it as ``False``,
+whereas ``LogTransformer`` could have it as ``True`` by default.
 
 Transformers where each output feature depends on a fixed number of input
 features may generate descriptive names as well. For instance, a
@@ -181,12 +193,12 @@ as a part of ``passthrough``, it won't be prefixed since no operation has been
 applied on it.
 
 This is the default behavior, and it can be tuned by constructor parameters if
-the meta estimator allows it. For instance, a ``prefix_feature_names=False``
+the meta estimator allows it. For instance, a ``verbose_feature_names=False``
 may indicate that a ``ColumnTransformer`` should not prefix the generated
 feature names with the name of the step.
 
 Examples
---------
+########
 
 Here we include some examples to demonstrate the behavior of output feature
 names::
@@ -226,7 +238,7 @@ names::
                          'num_pca0', 'num_pca1', 'num_pca2']
 
 However, the following examples produce a somewhat redundant feature names,
-and hence the relevance of ``prefix_feature_names=False``::
+and hence the relevance of ``verbose_feature_names=False``::
 
     [model, make, num0, ..., num100] ->
         ColumnTransformer([
@@ -243,23 +255,16 @@ If desired, the user can remove the prefixes::
         make_column_transformer(
             (OneHotEncoder(), ['model', 'make']),
             (PCA(n_components=3), ['num0', ..., 'num100']),
-            prefix_feature_names=False
+            verbose_feature_names=False
         )
     feature_names_out_: ['model_100', 'model_200', ...,
                          'make_ABC', 'make_XYZ', ...,
                          'pca0', 'pca1', 'pca2']
 
 Backward Compatibility
-----------------------
+######################
 
 All estimators should implement the ``feature_names_in_`` and
 ``feature_names_out_`` API. This is checked in ``check_estimator``, and the
 transition is done with a ``FutureWarning`` to give time to third party
 developers to implement the API.
-
-Notes
------
-
-This SLEP also applies to `resamplers
-<https://github.com/scikit-learn/enhancement_proposals/pull/15>`_ the same way
-as transformers.
