@@ -7,54 +7,12 @@ Feature names, their generation and the API
 ``scikit-learn`` has been making it easier to build complex workflows with the
 ``ColumnTransformer`` and it has been seeing widespread adoption. However,
 using it results in pipelines where it's not clear what the input features to
-the final predictor are, even more so than before. The following example
-illustrates that very well::
+the final predictor are, even more so than before. For example, after fitting
+the following pipeline, users should ideally be able to inspect the features
+going into the final predictor::
 
 
-    """
-    ===================================
-    Column Transformer with Mixed Types
-    ===================================
-
-    This example illustrates how to apply different preprocessing and
-    feature extraction pipelines to different subsets of features,
-    using :class:`sklearn.compose.ColumnTransformer`.
-    This is particularly handy for the case of datasets that contain
-    heterogeneous data types, since we may want to scale the
-    numeric features and one-hot encode the categorical ones.
-
-    In this example, the numeric data is standard-scaled after
-    mean-imputation, while the categorical data is one-hot
-    encoded after imputing missing values with a new category
-    (``'missing'``).
-
-    Finally, the preprocessing pipeline is integrated in a
-    full prediction pipeline using :class:`sklearn.pipeline.Pipeline`,
-    together with a simple classification model.
-    """
-
-    # Author: Pedro Morales <part.morales@gmail.com>
-    #
-    # License: BSD 3 clause
-
-    import numpy as np
-
-    from sklearn.compose import ColumnTransformer
-    from sklearn.datasets import fetch_openml
-    from sklearn.pipeline import Pipeline
-    from sklearn.impute import SimpleImputer
-    from sklearn.preprocessing import StandardScaler, OneHotEncoder
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.model_selection import train_test_split, GridSearchCV
-
-    np.random.seed(0)
-
-    # Load data from https://www.openml.org/d/40945
     X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
-
-    # Alternatively X and y can be obtained directly from the frame attribute:
-    # X = titanic.frame.drop('survived', axis=1)
-    # y = titanic.frame['survived']
 
     # We will train our classifier with the following features:
     # Numeric Features:
@@ -89,30 +47,6 @@ illustrates that very well::
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
     clf.fit(X_train, y_train)
-    print("model score: %.3f" % clf.score(X_test, y_test))
-
-
-    ###############################################################################
-    # Using the prediction pipeline in a grid search
-    ###############################################################################
-    # Grid search can also be performed on the different preprocessing steps
-    # defined in the ``ColumnTransformer`` object, together with the classifier's
-    # hyperparameters as part of the ``Pipeline``.
-    # We will search for both the imputer strategy of the numeric preprocessing
-    # and the regularization parameter of the logistic regression using
-    # :class:`sklearn.model_selection.GridSearchCV`.
-
-
-    param_grid = {
-        'preprocessor__num__imputer__strategy': ['mean', 'median'],
-        'classifier__C': [0.1, 1.0, 10, 100],
-    }
-
-    grid_search = GridSearchCV(clf, param_grid, cv=10)
-    grid_search.fit(X_train, y_train)
-
-    print(("best logistic regression from grid search: %.3f"
-           % grid_search.score(X_test, y_test)))
 
 
 However, it's impossible to interpret or even sanity-check the
