@@ -12,9 +12,9 @@ Feature names, their generation and the API
 Abstract
 ########
 
-This SLEP proposes the introduction of the `feature_names_in_` attribute for
-all estimators, and the `feature_names_out_` attribute for all transformers. We
-here discuss the generation of such attributes and their propagation through
+This SLEP proposes the introduction of the ``feature_names_in_`` attribute for
+all estimators, and the ``feature_names_out_`` attribute for all transformers.
+We here discuss the generation of such attributes and their propagation through
 pipelines.
 
 Motivation
@@ -117,11 +117,9 @@ attribute for all estimators, and a ``feature_names_out_`` attribute for any
 estimator with a ``transform`` method, *i.e.* they expose the generated feature
 names via the ``feature_names_out_`` attribute.
 
-.. note:
-
-    This SLEP also applies to `resamplers
-    <https://github.com/scikit-learn/enhancement_proposals/pull/15>`_ the same
-    way as transformers.
+Note that this SLEP also applies to `resamplers
+<https://github.com/scikit-learn/enhancement_proposals/pull/15>`_ the same way
+as transformers.
 
 Input Feature Names
 ###################
@@ -139,16 +137,20 @@ A fitted estimator exposes the output feature names through the
 feature names are generated. Since for most estimators there are multiple ways
 to generate feature names, this SLEP does not intend to define how exactly
 feature names are generated for all of them. It is instead a guideline on how
-they could generally be generated.
+they could generally be generated. Furthermore, that specific behavior of a
+given estimator may be tuned via the ``verbose_feature_names`` parameter, as
+detailed below.
+
+When generating the output feature names, if no input feature names are
+provided, ``x0`` to ``xn`` are assumed to be their names.
 
 Feature Selector Transformers
 *****************************
 
-The output feature names are the ones selected from the input, and if no
-feature names are provided, ``x0`` to ``xn`` are assumed to be their names. For
-example, if a ``SelectKBest`` transformer selects the first and the third
-features, and no names are provided, the ``feature_names_out_`` will be ``[x0,
-x2]``.
+This includes transformers which output a subset of the input features, w/o
+changing them. For example, if a ``SelectKBest`` transformer selects the first
+and the third features, and no names are provided, the ``feature_names_out_``
+will be ``[x0, x2]``.
 
 Feature Generating Transformers
 *******************************
@@ -158,13 +160,13 @@ generate a column based on a single given column. The generated output column
 in this case is a sensible transformation of the input feature name. For
 instance, a ``LogTransformer`` can do ``'age' -> 'log(age)'``, and a
 ``OneHotEncoder`` could do ``'gender' -> 'gender_female', 'gender_fluid',
-...``. An alternative generated feature name for the transformers where each
-output feature corresponds to exactly one input feature is to leave the feature
-name unchanged. Whether or not to modify the feature name, *e.g.* ``log(x0)``
-vs. ``x0`` is controlled via the ``verbose_feature_names`` to the constructor.
-The default value of ``verbose_feature_names`` can be different depending on
-the transformer. For instance, ``StandardScaler`` can have it as ``False``,
-whereas ``LogTransformer`` could have it as ``True`` by default.
+...``. An alternative is to leave the feature names unchanged when each output
+feature corresponds to exactly one input feature. Whether or not to modify the
+feature name, *e.g.* ``log(x0)`` vs. ``x0`` may be controlled via the
+``verbose_feature_names`` to the constructor. The default value of
+``verbose_feature_names`` can be different depending on the transformer. For
+instance, ``StandardScaler`` can have it as ``False``, whereas
+``LogTransformer`` could have it as ``True`` by default.
 
 Transformers where each output feature depends on a fixed number of input
 features may generate descriptive names as well. For instance, a
@@ -226,12 +228,12 @@ names::
     feature_names_out_: [pca0, pca1, pca2]
 
 
-    [model, make, num0, ..., num100] ->
+    [model, make, numeric0, ..., numeric100] ->
         ColumnTransformer(
             [('cat', Pipeline(SimpleImputer(), OneHotEncoder()),
               ['model', 'make']),
              ('num', Pipeline(SimpleImputer(), PCA(n_components=3)),
-              ['num0', ..., 'num100'])]
+              ['numeric0', ..., 'numeric100'])]
         )
     feature_names_out_: ['cat_model_100', 'cat_model_200', ...,
                          'cat_make_ABC', 'cat_make_XYZ', ...,
@@ -240,10 +242,10 @@ names::
 However, the following examples produce a somewhat redundant feature names,
 and hence the relevance of ``verbose_feature_names=False``::
 
-    [model, make, num0, ..., num100] ->
+    [model, make, numeric0, ..., numeric100] ->
         ColumnTransformer([
             ('ohe', OneHotEncoder(), ['model', 'make']),
-            ('pca', PCA(n_components=3), ['num0', ..., 'num100'])
+            ('pca', PCA(n_components=3), ['numeric0', ..., 'numeric100'])
         ])
     feature_names_out_: ['ohe_model_100', 'ohe_model_200', ...,
                          'ohe_make_ABC', 'ohe_make_XYZ', ...,
@@ -251,10 +253,10 @@ and hence the relevance of ``verbose_feature_names=False``::
 
 If desired, the user can remove the prefixes::
 
-    [model, make, num0, ..., num100] ->
+    [model, make, numeric0, ..., numeric100] ->
         make_column_transformer(
             (OneHotEncoder(), ['model', 'make']),
-            (PCA(n_components=3), ['num0', ..., 'num100']),
+            (PCA(n_components=3), ['numeric0', ..., 'numeric100']),
             verbose_feature_names=False
         )
     feature_names_out_: ['model_100', 'model_200', ...,
@@ -266,5 +268,5 @@ Backward Compatibility
 
 All estimators should implement the ``feature_names_in_`` and
 ``feature_names_out_`` API. This is checked in ``check_estimator``, and the
-transition is done with a ``FutureWarning`` to give time to third party
-developers to implement the API.
+transition is done with a ``FutureWarning`` for at least two versions to give
+time to third party developers to implement the API.
