@@ -5,7 +5,7 @@ SLEP011: Governance Change
 ==========================
 
 :Author: Guillaume Lemaitre
-:Status: Draft
+:Status: Under review
 :Type: Standards Track
 :Created: 2020-01-30
 
@@ -27,16 +27,16 @@ escalated to the TC, which in turn will use consensus seeking with the fallback
 option of a simple majority vote if no consensus can be found within a month.
 [...]"
 
-It might not be necessary to call for a TC vote if the proposer want to review
-the SLEP and make a new proposal.
+It might not be necessary to call for a Technical Committee (TC) vote if the
+proposer want to review the SLEP and make a new proposal.
 
 Solution
 ########
 
 "[...] If no option can gather two thirds of the votes cast, the decision is
-escalated to the TC **if the SLEP proposer would like the SLEP to be accepted**, which in turn will
-use consensus seeking with the fallback option of a simple majority vote if no
-consensus can be found within a month. [...]"
+escalated to the TC **if the SLEP proposer would like the SLEP to be
+accepted**, which in turn will use consensus seeking with the fallback option
+of a simple majority vote if no consensus can be found within a month. [...]"
 
 Considerations
 ##############
