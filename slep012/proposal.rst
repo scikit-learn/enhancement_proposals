@@ -19,7 +19,7 @@ Motivation
 ##########
 
 Knowing the number of features that a transformer outputs is useful for
-inspection purposes.
+inspection purposes. This is in conjunction with *SLEP010: ``n_features_in_``*.
 
 Solution
 ########
