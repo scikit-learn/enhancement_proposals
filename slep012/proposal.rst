@@ -50,12 +50,13 @@ to adjust.
 
 There are other minor considerations:
 
-- In most meta-estimators, this is handled by the
+- In most meta-estimators, this is delegated to the
   sub-estimator(s). The ``n_features_out_`` attribute of the meta-estimator is
   thus explicitly set to that of the sub-estimator, either via a ``@property``,
   or directly in ``fit()``.
 - Some transformers such as ``FunctionTransformer`` may not know the number
-  of output features. In such cases ``n_features_out_`` is set to ``None``.
+  of output features since arbitrary arrays can be passed to `transform`. In
+  such cases ``n_features_out_`` is set to ``None``.
 
 Copyright
 ---------
