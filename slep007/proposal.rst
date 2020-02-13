@@ -115,7 +115,7 @@ verbose_feature_names
 *********************
 
 ``verbose_feature_names`` controls the verbosity of the generated feature names
-and it can be ``True`` or ``False``. Alternative solutions could imagine:
+and it can be ``True`` or ``False``. Alternative solutions could include:
 
 - an integer: fine tuning the verbosity of the generated feature names.
 - a ``callable`` which would give further flexibility to the user to generate
