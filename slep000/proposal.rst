@@ -60,7 +60,7 @@ draft must use the `SLEP — Template and Instructions
 <https://github.com/scikit-learn/enhancement_proposals/blob/master/slep_template.rst>`_
 file.
 
-Once the PR for the SLEP is in place, a post should be made to the mailing list
+Once the PR for the SLEP is created, a post should be made to the mailing list
 containing the sections up to “Backward compatibility”, with the purpose of
 limiting discussion there to usage and impact. Discussion on the pull request
 will have a broader scope, also including details of implementation.
