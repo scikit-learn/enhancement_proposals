@@ -19,7 +19,8 @@ Motivation
 ##########
 
 Knowing the number of features that a transformer outputs is useful for
-inspection purposes. This is in conjunction with *SLEP010: ``n_features_in_``*.
+inspection purposes. This is in conjunction with `*SLEP010: ``n_features_in_``*
+<https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep010/proposal.html>`_.
 
 Solution
 ########
@@ -29,6 +30,12 @@ call to ``fit`` is done. In most cases the value of ``n_features_out_`` is the
 same as some other attribute stored in the transformer, *e.g.*
 ``n_components_``, and in these cases a ``Mixin`` such as a ``ComponentsMixin``
 can delegate ``n_features_out_`` to those attributes.
+
+Testing
+-------
+
+A test to the common tests is added to ensure the presence of the attribute or
+property after calling ``fit``.
 
 Considerations
 ##############
