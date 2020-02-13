@@ -50,7 +50,7 @@ to adjust.
 
 There are other minor considerations:
 
-- In most meta-estimators, this is delegated to the
+- In some meta-estimators, this is delegated to the
   sub-estimator(s). The ``n_features_out_`` attribute of the meta-estimator is
   thus explicitly set to that of the sub-estimator, either via a ``@property``,
   or directly in ``fit()``.
