@@ -19,9 +19,9 @@ Motivation
 ##########
 
 Without a predefined workflow, the discussions around a SLEP can be long and
-frustrating for both the author and the reviewers. The lack of a known workflow
-also results in the SLEPs to take months (if not years) before it is accepted
-as ``Draft``. The purpose of this SLEP is to lubricate and ease the
+frustrating for both the author(s) and the reviewers. The lack of a known
+workflow also results in the SLEPs to take months (if not years) before it is
+accepted as ``Draft``. The purpose of this SLEP is to lubricate and ease the
 process of working on a SLEP, and make it a more enjoyable and productive
 experience.
 
@@ -130,14 +130,13 @@ completed. When the reference implementation is complete and incorporated into
 the main source code repository, the status will be changed to ``Final``.
 
 To allow gathering of additional design and interface feedback before
-committing to long term stability for a language feature or standard library
-API, a SLEP may also be marked as ``Provisional``. This is short for
-“Provisionally Accepted”, and indicates that the proposal has been accepted for
-inclusion in the reference implementation, but additional user feedback is
-needed before the full design can be considered ``Final``. Unlike regular
-accepted SLEPs, provisionally accepted SLEPs may still be ``Rejected`` or
-``Withdrawn`` even after the related changes have been included in a
-scikit-learn release.
+committing to long term stability for a feature or API, a SLEP may also be
+marked as ``Provisional``. This is short for“Provisionally Accepted”, and
+indicates that the proposal has been accepted for inclusion in the reference
+implementation, but additional user feedback is needed before the full design
+can be considered ``Final``. Unlike regular accepted SLEPs, provisionally
+accepted SLEPs may still be ``Rejected`` or ``Withdrawn`` even after the
+related changes have been included in a scikit-learn release.
 
 Wherever possible, it is considered preferable to reduce the scope of a
 proposal to avoid the need to rely on the ``Provisional`` status (e.g. by
