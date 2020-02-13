@@ -21,7 +21,7 @@ Motivation
 Without a predefined workflow, the discussions around a SLEP can be long and
 frustrating for both the author(s) and the reviewers. The lack of a known
 workflow also results in the SLEPs to take months (if not years) before it is
-accepted as ``Draft``. The purpose of this SLEP is to lubricate and ease the
+merged as ``Draft``. The purpose of this SLEP is to lubricate and ease the
 process of working on a SLEP, and make it a more enjoyable and productive
 experience.
 
