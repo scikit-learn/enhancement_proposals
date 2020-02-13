@@ -15,7 +15,9 @@ Abstract
 This SLEP proposes the introduction of the ``feature_names_in_`` attribute for
 all estimators, and the ``feature_names_out_`` attribute for all transformers.
 We here discuss the generation of such attributes and their propagation through
-pipelines.
+pipelines. Since for most estimators there are multiple ways to generate
+feature names, this SLEP does not intend to define how exactly feature names
+are generated for all of them.
 
 Motivation
 ##########
@@ -109,6 +111,19 @@ original features:
 This proposal talks about how feature names are generated and not how they are
 propagated.
 
+verbose_feature_names
+*********************
+
+``verbose_feature_names`` controls the verbosity of the generated feature names
+and it can be ``True`` or ``False``. Alternative solutions could imagine:
+
+- an integer: fine tuning the verbosity of the generated feature names.
+- a ``callable`` which would give further flexibility to the user to generate
+  user defined feature names.
+
+These alternatives may be discussed and implemented in the future if deemed
+necessary.
+
 Scope
 #####
 
@@ -141,8 +156,9 @@ they could generally be generated. Furthermore, that specific behavior of a
 given estimator may be tuned via the ``verbose_feature_names`` parameter, as
 detailed below.
 
-When generating the output feature names, if no input feature names are
-provided, ``x0`` to ``xn`` are assumed to be their names.
+As detailed bellow, some generated output features names are the same or a
+derived from the input feature names. In such cases, if no input feature names
+are provided, ``x0`` to ``xn`` are assumed to be their names.
 
 Feature Selector Transformers
 *****************************
