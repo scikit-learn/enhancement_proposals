@@ -19,12 +19,12 @@ Motivation
 ##########
 
 Without a predefined workflow, the discussions around a SLEP can be long and
-frustrating for both the author(s) and the reviewers. The lack of a known
-workflow also results in the SLEPs to take months (if not years) before it is
-merged as ``Under Review``. The purpose of this SLEP is to lubricate and ease
-the process of working on a SLEP, and make it a more enjoyable and productive
-experience. This SLEP borrows the process used in PEPs and NEPs which means
-there will be no ``Under Review`` status.
+consume a lot of energy for both the author(s) and the reviewers. The lack of a
+known workflow also results in the SLEPs to take months (if not years) before
+it is merged as ``Under Review``. The purpose of this SLEP is to lubricate and
+ease the process of working on a SLEP, and make it a more enjoyable and
+productive experience. This SLEP borrows the process used in PEPs and NEPs
+which means there will be no ``Under Review`` status.
 
 
 What is a SLEP?
@@ -53,31 +53,6 @@ project. However, these documents also serve the purpose of documenting the
 changes and decisions to help users understand the changes and why they are
 made. The SLEPs are available under `Scikit-learn enhancement proposals
 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/>`_.
-
-The proposal should be submitted as a draft SLEP via a GitHub pull request to a
-``slepXXX`` directory with the name ``proposal.rst`` where ``XXX`` is an
-appropriately assigned three-digit number (e.g., ``slep000/proposal.rst``). The
-draft must use the `SLEP — Template and Instructions
-<https://github.com/scikit-learn/enhancement_proposals/blob/master/slep_template.rst>`_
-file.
-
-Once the PR for the SLEP is created, a post should be made to the mailing list
-containing the sections up to “Backward compatibility”, with the purpose of
-limiting discussion there to usage and impact. Discussion on the pull request
-will have a broader scope, also including details of implementation.
-
-At the earliest convenience, the PR should be merged (regardless of whether it
-is accepted during discussion). Additional PRs may be made by the champions to
-update or expand the SLEP, or by maintainers to set its status, discussion URL,
-etc.
-
-Standards Track SLEPs (see bellow) consist of two parts, a design document and
-a reference implementation. It is generally recommended that at least a
-prototype implementation be co-developed with the SLEP, as ideas that sound
-good in principle sometimes turn out to be impractical when subjected to the
-test of implementation. Often it makes sense for the prototype implementation
-to be made available as PR to the scikit-learn repo (making sure to
-appropriately mark the PR as a WIP).
 
 SLEP Types
 ##########
@@ -113,6 +88,31 @@ community before working on a SLEP, mostly to save author's time.
 A SLEP must have one or more champions: people who write the SLEP following the
 SLEP template, shepherd the discussions around it, and seek consensus in the
 community.
+
+The proposal should be submitted as a draft SLEP via a GitHub pull request to a
+``slepXXX`` directory with the name ``proposal.rst`` where ``XXX`` is an
+appropriately assigned three-digit number (e.g., ``slep000/proposal.rst``). The
+draft must use the `SLEP — Template and Instructions
+<https://github.com/scikit-learn/enhancement_proposals/blob/master/slep_template.rst>`_
+file.
+
+Once the PR for the SLEP is created, a post should be made to the mailing list
+containing the sections up to “Backward compatibility”, with the purpose of
+limiting discussion there to usage and impact. Discussion on the pull request
+will have a broader scope, also including details of implementation.
+
+At the earliest convenience, the PR should be merged (regardless of whether it
+is accepted during discussion). Additional PRs may be made by the champions to
+update or expand the SLEP, or by maintainers to set its status, discussion URL,
+etc.
+
+Standards Track SLEPs (see bellow) consist of two parts, a design document and
+a reference implementation. It is generally recommended that at least a
+prototype implementation be co-developed with the SLEP, as ideas that sound
+good in principle sometimes turn out to be impractical when subjected to the
+test of implementation. Often it makes sense for the prototype implementation
+to be made available as PR to the scikit-learn repo (making sure to
+appropriately mark the PR as a WIP).
 
 Review and Resolution
 ---------------------
