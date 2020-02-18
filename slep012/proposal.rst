@@ -19,7 +19,7 @@ transformers, pipelines, and the column transformer. Ideally, we would have::
     # transforming the data in an arbitrary way
     transformer0 = ColumnTransformer(...)
     # a pipeline preprocessing the data and then a classifier (or a regressor)
-    clf = make_pipeline(transfoemer0, ..., SVC())
+    clf = make_pipeline(transformer0, ..., SVC())
 
     # now we can investigate features at each stage of the pipeline
     clf[-1].input_feature_names_
