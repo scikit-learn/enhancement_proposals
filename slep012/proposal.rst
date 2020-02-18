@@ -4,6 +4,14 @@
 InputArray
 ==========
 
+:Author: Adrin jalali
+:Status: Draft
+:Type: Standards Track
+:Created: 2019-12-20
+
+Motivation
+**********
+
 This proposal results in a solution to propagating feature names through
 transformers, pipelines, and the column transformer. Ideally, we would have::
 

@@ -9,3 +9,4 @@ SLEPs under review
     :maxdepth: 1
 
     slep007/proposal
+    slep012/proposal
