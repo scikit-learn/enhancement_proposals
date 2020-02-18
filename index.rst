@@ -15,7 +15,8 @@
     :maxdepth: 1
     :caption: Accepted
 
-    accepted
+    slep009/proposal
+    slep010/proposal
 
 .. toctree::
     :maxdepth: 1
