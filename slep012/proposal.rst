@@ -26,7 +26,7 @@ Solution
 ########
 
 The proposed solution is for the ``n_features_out_`` attribute to be set once a
-call to ``fit`` is done. In most cases the value of ``n_features_out_`` is the
+call to ``fit`` is done. In many cases the value of ``n_features_out_`` is the
 same as some other attribute stored in the transformer, *e.g.*
 ``n_components_``, and in these cases a ``Mixin`` such as a ``ComponentsMixin``
 can delegate ``n_features_out_`` to those attributes.
