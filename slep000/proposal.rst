@@ -101,10 +101,20 @@ containing the sections up to “Backward compatibility”, with the purpose of
 limiting discussion there to usage and impact. Discussion on the pull request
 will have a broader scope, also including details of implementation.
 
-At the earliest convenience, the PR should be merged (regardless of whether it
-is accepted during discussion). Additional PRs may be made by the champions to
-update or expand the SLEP, or by maintainers to set its status, discussion URL,
-etc.
+The SLEP is reviewed for structure, formatting, and other errors. Approval
+criteria are:
+
+- It sound and complete. The ideas must make technical sense.
+- The reviewers do not consider whether they seem likely to be accepted.
+- The title accurately describes the content.
+
+Reviewers are generally quite lenient about this initial review, expecting that
+problems will be corrected by the further reviewing process. **Note**: Approval
+of the SLEP is no guarantee that there are no embarrassing mistakes! Ideally
+they're avoided, but they can also be fixed later in separate PRs. Once
+approved by at least one core developer, the SLEP can be merged. Additional PRs
+may be made by the champions to update or expand the SLEP, or by maintainers to
+set its status, discussion URL, etc.
 
 Standards Track SLEPs (see bellow) consist of two parts, a design document and
 a reference implementation. It is generally recommended that at least a
@@ -135,7 +145,7 @@ the main source code repository, the status will be changed to ``Final``.
 
 To allow gathering of additional design and interface feedback before
 committing to long term stability for a feature or API, a SLEP may also be
-marked as ``Provisional``. This is short for“Provisionally Accepted”, and
+marked as ``Provisional``. This is short for "Provisionally Accepted", and
 indicates that the proposal has been accepted for inclusion in the reference
 implementation, but additional user feedback is needed before the full design
 can be considered ``Final``. Unlike regular accepted SLEPs, provisionally
