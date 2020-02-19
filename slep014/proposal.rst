@@ -166,6 +166,15 @@ Alternatives
   adds another data structure in the Python Data ecosystem. This increases
   the maintenance responsibilities of the ``scikit-learn`` library.
 
+- Use xarray's Dataset, ``xr.Dataset``: The pandas DataFrame is more widely used
+  in Python's Data ecosystem, which means more libraries are built with pandas
+  in mind. With xarray support, users will need to convert their DataFrame into
+  a ``xr.Dataset``. This converstion process will be lossy when working with
+  pandas categorical dtypes.
+
+In both alternatives, the output data structure will need to be converted into
+a pandas DataFrame to take advantage of the ecosytem built around pandas.
+
 References and Footnotes
 ------------------------
 
