@@ -1,7 +1,7 @@
 .. _slep_013:
 
 ======================================
-SLEP012: ``n_features_out_`` attribute
+SLEP013: ``n_features_out_`` attribute
 ======================================
 
 :Author: Adrin Jalali
