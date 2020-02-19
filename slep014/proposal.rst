@@ -69,7 +69,7 @@ API for extracting feature names would be::
     pipe.fit(X, y)
     X_trans = pipe[:-1].transform(X)
 
-    print(X_trans.columns.tolist()
+    X_trans.columns.tolist()
     ['letter_a', 'letter_b', 'letter_c', 'pet_dog', 'pet_snake', 'num']
 
 This introduces a soft dependency on pandas, which is opt-in with the
