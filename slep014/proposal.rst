@@ -18,7 +18,7 @@ through ``scikit-learn`` estimators.
 Motivation
 ##########
 
-``scikit-learn`` can be used as a part of a larger data processing
+``scikit-learn`` is commonly used as a part of a larger data processing
 pipeline. When this pipeline is used to transform data, the result is a
 NumPy array, discarding column names. The current workflow for
 extracting the feature names requires calling ``get_feature_names`` on the
