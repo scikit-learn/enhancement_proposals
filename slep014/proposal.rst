@@ -58,8 +58,8 @@ would need to be used to select column names that were selected.
 Solution
 ########
 
-The pandas ``DataFrame`` has been widely adopted by the Python Data ecosystem to
-store data with feature names. This SLEP proposes using a ``DataFrame`` to
+The pandas DataFrame has been widely adopted by the Python Data ecosystem to
+store data with feature names. This SLEP proposes using a DataFrame to
 track the feature names as the data is transformed. With this feature, the
 API for extracting feature names would be::
 
@@ -72,8 +72,8 @@ API for extracting feature names would be::
     print(X_trans.columns.tolist()
     ['letter_a', 'letter_b', 'letter_c', 'pet_dog', 'pet_snake', 'num']
 
-This introduces a soft dependency on ``pandas``, which is opt-in with the
-the configuration flag: ``pandas_inout``. By default, `pandas_inout` is set
+This introduces a soft dependency on pandas, which is opt-in with the
+the configuration flag: ``pandas_inout``. By default, ``pandas_inout`` is set
 to ``False``, resulting in the output of all estimators to be a ndarray.
 
 Enabling Functionality
@@ -114,7 +114,7 @@ Considerations
 Index alignment
 ---------------
 
-Operations are index aligned when working with ``DataFrames``. Interally,
+Operations are index aligned when working with DataFrames. Interally,
 ``scikit-learn`` will ignore the alignment by operating on the ndarray as
 suggested by `TomAugspurger <https://github.com/scikit-learn/enhancement_proposals/pull/25#issuecomment-573859151>`_::
 
@@ -131,7 +131,7 @@ Memory copies
 
 As noted in `pandas #27211 <https://github.com/pandas-dev/pandas/issues/27211>`_,
 there is not a guarantee that there is a zero-copy round-trip going from numpy
-to a ``DataFrame``. In other words, the following may lead to a memory copy in
+to a DataFrame. In other words, the following may lead to a memory copy in
 a future version of ``pandas``::
 
     X = np.array(...)
@@ -146,9 +146,9 @@ pipeline. For example, consider the following pipeline::
     pipe.fit(X, y)
 
 Interally, ``StandardScaler.fit_transform`` will operate on a ndarray and
-wrap the ndarray into a ``DataFrame`` as a return value. This is will be
+wrap the ndarray into a DataFrame as a return value. This is will be
 piped into ``LogisticRegression.fit`` which calls ``check_array`` on the
-``DataFrame``, which may lead to a memory copy in a future version of
+DataFrame, which may lead to a memory copy in a future version of
 ``pandas``. This leads to unnecessary overhead from piping the data from one
 estimator to another.
 
@@ -162,7 +162,9 @@ the output of all estimators will be a ndarray.
 Alternatives
 ############
 
-- :ref:`SLEP012 Custom InputArray Data Structure <slep_012>`
+- :ref:`SLEP012 Custom InputArray Data Structure <slep_012>`: This approach
+  adds another data structure in the Python Data ecosystem. This increases
+  the maintenance responsibilities of the ``scikit-learn`` library.
 
 References and Footnotes
 ------------------------
