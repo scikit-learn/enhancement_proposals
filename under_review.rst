@@ -8,4 +8,4 @@ SLEPs under review
 .. toctree::
     :maxdepth: 1
 
-    slep012/proposal
+    slep013/proposal
