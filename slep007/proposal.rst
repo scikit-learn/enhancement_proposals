@@ -111,19 +111,6 @@ original features:
 This proposal talks about how feature names are generated and not how they are
 propagated.
 
-verbose_feature_names
-*********************
-
-``verbose_feature_names`` controls the verbosity of the generated feature names
-and it can be ``True`` or ``False``. Alternative solutions could include:
-
-- an integer: fine tuning the verbosity of the generated feature names.
-- a ``callable`` which would give further flexibility to the user to generate
-  user defined feature names.
-
-These alternatives may be discussed and implemented in the future if deemed
-necessary.
-
 Scope
 #####
 
@@ -267,7 +254,29 @@ and hence the relevance of ``verbose_feature_names=False``::
                          'ohe_make_ABC', 'ohe_make_XYZ', ...,
                          'pca_pca0', 'pca_pca1', 'pca_pca2']
 
-If desired, the user can remove the prefixes::
+Extensions
+##########
+
+verbose_feature_names
+*********************
+By default, transformers will retain existing feature names. In some cases
+it might be desireable to allow the feature names to capture that a transformation
+(like scaling or log) has taken place.
+
+To allow for that, ``verbose_feature_names`` can be added as a constructor
+parameter to certain transformers to control the verbosity of generated feature
+names.  The ``verbose_feature_names`` parameter can be ``True`` or ``False``.
+Alternative solutions could include:
+
+- an integer: fine tuning the verbosity of the generated feature names.
+- a ``callable`` which would give further flexibility to the user to generate
+  user defined feature names.
+
+These alternatives may be discussed and implemented in the future if deemed
+necessary.
+
+In case of the ``ColumnTransformer`` example above ``verbose_feature_names``
+could remove the estimator names, leading to shorter and less redundant names::
 
     [model, make, numeric0, ..., numeric100] ->
         make_column_transformer(
