@@ -11,3 +11,4 @@ SLEPs under review
     slep007/proposal
     slep012/proposal
     slep013/proposal
+    slep014/proposal
