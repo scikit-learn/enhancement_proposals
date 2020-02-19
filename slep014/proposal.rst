@@ -5,7 +5,7 @@ SLEP014: Pandas In, Pandas Out
 ==============================
 
 :Author: Thomas J Fan
-:Status: Under Review
+:Status: Draft
 :Type: Standards Track
 :Created: 2020-02-18
 
@@ -72,6 +72,10 @@ API for extracting feature names would be::
     print(X_trans.columns.tolist()
     ['letter_a', 'letter_b', 'letter_c', 'pet_dog', 'pet_snake', 'num']
 
+This introduces a soft dependency on ``pandas``, which is opt-in with the
+the configuration flag: ``pandas_inout``. By default, `pandas_inout` is set
+to ``False``, resulting in the output of all estimators to be a ndarray.
+
 Enabling Functionality
 ######################
 
@@ -100,6 +104,9 @@ made possible if this SLEP gets accepted.
 
     # Gets the feature names used by an estimator in the ensemble
     est.estimators_[0].feature_names_in_
+
+For options 2 and 3 the default value of configuration flag:
+`store_feature_names_in` is False.
 
 Considerations
 ##############
