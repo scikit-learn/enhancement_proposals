@@ -178,7 +178,7 @@ a pandas DataFrame to take advantage of the ecosytem built around pandas.
 A major advantage of both alternatives is that they do not have the memory
 copy issue. Since ``InputArray`` is designed from the ground up, we can
 guarantee that it does not make memory copies during round-trips from numpy.
-As stated in `xarray #3077 <https://github.com/pydata/xarray/issues/3077>`,
+As stated in `xarray #3077 <https://github.com/pydata/xarray/issues/3077>`_,
 ``xarray`` guarantees that there is no copies during round-trips from numpy.
 
 References and Footnotes
