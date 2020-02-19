@@ -53,7 +53,7 @@ passed into ``LogisticRegression``. As demonstrated above, the process of
 extracting ``feature_names`` requires knowing the order of the selected
 categories in the ``ColumnTransformer``. Furthemore, if there is feature
 selection in the pipeline, such as ``SelectKBest``, the ``get_support`` method
-would need to be used to select column names that were selected through.
+would need to be used to select column names that were selected.
 
 Solution
 ########
