@@ -13,7 +13,7 @@ Abstract
 ########
 
 This SLEP proposes using pandas DataFrames for propagating feature names
-through ``scikit-learn`` estimators.
+through ``scikit-learn`` transformers.
 
 Motivation
 ##########
@@ -64,7 +64,7 @@ track the feature names as the data is transformed. With this feature, the
 API for extracting feature names would be::
 
     from sklearn import set_config
-    set_config(pandas_inout=True)
+    set_config(pandas_in_out=True)
 
     pipe.fit(X, y)
     X_trans = pipe[:-1].transform(X)
@@ -72,9 +72,14 @@ API for extracting feature names would be::
     X_trans.columns.tolist()
     ['letter_a', 'letter_b', 'letter_c', 'pet_dog', 'pet_snake', 'num']
 
-This introduces a soft dependency on pandas, which is opt-in with the
-the configuration flag: ``pandas_inout``. By default, ``pandas_inout`` is set
-to ``False``, resulting in the output of all estimators to be a ndarray.
+This SLEP proposes attaching feature names to the output of ``transform``. In
+the above example, ``pipe[:-1].transform(X)`` propagates the feature names
+through the multiple transformers.
+
+This feature is only available through a soft dependency on pandas. Furthermore,
+it will be opt-in with the the configuration flag: ``pandas_in_out``. By
+default, ``pandas_in_out`` is set to ``False``, resulting in the output of all
+estimators to be a ndarray.
 
 Enabling Functionality
 ######################
@@ -114,7 +119,7 @@ Considerations
 Index alignment
 ---------------
 
-Operations are index aligned when working with DataFrames. Interally,
+Operations are index aligned when working with DataFrames. Internally,
 ``scikit-learn`` will ignore the alignment by operating on the ndarray as
 suggested by `TomAugspurger <https://github.com/scikit-learn/enhancement_proposals/pull/25#issuecomment-573859151>`_::
 
@@ -141,7 +146,7 @@ a future version of ``pandas``::
 This is an issue for ``scikit-learn`` when estimators are placed into a
 pipeline. For example, consider the following pipeline::
 
-    set_config(pandas_inout=True)
+    set_config(pandas_in_out=True)
     pipe = make_pipeline(StandardScaler(), LogisticRegression())
     pipe.fit(X, y)
 
@@ -155,7 +160,7 @@ estimator to another.
 Backward compatibility
 ######################
 
-The ``set_config(pandas_inout=True)`` global configuration flag will be set to
+The ``set_config(pandas_in_out=True)`` global configuration flag will be set to
 ``False`` by default to ensure backward compatibility. When this flag is False,
 the output of all estimators will be a ndarray.
 
