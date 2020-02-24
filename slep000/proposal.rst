@@ -101,8 +101,10 @@ containing the sections up to “Backward compatibility”, with the purpose of
 limiting discussion there to usage and impact. Discussion on the pull request
 will have a broader scope, also including details of implementation.
 
-The SLEP is reviewed for structure, formatting, and other errors. Approval
-criteria are:
+The first draft of the SLEP needs to be approved by at least one core developer
+before being merged. Merging the draft does not mean it is accepted or is ready
+for the vote. To this end, the SLEP draft is reviewed for structure,
+formatting, and other errors. Approval criteria are:
 
 - It sound and complete. The ideas must make technical sense.
 - The reviewers do not consider whether they seem likely to be accepted.
