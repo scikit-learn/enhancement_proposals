@@ -159,7 +159,7 @@ Feature Generating Transformers
 The simplest category of transformers in this section are the ones which
 generate a column based on a single given column. These would simply
 preserve the input feature names if a single new feature is generated,
-such as in ``StandardScaler``, which would mape ``'age'`` to ``'age'``.
+such as in ``StandardScaler``, which would map ``'age'`` to ``'age'``.
 If an input feature maps to multiple new
 features, a postfix is added, so that ``OneHotEncoder`` might map
 ``'gender'`` to ``'gender_female'`` ``'gender_fluid'`` etc.
