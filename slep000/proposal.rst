@@ -112,11 +112,11 @@ formatting, and other errors. Approval criteria are:
 
 Reviewers are generally quite lenient about this initial review, expecting that
 problems will be corrected by the further reviewing process. **Note**: Approval
-of the SLEP is no guarantee that there are no embarrassing mistakes! Ideally
-they're avoided, but they can also be fixed later in separate PRs. Once
-approved by at least one core developer, the SLEP can be merged. Additional PRs
-may be made by the champions to update or expand the SLEP, or by maintainers to
-set its status, discussion URL, etc.
+of the SLEP draft is no guarantee that there are no embarrassing mistakes!
+Ideally they're avoided, but they can also be fixed later in separate PRs. Once
+approved by at least one core developer, the SLEP draft can be merged.
+Additional PRs may be made by the champions to update or expand the SLEP, or by
+maintainers to set its status, discussion URL, etc.
 
 Standards Track SLEPs (see bellow) consist of two parts, a design document and
 a reference implementation. It is generally recommended that at least a
