@@ -106,9 +106,10 @@ before being merged. Merging the draft does not mean it is accepted or is ready
 for the vote. To this end, the SLEP draft is reviewed for structure,
 formatting, and other errors. Approval criteria are:
 
-- It sound and complete. The ideas must make technical sense.
-- The reviewers do not consider whether they seem likely to be accepted.
-- The title accurately describes the content.
+- The draft is sound and complete. The ideas must make technical sense.
+- The initial PR reviewer(s) should not consider whether the SLEP seems likely
+  to be accepted.
+- The title of the SLEP draft accurately describes its content.
 
 Reviewers are generally quite lenient about this initial review, expecting that
 problems will be corrected by the further reviewing process. **Note**: Approval
@@ -191,7 +192,7 @@ a SLEP is ready to accept, create a PR changing the status of the SLEP to
 ``Accepted``, then send an email to the scikit-learn mailing list with a
 subject like:
 
-    Proposal to accept SLEP #<number>: <title>
+    [VOTE] Proposal to accept SLEP #<number>: <title>
 
 In the body of your email, you should:
 
@@ -220,7 +221,10 @@ If the vote does not achieve a required majority, then the SLEP remains in
 acceptance again later once the objections are resolved.
 
 In unusual cases, with the request of the author, the scikit-learn technical
-committee may be asked to decide whether a controversial SLEP is ``Accepted``.
+committee may be asked to decide whether a controversial SLEP is ``Accepted``,
+put back to ``Draft`` with additional recommendation to try again to reach
+consensus or definitely ``Rejected``. Please refer to the governance doc for
+more details.
 
 Maintenance
 -----------
