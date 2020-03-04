@@ -40,7 +40,7 @@ together with a pipeline with multiple column names::
 
     ct = make_column_transformer(
         (OneHotEncoder(), orig_cat_cols), (StandardScaler(), orig_num_cols))
-    pipe = make_pipeline(ct, LogisticRegression()).fit(X,y)
+    pipe = make_pipeline(ct, LogisticRegression()).fit(X, y)
 
     cat_names = (pipe['columntransformer']
                  .named_transformers_['onehotencoder']
@@ -111,7 +111,7 @@ made possible if this SLEP gets accepted.
     est.estimators_[0].feature_names_in_
 
 For options 2 and 3 the default value of configuration flag:
-`store_feature_names_in` is False.
+``store_feature_names_in`` is False.
 
 Considerations
 ##############
@@ -157,6 +157,16 @@ DataFrame, which may lead to a memory copy in a future version of
 ``pandas``. This leads to unnecessary overhead from piping the data from one
 estimator to another.
 
+Sparse matrices
+---------------
+
+Traditionally, ``scikit-learn`` prefers to process sparse matrices in
+the compressed sparse row (CSR) matrix format. The `sparse data structure <https://pandas.pydata.org/pandas-docs/stable/user_guide/sparse.html>`_ in pandas 1.0, only supports converting directly to
+the cooridnate format (COO). Although this format was designed to quickly
+convert to CSR or CSC formats, the converation process still needs to allocate
+more memory to store. This can be an issue with transformers such as the
+``OneHotEncoder.transform`` which has been optimized to construct a CSR matrix.
+
 Backward compatibility
 ######################
 
@@ -167,27 +177,58 @@ the output of all estimators will be a ndarray.
 Alternatives
 ############
 
-- :ref:`SLEP012 Custom InputArray Data Structure <slep_012>`: This approach
-  adds another data structure in the Python Data ecosystem. This increases
-  the maintenance responsibilities of the ``scikit-learn`` library.
+This section lists alternative data structures that can be used with their
+advantages and disadvantages when compared to a pandas DataFrame.
 
-- Use xarray's Dataset, ``xr.Dataset``: The pandas DataFrame is more widely used
-  in Python's Data ecosystem, which means more libraries are built with pandas
-  in mind. With xarray support, users will need to convert their DataFrame into
-  a ``xr.Dataset``. This converstion process will be lossy when working with
-  pandas categorical dtypes.
+InputArray
+----------
 
-In both alternatives, the output data structure will need to be converted into
-a pandas DataFrame to take advantage of the ecosytem built around pandas.
+The proposed ``InputArray`` described
+:ref:`SLEP012 Custom InputArray Data Structure <slep_012>` introduces a new
+data structure for homogenous data.
 
-A major advantage of both alternatives is that they do not have the memory
-copy issue. Since ``InputArray`` is designed from the ground up, we can
-guarantee that it does not make memory copies during round-trips from numpy.
-As stated in `xarray #3077 <https://github.com/pydata/xarray/issues/3077>`_,
-``xarray`` guarantees that there is no copies during round-trips from numpy.
+Pros
+~~~~
+
+- A thin wrapper around a numpy array or a sparse matrix with a minimial feature
+  set that ``scikit-learn`` can evolve independently.
+
+Cons
+~~~~
+
+- Introduces yet another data structure for data storage in the PyData
+  ecosystem.
+- Does not have a clear path to encode categorical features.
+
+XArray Dataset
+--------------
+
+`xarray's Dataset <http://xarray.pydata.org/en/stable/data-structures.html#dataset>`_
+is a multi-dimenstional version of panda's DataFrame.
+
+Pros
+~~~~
+
+- xarray guartantees that there will be no copies during round-trips from
+  numpy. (`xarray #3077 <https://github.com/pydata/xarray/issues/3077>`_)
+
+Cons
+~~~~
+
+- The `conversation from a pandas DataFrame to a Dataset <http://xarray.pydata.org/en/stable/pandas.html>`_ 
+  is not lossless. For example, categorical dtypes in a pandas dataframe will
+  lose its categorical information when converted to a Dataset.
+- xarray does not have as much adoption as pandas, which increases the learning
+  curve for using Dataset with `scikit-learn``.
+
+XArray DataArray
+----------------
+
+`xarray's Data`
+
 
 References and Footnotes
-------------------------
+########################
 
 .. [1] Each SLEP must either be explicitly labeled as placed in the public
    domain (see this SLEP as an example) or licensed under the `Open
@@ -197,6 +238,6 @@ References and Footnotes
 
 
 Copyright
----------
+#########
 
 This document has been placed in the public domain. [1]_
