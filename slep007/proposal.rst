@@ -1,8 +1,8 @@
  .. _slep_007:
 
-===========================================
-Feature names, their generation and the API
-===========================================
+====================================================
+SLEP007: Feature names, their generation and the API
+====================================================
 
 :Author: Adrin Jalali
 :Status: Under Review
