@@ -111,19 +111,6 @@ original features:
 This proposal talks about how feature names are generated and not how they are
 propagated.
 
-verbose_feature_names
-*********************
-
-``verbose_feature_names`` controls the verbosity of the generated feature names
-and it can be ``True`` or ``False``. Alternative solutions could include:
-
-- an integer: fine tuning the verbosity of the generated feature names.
-- a ``callable`` which would give further flexibility to the user to generate
-  user defined feature names.
-
-These alternatives may be discussed and implemented in the future if deemed
-necessary.
-
 Scope
 #####
 
@@ -152,9 +139,7 @@ A fitted estimator exposes the output feature names through the
 feature names are generated. Since for most estimators there are multiple ways
 to generate feature names, this SLEP does not intend to define how exactly
 feature names are generated for all of them. It is instead a guideline on how
-they could generally be generated. Furthermore, that specific behavior of a
-given estimator may be tuned via the ``verbose_feature_names`` parameter, as
-detailed below.
+they could generally be generated. 
 
 As detailed bellow, some generated output features names are the same or a
 derived from the input feature names. In such cases, if no input feature names
@@ -172,17 +157,12 @@ Feature Generating Transformers
 *******************************
 
 The simplest category of transformers in this section are the ones which
-generate a column based on a single given column. The generated output column
-in this case is a sensible transformation of the input feature name. For
-instance, a ``LogTransformer`` can do ``'age' -> 'log(age)'``, and a
-``OneHotEncoder`` could do ``'gender' -> 'gender_female', 'gender_fluid',
-...``. An alternative is to leave the feature names unchanged when each output
-feature corresponds to exactly one input feature. Whether or not to modify the
-feature name, *e.g.* ``log(x0)`` vs. ``x0`` may be controlled via the
-``verbose_feature_names`` to the constructor. The default value of
-``verbose_feature_names`` can be different depending on the transformer. For
-instance, ``StandardScaler`` can have it as ``False``, whereas
-``LogTransformer`` could have it as ``True`` by default.
+generate a column based on a single given column. These would simply
+preserve the input feature names if a single new feature is generated,
+such as in ``StandardScaler``, which would map ``'age'`` to ``'age'``.
+If an input feature maps to multiple new
+features, a postfix is added, so that ``OneHotEncoder`` might map
+``'gender'`` to ``'gender_female'`` ``'gender_fluid'`` etc.
 
 Transformers where each output feature depends on a fixed number of input
 features may generate descriptive names as well. For instance, a
@@ -209,11 +189,6 @@ last step is not a transformer.
 indicating the name of the transformer applied to them. If a column is in the output
 as a part of ``passthrough``, it won't be prefixed since no operation has been
 applied on it.
-
-This is the default behavior, and it can be tuned by constructor parameters if
-the meta estimator allows it. For instance, a ``verbose_feature_names=False``
-may indicate that a ``ColumnTransformer`` should not prefix the generated
-feature names with the name of the step.
 
 Examples
 ########
@@ -255,8 +230,7 @@ names::
                          'cat_make_ABC', 'cat_make_XYZ', ...,
                          'num_pca0', 'num_pca1', 'num_pca2']
 
-However, the following examples produce a somewhat redundant feature names,
-and hence the relevance of ``verbose_feature_names=False``::
+However, the following examples produce a somewhat redundant feature names::
 
     [model, make, numeric0, ..., numeric100] ->
         ColumnTransformer([
@@ -267,7 +241,18 @@ and hence the relevance of ``verbose_feature_names=False``::
                          'ohe_make_ABC', 'ohe_make_XYZ', ...,
                          'pca_pca0', 'pca_pca1', 'pca_pca2']
 
-If desired, the user can remove the prefixes::
+Extensions
+##########
+
+verbose_feature_names
+*********************
+To provide more control over feature names, we could add a boolean
+``verbose_feature_names`` constructor argument to certain transformers.
+The default would reflect the description above, but changes would allow more verbose
+names in some transformers, say having ``StandardScaler`` map ``'age'`` to ``'scale(age)'``.
+
+In case of the ``ColumnTransformer`` example above ``verbose_feature_names``
+could remove the estimator names, leading to shorter and less redundant names::
 
     [model, make, numeric0, ..., numeric100] ->
         make_column_transformer(
@@ -278,6 +263,15 @@ If desired, the user can remove the prefixes::
     feature_names_out_: ['model_100', 'model_200', ...,
                          'make_ABC', 'make_XYZ', ...,
                          'pca0', 'pca1', 'pca2']
+
+Alternative solutions to a boolean flag could include:
+
+- an integer: fine tuning the verbosity of the generated feature names.
+- a ``callable`` which would give further flexibility to the user to generate
+  user defined feature names.
+
+These alternatives may be discussed and implemented in the future if deemed
+necessary.
 
 Backward Compatibility
 ######################
