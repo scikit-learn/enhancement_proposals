@@ -174,6 +174,28 @@ The ``set_config(pandas_in_out=True)`` global configuration flag will be set to
 ``False`` by default to ensure backward compatibility. When this flag is False,
 the output of all estimators will be a ndarray.
 
+Community Adoption
+##################
+
+With the new ``pandas_in_out`` configuration flag, third party libraries may
+need to query the configuration flag to be fully compliant with this SLEP.
+Specifically, "to be fully compliant" entails the following policy:
+
+1. If ``pandas_in_out=False``, then ``transform`` always returns numpy array.
+2. If ``pandas_in_out=True``, then ``transform`` returns a DataFrame if the
+   input is a Dataframe.
+
+This policy can either be enforced with ``check_estimator`` or not:
+
+- **Enforce**: This increases the maintaince burden of third party libraries.
+  This burden includes: checking for the configuration flag, generating feature names and including pandas as a dependency to their library.
+
+- **Not Enforce**: Currently, third party transformers can return a DataFrame
+  or a numpy and this is mostly compatible with ``scikit-learn``. Users with
+  third party transformers would not be able to access the features enabled
+  by this SLEP.
+
+
 Alternatives
 ############
 
@@ -196,9 +218,9 @@ Pros
 Cons
 ~~~~
 
-- Introduces yet another data structure for data storage in the PyData
-  ecosystem.
-- Does not have a clear path to encode categorical features.
+- Introduces another data structure for data storage in the PyData ecosystem.
+- Currently, the design only allows for homogenous data.
+- Increases maintenance responsibilities for ``scikit-learn``.
 
 XArray Dataset
 --------------
@@ -209,23 +231,37 @@ is a multi-dimenstional version of panda's DataFrame.
 Pros
 ~~~~
 
+- Can be used for heterogeneous data.
+
+Cons
+~~~~
+
+- ``scikit-learn`` does not require many of the features Dataset provides.
+- Needs to be converted to a DataArray before it can be converted to a numpy array.
+- The `conversation from a pandas DataFrame to a Dataset <http://xarray.pydata.org/en/stable/pandas.html>`_ 
+  is not lossless. For example, categorical dtypes in a pandas dataframe will
+  lose its categorical information when converted to a Dataset.
+- xarray does not have as much adoption as pandas, which increases the learning
+  curve for using Dataset with ``scikit-learn``.
+
+XArray DataArray
+----------------
+
+`xarray's DataArray <http://xarray.pydata.org/en/stable/data-structures.html#dataarray>`_
+is a data structure that store homogenous data.
+
+Pros
+~~~~
+
 - xarray guartantees that there will be no copies during round-trips from
   numpy. (`xarray #3077 <https://github.com/pydata/xarray/issues/3077>`_)
 
 Cons
 ~~~~
 
-- The `conversation from a pandas DataFrame to a Dataset <http://xarray.pydata.org/en/stable/pandas.html>`_ 
-  is not lossless. For example, categorical dtypes in a pandas dataframe will
-  lose its categorical information when converted to a Dataset.
-- xarray does not have as much adoption as pandas, which increases the learning
-  curve for using Dataset with `scikit-learn``.
-
-XArray DataArray
-----------------
-
-`xarray's Data`
-
+- Can only be used for homogenous data.
+- As with XArray's Dataset, DataArray does not have much adoption as pandas,
+  which increases the learning curve for using DataArray with ``scikit-learn``.
 
 References and Footnotes
 ########################
