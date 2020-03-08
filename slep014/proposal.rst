@@ -116,21 +116,6 @@ For options 2 and 3 the default value of configuration flag:
 Considerations
 ##############
 
-Index alignment
----------------
-
-Operations are index aligned when working with DataFrames. Internally,
-``scikit-learn`` will ignore the alignment by operating on the ndarray as
-suggested by `TomAugspurger <https://github.com/scikit-learn/enhancement_proposals/pull/25#issuecomment-573859151>`_::
-
-    def transform(self, X, y=None):
-        X, row_labels, input_type = check_array(X)
-        # X is a ndarray
-        result = ...
-        # some hypothetical function that recreates a DataFrame / DataArray,
-        # preserving row labels, attaching new features names.
-        return construct_result(result, output_feature_names, row_labels, input_type)
-
 Memory copies
 -------------
 
@@ -161,9 +146,9 @@ Sparse matrices
 ---------------
 
 Traditionally, ``scikit-learn`` prefers to process sparse matrices in
-the compressed sparse row (CSR) matrix format. The `sparse data structure <https://pandas.pydata.org/pandas-docs/stable/user_guide/sparse.html>`_ in pandas 1.0, only supports converting directly to
-the cooridnate format (COO). Although this format was designed to quickly
-convert to CSR or CSC formats, the converation process still needs to allocate
+the compressed sparse row (CSR) matrix format. The `sparse data structure <https://pandas.pydata.org/pandas-docs/stable/user_guide/sparse.html>`_ in pandas 1.0 only supports converting directly to
+the coordinate format (COO). Although this format was designed to quickly
+convert to CSR or CSC formats, the conversion process still needs to allocate
 more memory to store. This can be an issue with transformers such as the
 ``OneHotEncoder.transform`` which has been optimized to construct a CSR matrix.
 
@@ -238,9 +223,9 @@ Cons
 
 - ``scikit-learn`` does not require many of the features Dataset provides.
 - Needs to be converted to a DataArray before it can be converted to a numpy array.
-- The `conversation from a pandas DataFrame to a Dataset <http://xarray.pydata.org/en/stable/pandas.html>`_ 
+- The `conversion from a pandas DataFrame to a Dataset <http://xarray.pydata.org/en/stable/pandas.html>`_ 
   is not lossless. For example, categorical dtypes in a pandas dataframe will
-  lose its categorical information when converted to a Dataset.
+  lose their categorical information when converted to a Dataset.
 - xarray does not have as much adoption as pandas, which increases the learning
   curve for using Dataset with ``scikit-learn``.
 
@@ -253,14 +238,14 @@ is a data structure that store homogenous data.
 Pros
 ~~~~
 
-- xarray guartantees that there will be no copies during round-trips from
+- xarray guarantees that there will be no copies during round-trips from
   numpy. (`xarray #3077 <https://github.com/pydata/xarray/issues/3077>`_)
 
 Cons
 ~~~~
 
 - Can only be used for homogenous data.
-- As with XArray's Dataset, DataArray does not have much adoption as pandas,
+- As with XArray's Dataset, DataArray does not as much adoption as pandas,
   which increases the learning curve for using DataArray with ``scikit-learn``.
 
 References and Footnotes
