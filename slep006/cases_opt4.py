@@ -20,6 +20,10 @@ cross_validate(lr, X, y, cv=group_cv,
                props={'sample_weight': my_weights, 'groups': my_groups},
                scoring=weighted_acc)
 
+# Error handling: if props={'sample_eight': my_weights, ...} was passed,
+# cross_validate would raise an error, since 'sample_eight' was not requested
+# by any of its children.
+
 # %%
 # Case B: weighted scoring and unweighted fitting
 

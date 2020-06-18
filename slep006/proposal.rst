@@ -83,7 +83,7 @@ Other related issues include: :issue:`1574`, :issue:`2630`, :issue:`3524`,
 Desiderata
 ----------
 
-We will consider the following attributes to develop and compare solutions:
+We will consider the following aspects to develop and compare solutions:
 
 Usability
    Can the use cases be achieved in succinct, readable code? Can common use
@@ -156,6 +156,9 @@ Case A
 Cross-validate a ``LogisticRegressionCV(cv=GroupKFold(), scoring='accuracy')``
 with weighted scoring and weighted fitting.
 
+Error handling: what would happen if the user misspelled `sample_weight` as
+`sample_eight`?
+
 Case B
 ~~~~~~
 
@@ -175,7 +178,6 @@ Different weights for scoring and for fitting in Case A.
 
 TODO: case involving props passed at test time (???)
 TODO: case involving score() method
-TODO: in case A, if sample_weight were misspelled, wheer would the error be raised?
 
 Solution sketches will import these definitions:
 

@@ -13,6 +13,9 @@ cross_validate(lr, X, y, cv=group_cv,
                props={'sample_weight': my_weights, 'groups': my_groups},
                scoring='accuracy')
 
+# Error handling: if props={'sample_eight': my_weights, ...} was passed
+# instead, the estimator would fit and score without weight, silently failing.
+
 # %%
 # Case B: weighted scoring and unweighted fitting
 

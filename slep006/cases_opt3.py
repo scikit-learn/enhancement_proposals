@@ -30,6 +30,10 @@ cross_validate(lr, X, y, cv=group_cv,
                              'scoring': ['sample_weight'],
                              })
 
+# Error handling: if props={'sample_eight': my_weights, ...} was passed
+# instead, LogisticRegressionCV would have to identify that a key was passed
+# that could not be routed nor used, in order to raise an error.
+
 # %%
 # Case B: weighted scoring and unweighted fitting
 

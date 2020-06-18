@@ -18,6 +18,9 @@ cross_validate(lr, X, y, cv=group_cv,
                props=props,
                scoring='accuracy')
 
+# error handling: if props={'estimator__sample_eight': my_weights, ...} was
+# passed instead, the estimator would raise an error.
+
 # %%
 # Case B: weighted scoring and unweighted fitting
 
