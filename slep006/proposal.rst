@@ -42,8 +42,8 @@ key
     interpreted (e.g. "weight").
 router
     An estimator or function that passes props on to some other router or
-    consumer, while either consuming props itself or delivering props to
-    more than one immediate destination.
+    consumer, potentially selecting which props to pass to which destination,
+    and by what key.
 
 History
 -------
@@ -67,6 +67,10 @@ Related issues and pull requests include:
    #4632 <https://github.com/scikit-learn/scikit-learn/issues/4632>`__
 -  `Sample properties
    #4696 <https://github.com/scikit-learn/scikit-learn/issues/4696>`__
+-  `sample props (proposal 4) #16079  <https://github.com/scikit-learn/scikit-learn/issues/16079>`__
+
+..
+    maybe also #15282 #8710 #7112 #12052 #11429 #4632 #4652
 
 TODO: more. ndawe's work.
 
@@ -161,13 +165,17 @@ Extend Case A to apply an unweighted univariate feature selector in a
 Case D
 ~~~~~~
 
-Extend Case A to apply an arbitrary SLEP005 resampler in a pipeline, which
-rewrites ``sample_weight`` and ``groups``.
+Different weights for scoring and for fitting in Case A.
 
 Case E
 ~~~~~~
 
-Different weights for scoring and for fitting in Case A.
+Extend Case A to apply an arbitrary SLEP005 resampler in a pipeline, which
+rewrites ``sample_weight`` and ``groups``.
+
+Solutions will import these definitions:
+
+.. literalinclude:: defs.py
 
 Solution 1: Pass everything
 ---------------------------
@@ -187,16 +195,23 @@ incoming props:
 
 These constraints would be checked by calling a helper at the consumer.
 
-Issues (TODO: clean)
+Issues:
 
-* Error handling: if a prop is optional in a consumer, no error will be
+* Error handling: if a key is optional in a consumer, no error will be
   raised for misspelling. An introspection API might change this, allowing a
-  meta-estimator to check if all props are to be used.
-* Forwards compatibility: newly supporting a prop in a consumer will change
-  behaviour. Other than a ChangedBehaviorWarning I don't see any way around
+  user or meta-estimator to check if all keys passed are to be used in at least
+  one consumer.
+* Forwards compatibility: newly supporting a prop key in a consumer will change
+  behaviour. Other than a ChangedBehaviorWarning, I don't see any way around
   this.
 * Introspection: not inherently supported. Would need an API like
   ``get_prop_support(names: List[str]) -> Dict[str, Literal["supported", "required", "ignored"]]``.
+
+Possible public syntax:
+
+TODO
+
+
 
 Solution 2: Specify routes at call
 ----------------------------------
@@ -220,6 +235,10 @@ Issues:
   balanced classes onto its base estimator.  The meta-estimator would need a
   list of destinations to pass props to.
 
+Possible public syntax:
+
+TODO
+
 Solution 3: Specify routes on metaestimators
 --------------------------------------------
 
@@ -237,6 +256,10 @@ Disadvantages:
   support belongs to the child estimator but the parent is responsible for the
   routing.
 * Need to design an API for specifying routings.
+
+Possible public syntax:
+
+TODO
 
 Solution 4: Each child requests
 -------------------------------
@@ -282,81 +305,17 @@ Possible public syntax:
 * `BaseEstimator` will have methods `set_props_request` and `get_props_request`
 * `make_scorer` will have a `request_props` parameter to set props required by
   the scorer.
-* `get_props_request` will return a dict. It maps the prop name that the user
-  passes to the prop name that the estimator expects.
+* `get_props_request` will return a dict. It maps the key that the user
+  passes to the key that the estimator expects.
 * `set_props_request` will accept either such a dict or a sequence `s` to be
   interpreted as the identity mapping for all elements in `s`
   (`{x: x for x in s}`). It will return `self` to enable chaining.
 * `Group*` CV splitters will by default request the 'groups' prop, but its
   mapping can be changed with their `set_props_request` method.
 
-(TODO: this might look more persuasive using ``**fit_params`` rather than a
-prop param.)
+Test cases:
 
-Test cases::
-
-    from sklearn.model_selection import GroupKFold, cross_validate
-    from sklearn.feature_selection import SelectKBest
-    from sklearn.pipeline import make_pipeline
-    from sklearn.linear_model import LogisticRegressionCV
-    from sklearn.metrics import accuracy
-
-    # Case A:
-    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
-    lr = LogisticRegressionCV(
-        cv=GroupKFold(),
-        scoring=weighted_acc,
-    ).set_props_request(['sample_weight'])
-    cross_validate(lr, X, y,
-                   props={'sample_weight': my_weights, 'groups': my_groups},
-                   scoring=weighted_acc)
-
-    # Case B variant 1:
-    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
-    lr = LogisticRegressionCV(
-        cv=GroupKFold(),
-        scoring=weighted_acc,
-    )
-    cross_validate(lr, X, y,
-                   props={'sample_weight': my_weights, 'groups': my_groups},
-                   scoring=weighted_acc)
-
-    # Case B variant 2:
-    weighted_acc = make_scorer(accuracy, request_props=['scoring_weight'])
-    lr = LogisticRegressionCV(
-        cv=GroupKFold(),
-        scoring=weighted_acc,
-    ).set_props_request(['fitting_weight'])
-    cross_validate(lr, X, y,
-                   props={
-                        'scoring_weight': my_weights,
-                        'fitting_weight': None,
-                        'groups': my_groups,
-                   scoring=weighted_acc)
-
-    # Case C:
-    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
-    lr = LogisticRegressionCV(
-        cv=GroupKFold(),
-        scoring=weighted_acc,
-    ).set_props_request(['sample_weight'])
-    sel = SelectKBest()
-    pipe = make_pipeline(sel, lr)
-    cross_validate(pipe, X, y,
-                   props={'sample_weight': my_weights, 'groups': my_groups},
-                   scoring=weighted_acc)
-
-    # Case D:
-    weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
-    lr = LogisticRegressionCV(
-        cv=GroupKFold(),
-        scoring=weighted_acc,
-    ).set_props_request(['sample_weight'])
-    pipe = ResamplingTrainer(Resampler(), lr)
-    cross_validate(pipe, X, y,
-                   props={'sample_weight': my_weights, 'groups': my_groups},
-                   scoring=weighted_acc)
-
+.. literalinclude:: cases_opt4.py
 
 Proposal
 --------
@@ -383,4 +342,3 @@ Copyright
 ---------
 
 This document has been placed in the public domain. [1]_
-
