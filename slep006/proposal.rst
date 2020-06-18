@@ -4,6 +4,12 @@
 Routing sample-aligned meta-data 
 ================================
 
+:Author: Joel Nothman
+:Status: Draft
+:Type: Standards Track
+:Created: 2019-03-07
+
+
 Scikit-learn has limited support for information pertaining to each sample
 (henceforth "sample properties") to be passed through an estimation pipeline.
 The user can, for instance, pass fit parameters to all members of a
@@ -55,24 +61,24 @@ Supersedes `SLEP004
 <https://github.com/scikit-learn/enhancement_proposals/tree/master/slep004>`_
 with greater depth of desiderata and options.
 
-Related issues and pull requests include:
+Primary related issues and pull requests include:
 
--  `Consistent API for attaching properties to samples
-   #4497 <https://github.com/scikit-learn/scikit-learn/issues/4497>`__
--  `Acceptance of sample\_weights in pipeline.score
-   #7723 <https://github.com/scikit-learn/scikit-learn/pull/7723>`__
--  `Establish global error state like np.seterr
-   #4660 <https://github.com/scikit-learn/scikit-learn/issues/4660>`__
--  `Should cross-validation scoring take sample-weights into account?
-   #4632 <https://github.com/scikit-learn/scikit-learn/issues/4632>`__
--  `Sample properties
-   #4696 <https://github.com/scikit-learn/scikit-learn/issues/4696>`__
--  `sample props (proposal 4) #16079  <https://github.com/scikit-learn/scikit-learn/issues/16079>`__
+- :issue:`4497`: Overarching issue,
+  "Consistent API for attaching properties to samples"
+  by :user:`GaelVaroquaux`
+- :pr:`4696` A first implementation by :user:`amueller`
+- `Discussion towards SLEP004
+  <https://github.com/scikit-learn/enhancement_proposals/pull/6>`__ initiated
+  by :user:`tguillemot`
+- :pr:`9566` Another implementation (solution 3 from this SLEP)
+  by :user:`jnothman`
+- :pr:`16079` Another implementation (solution 4 from this SLEP)
+  by :user:`adrinjalali`
 
-..
-    maybe also #15282 #8710 #7112 #12052 #11429 #4632 #4652
-
-TODO: more. ndawe's work.
+Other related issues include: :issue:`1574`, :issue:`2630`, :issue:`3524`,
+:issue:`4632`, :issue:`4652`, :issue:`4660`, :issue:`4696`, :issue:`6322`,
+:issue:`7112`, :issue:`7646`, :issue:`7723`, :issue:`8127`, :issue:`8158`,
+:issue:`8710`, :issue:`8950`, :issue:`11429`, :issue:`12052`, :issue:`15282`. 
 
 Desiderata
 ----------
@@ -167,13 +173,11 @@ Case D
 
 Different weights for scoring and for fitting in Case A.
 
-Case E
-~~~~~~
+TODO: case involving props passed at test time (???)
+TODO: case involving score() method
+TODO: in case A, if sample_weight were misspelled, wheer would the error be raised?
 
-Extend Case A to apply an arbitrary SLEP005 resampler in a pipeline, which
-rewrites ``sample_weight`` and ``groups``.
-
-Solutions will import these definitions:
+Solution sketches will import these definitions:
 
 .. literalinclude:: defs.py
 
@@ -207,10 +211,9 @@ Issues:
 * Introspection: not inherently supported. Would need an API like
   ``get_prop_support(names: List[str]) -> Dict[str, Literal["supported", "required", "ignored"]]``.
 
-Possible public syntax:
+In short, this is a simple solution, but prone to risk.
 
-TODO
-
+.. literalinclude:: cases_opt1.py
 
 
 Solution 2: Specify routes at call
@@ -225,19 +228,35 @@ a prop named 'weights' to a step named 'spam' in a Pipeline, you might use
 SLEP004's syntax to override the common routing scheme falls under this
 solution.
 
+Advantages:
+
+* Very explicit and robust to misspellings.
+
 Issues:
 
-* This gets tricky or impossible where the available routes change
-  mid-fit, such as where a grid search considers estimators with different
-  structures.
+* The user needs to know the deep internal structure, or it is easy to fail to
+  pass a prop to a specific estimator.
+* A corollary is that prop keys need changing when the developer modifies their
+  estimator structure (see case C).
+* This gets especially tricky or impossible where the available routes
+  change mid-fit, such as where a grid search considers estimators with
+  different   structures.
+* We would need to find a different solution for :issue:`2630` where a Pipeline
+  could not be the base estimator of AdaBoost because AdaBoost expects the base
+  estimator to accept a fit param keyed 'sample_weight'.
 * This may not work if a meta-estimator were to have the role of changing a
-  prop, e.g. a meta-estimator that passes `sample_weights` corresponding to
+  prop, e.g. a meta-estimator that passes `sample_weight` corresponding to
   balanced classes onto its base estimator.  The meta-estimator would need a
-  list of destinations to pass props to.
+  list of destinations to pass modified props to, or a list of keys to modify.
+* We would need to develop naming conventions for different routes, which may
+  be more complicated than the current conventions; while a GridSearchCV
+  wrapping a Pipeline currently takes parameters with keys like
+  `{step_name}__{prop_name}`, this explicit routing, and conflict with
+  GridSearchCV routing destinations, implies keys like
+  `estimator__{step_name}__{prop_name}`.
 
-Possible public syntax:
+.. literalinclude:: cases_opt2.py
 
-TODO
 
 Solution 3: Specify routes on metaestimators
 --------------------------------------------
@@ -247,26 +266,38 @@ passing only the required parameters to each of its children. In this context,
 a GridSearchCV has children including `estimator`, `cv` and (each element of)
 `scoring`.
 
-Pull request `#9566 <https://github.com/scikit-learn/scikit-learn/pull/9566>`__
-is a partial implementation of this approach.
+Pull request :pr:`9566` is a partial implementation of this approach.
 
-Disadvantages:
+A major benefit of this approach is that it may allow only prop routing
+meta-estimators to be modified, not prop consumers.
+
+All consumers would be required to check that 
+
+Issues:
 
 * Routing may be hard to get one's head around, especially since the prop
   support belongs to the child estimator but the parent is responsible for the
   routing.
 * Need to design an API for specifying routings.
+* As in Solution 2, each local destination for routing props needs to be given
+  a name.
 
 Possible public syntax:
 
-TODO
+Each meta-estimator has a `prop_routing` parameter to encode local routing
+rules, and a set of named children which it routes to. In :pr:`9566`, the
+`prop_routing` entry for each child may be a white list or black list of
+named keys passed to the meta-estimator.
+
+.. literalinclude:: cases_opt3.py
+
 
 Solution 4: Each child requests
 -------------------------------
 
 Here the meta-estimator provides only what its each of its children requests.
 The meta-estimator would also need to request, on behalf of its children,
-any prop that its descendants require.
+any prop that descendant consumers require. 
 
 Each object in a situation that could receive props would have a method like
 `_get_prop_requests()` which would return a list of prop names (or perhaps a
@@ -277,10 +308,10 @@ may be set to `['weight']` if weight is sought, or perhaps just boolean
 parameter `request_weight`. `make_scorer` would have a similar mechanism for
 enabling weighted scoring.
 
-Benefits:
+Advantages:
 
 * This will not need to affect legacy estimators, since no props will be
-  passed.
+  passed when a props request is not available.
 * This does not require defining a new syntax for routing.
 * The implementation changes in meta-estimators may be easy to provide via a
   helper or two (perhaps even `call_with_props(method, target, props)`).
@@ -322,6 +353,11 @@ Proposal
 
 Having considered the above solutions, we propose:
 
+TODO
+
+* which solution?
+* if an estimator requests a prop, must it be not-null
+* props param or kwargs?
 
 Backward compatibility
 ----------------------

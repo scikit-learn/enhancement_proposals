@@ -29,6 +29,7 @@
     slep002/proposal
     slep003/proposal
     slep004/proposal
+    slep006/proposal
 
 .. toctree::
     :maxdepth: 1
