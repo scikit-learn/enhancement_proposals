@@ -78,7 +78,8 @@ Primary related issues and pull requests include:
 Other related issues include: :issue:`1574`, :issue:`2630`, :issue:`3524`,
 :issue:`4632`, :issue:`4652`, :issue:`4660`, :issue:`4696`, :issue:`6322`,
 :issue:`7112`, :issue:`7646`, :issue:`7723`, :issue:`8127`, :issue:`8158`,
-:issue:`8710`, :issue:`8950`, :issue:`11429`, :issue:`12052`, :issue:`15282`. 
+:issue:`8710`, :issue:`8950`, :issue:`11429`, :issue:`12052`, :issue:`15282`,
+:issues:`15370`, :issue:`15425`.
 
 Desiderata
 ----------
@@ -176,12 +177,43 @@ Case D
 
 Different weights for scoring and for fitting in Case A.
 
-TODO: case involving props passed at test time (???)
-TODO: case involving score() method
+TODO: case involving props passed at test time, e.g. to pipe.transform (???).
+TODO: case involving score() method, e.g. not specifying scoring in
+cross_val_score when wrapping an estimator with weighted score func ...
 
 Solution sketches will import these definitions:
 
 .. literalinclude:: defs.py
+
+Status quo solution 0a: additional feature
+------------------------------------------
+
+Without changing scikit-learn, the following hack can be used:
+
+Additional numeric features representing sample props can be appended to the
+data and passed around, being handled specially in each consumer of features
+or sample props.
+
+.. literalinclude:: cases_opt0a.py
+
+Status quo solution 0b: Pandas Index and global resources
+---------------------------------------------------------
+
+Without changing scikit-learn, the following hack can be used:
+
+If `y` is represented with a Pandas datatype, then its index can be used to
+access required elements from props stored in a global namespace (or otherwise
+made available to the estimator before fitting). This is possible everywhere
+that a gold-standard `y` is passed, including fit, split and score.  A similar
+solution with `X` is also possible for handling predict-time props, if all
+Pipeline components retain the original Pandas Index.
+
+Issues:
+
+* use of global data source
+* requires Pandas data types and indices to be maintained
+
+.. literalinclude:: cases_opt0b.py
 
 Solution 1: Pass everything
 ---------------------------
