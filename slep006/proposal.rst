@@ -94,8 +94,8 @@ Brittleness
    structure of the pipeline (e.g. adding a layer of nesting) require rewriting
    other code?
 Error handling
-   If the user mistypes the name of a sample property, will an appropriate
-   exception be raised?
+   If the user mistypes the name of a sample property, or misspecifies how it
+   should be routed to a consumer, will an appropriate exception be raised?
 Impact on meta-estimator design
    How much meta-estimator code needs to change? How hard will it be to
    maintain?
@@ -111,7 +111,7 @@ Introspection
    If sensible to do so (e.g. for improved efficiency), can a
    meta-estimator identify whether its base estimator (recursively) would
    handle some particular sample property (e.g. so a meta-estimator can choose
-   between weighting and resampling)?
+   between weighting and resampling, or for automated invariance testing)?
 
 Keyword arguments vs. a single argument
 ---------------------------------------
@@ -300,7 +300,8 @@ passing only the required parameters to each of its children. In this context,
 a GridSearchCV has children including `estimator`, `cv` and (each element of)
 `scoring`.
 
-Pull request :pr:`9566` is a partial implementation of this approach.
+Pull request :pr:`9566` and its extension in :pr:`15425` are partial
+implementations of this approach.
 
 A major benefit of this approach is that it may allow only prop routing
 meta-estimators to be modified, not prop consumers.
@@ -315,6 +316,12 @@ Issues:
 * Need to design an API for specifying routings.
 * As in Solution 2, each local destination for routing props needs to be given
   a name.
+* Every router along the route will need consistent instructions to pass a
+  specific prop to a consumer. If the prop is optional in the consumer, routing
+  failures may be hard to identify and debug.
+* For estimators to be cloned, this routing information needs to be cloned with
+  it. This implies one of: the routing information be stored as a constructor
+  paramerter; or `clone` is extended to explicitly copy routing information.
 
 Possible public syntax:
 
@@ -361,9 +368,9 @@ Disadvantages:
   `set_props_request` method (instead of the `request_props` constructor
   parameter approach) such that all legacy base estimators are
   automatically equipped.
-* If the parameter request does not correspond to a `get_params` parameter,
-  `clone` will have to ensure that this request is cloned as well as
-  parameters.
+* For estimators to be cloned, this request information needs to be cloned with
+  it. This implies one of: the request information be stored as a constructor
+  paramerter; or `clone` is extended to explicitly copy request information.
 
 Possible public syntax:
 
@@ -382,6 +389,17 @@ Test cases:
 
 .. literalinclude:: cases_opt4.py
 
+Naming
+------
+
+"Sample props" has become a name understood internally to the Scikit-learn
+development team. For ongoing usage we have several choices for naming:
+
+* Sample meta
+* Sample properties
+* Sample props
+* Sample extra
+
 Proposal
 --------
 
@@ -392,12 +410,20 @@ TODO
 * which solution?
 * if an estimator requests a prop, must it be not-null
 * props param or kwargs?
+* naming?
 
 Backward compatibility
 ----------------------
 
+TODO
+
+Do we keep existing names of fit params like `sample_weight` and `groups`
+(despite those two existing inconsistent pluralisation)?
+
 Discussion
 ----------
+
+TODO
 
 References and Footnotes
 ------------------------
