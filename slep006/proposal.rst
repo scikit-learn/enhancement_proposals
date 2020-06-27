@@ -426,6 +426,8 @@ Grouped cross validation splitters will request `groups` since they were previou
 Discussion
 ----------
 
+One benefit of the explicitness in Solution 4 is that even if it makes use of **kw arguments, it does not preclude keywords arguments serving other purposes in addition. That is, in addition to requesting sample props, a future proposal could allow estimators to request feature metadata or other keys.
+
 TODO
 
 References and Footnotes
