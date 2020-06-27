@@ -408,7 +408,7 @@ Having considered the above solutions, we propose:
 TODO
 
 * which solution?
-* if an estimator requests a prop, must it be not-null
+* if an estimator requests a prop, must it be not-null? Must it be provided or explicitly passed as None?
 * props param or kwargs?
 * naming?
 
@@ -417,8 +417,11 @@ Backward compatibility
 
 TODO
 
-Do we keep existing names of fit params like `sample_weight` and `groups`
-(despite those two existing inconsistent pluralisation)?
+TODO: Do we continue to handle sample_weight such that it only gets provided of requested explicitly? Or do we make it requested by default in the future (possibly with a deprecation period)?
+
+During a deprecation period, fit_params will be handled dually: Keys that are requested will be passed through the new request mechanism, while keys that are not known will be routed using legacy mechanisms. At completion of the deprecation period, the legacy handling will cease.
+
+Grouped cross validation splitters will request `groups` since they were previously unusable in a nested cross validation context, so this should not often create backwards incompatibilities, except perhaps where a fit param named `groups` served another purpose.
 
 Discussion
 ----------
