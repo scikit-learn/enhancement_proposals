@@ -1,6 +1,6 @@
 import numpy as np
 
-from defs import (accuracy, group_cv, make_scorer, SelectKBest,
+from defs import (accuracy, group_cv, get_scorer, SelectKBest,
                   LogisticRegressionCV, cross_validate,
                   make_pipeline, X, y, my_groups, my_weights,
                   my_other_weights)
@@ -28,7 +28,7 @@ class WrappedGroupCV:
 
     def get_n_splits(self, X, y, groups=None):
         groups = X[:, self.groups_idx]
-        return self.base_cv.split(unwrap_X(X), y, groups=groups)
+        return self.base_cv.get_n_splits(unwrap_X(X), y, groups=groups)
 
 
 wrapped_group_cv = WrappedGroupCV(group_cv)
@@ -39,11 +39,11 @@ class WrappedLogisticRegressionCV(LogisticRegressionCV):
         return super().fit(unwrap_X(X), y, sample_weight=X[:, WEIGHT_IDX])
 
 
-weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+acc_scorer = get_scorer('accuracy')
 
 
 def wrapped_weighted_acc(est, X, y, sample_weight=None):
-    return weighted_acc(est, unwrap_X(X), y, sample_weight=X[:, WEIGHT_IDX])
+    return acc_scorer(est, unwrap_X(X), y, sample_weight=X[:, WEIGHT_IDX])
 
 
 lr = WrappedLogisticRegressionCV(
@@ -81,7 +81,7 @@ class UnweightedWrappedSelectKBest(SelectKBest):
 
 lr = WrappedLogisticRegressionCV(
     cv=wrapped_group_cv,
-    scoring=weighted_acc,
+    scoring=wrapped_weighted_acc,
 ).set_props_request(['sample_weight'])
 sel = UnweightedWrappedSelectKBest()
 pipe = make_pipeline(sel, lr)
