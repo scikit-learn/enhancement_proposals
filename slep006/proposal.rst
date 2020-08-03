@@ -79,7 +79,7 @@ Other related issues include: :issue:`1574`, :issue:`2630`, :issue:`3524`,
 :issue:`4632`, :issue:`4652`, :issue:`4660`, :issue:`4696`, :issue:`6322`,
 :issue:`7112`, :issue:`7646`, :issue:`7723`, :issue:`8127`, :issue:`8158`,
 :issue:`8710`, :issue:`8950`, :issue:`11429`, :issue:`12052`, :issue:`15282`,
-:issues:`15370`, :issue:`15425`.
+:issues:`15370`, :issue:`15425`, :issue:`18028`.
 
 Desiderata
 ----------
@@ -368,6 +368,14 @@ Disadvantages:
   `set_props_request` method (instead of the `request_props` constructor
   parameter approach) such that all legacy base estimators are
   automatically equipped.
+* Aliasing is a bit confusing in this design, in that the consumer still
+  accepts the fit param by its original name (e.g. `sample_weight`) even if it
+  has a request that specifies a different key given to the router (e.g.
+  `fit_sample_weight`). This design has the advantage that the handling of
+  props within a consumer is simple and unchanged; the complexity is in
+  how it is forwarded the data by the router, but it may be conceptually
+  difficult for users to understand. (This may be acceptable, as an advanced
+  feature.)
 * For estimators to be cloned, this request information needs to be cloned with
   it. This implies one of: the request information be stored as a constructor
   paramerter; or `clone` is extended to explicitly copy request information.
@@ -388,6 +396,22 @@ Possible public syntax:
 Test cases:
 
 .. literalinclude:: cases_opt4.py
+
+Extensions and alternatives to the syntax considered while working on
+:pr:`16079`:
+
+* `set_prop_request` and `get_props_request` have lists of props requested
+  **for each method** i.e. fit, score, transform, predict and perhaps others.
+* `set_props_request` could be replaced by a method (or parameter) representing
+  the routing of each prop that it consumes. For example, an estimator that
+  consumes `sample_weight` would have a `request_sample_weight` method. One of
+  the difficulties of this approach is automatically introducing
+  `request_sample_weight` into classes inheriting from BaseEstimator without
+  too much magic (e.g. meta-classes, which might be the simplest solution).
+
+These are demonstrated together in the following:
+
+.. literalinclude:: cases_opt4b.py
 
 Naming
 ------
