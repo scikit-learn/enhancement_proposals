@@ -429,30 +429,49 @@ Proposal
 
 Having considered the above solutions, we propose:
 
-TODO
+* Solution 4 per :pr:`16079` which will be used to resolve further, specific
+  details of the solution.
+* Props will be known simply as Metadata.
+* `**kw` syntax will be used to pass props by key.
 
-* which solution?
-* if an estimator requests a prop, must it be not-null? Must it be provided or explicitly passed as None?
-* props param or kwargs?
-* naming?
+TODO:
+
+* if an estimator requests a prop, must it be not-null? Must it be provided or
+  explicitly passed as None?
 
 Backward compatibility
 ----------------------
 
-TODO
+Under this proposal, consumer behaviour will be backwards compatible, but
+meta-estimators will change their routing behaviour.
 
-TODO: Do we continue to handle sample_weight such that it only gets provided of requested explicitly? Or do we make it requested by default in the future (possibly with a deprecation period)?
+By default, `sample_weight` will not be requested by estimators that support
+it. This ensures that addition of `sample_weight` support to an estimator will
+not change its behaviour.
 
-During a deprecation period, fit_params will be handled dually: Keys that are requested will be passed through the new request mechanism, while keys that are not known will be routed using legacy mechanisms. At completion of the deprecation period, the legacy handling will cease.
+During a deprecation period, fit_params will be handled dually: Keys that are
+requested will be passed through the new request mechanism, while keys that are
+not known will be routed using legacy mechanisms. At completion of the
+deprecation period, the legacy handling will cease.
 
-Grouped cross validation splitters will request `groups` since they were previously unusable in a nested cross validation context, so this should not often create backwards incompatibilities, except perhaps where a fit param named `groups` served another purpose.
+Similarly, during a deprecation period, `fit_params` in GridSearchCV and
+related utilities will be routed to the estimator's `fit` by default, per
+incumbent behaviour. After the deprecation period, an error will be raised for
+any params not explicitly requested.
+
+Grouped cross validation splitters will request `groups` since they were
+previously unusable in a nested cross validation context, so this should not
+often create backwards incompatibilities, except perhaps where a fit param
+named `groups` served another purpose.
 
 Discussion
 ----------
 
-One benefit of the explicitness in Solution 4 is that even if it makes use of **kw arguments, it does not preclude keywords arguments serving other purposes in addition. That is, in addition to requesting sample props, a future proposal could allow estimators to request feature metadata or other keys.
-
-TODO
+One benefit of the explicitness in Solution 4 is that even if it makes use of
+`**kw` arguments, it does not preclude keywords arguments serving other
+purposes in addition.  That is, in addition to requesting sample props, a
+future proposal could allow estimators to request feature metadata or other
+keys.
 
 References and Footnotes
 ------------------------
