@@ -5,11 +5,10 @@ SLEP009: Keyword-only arguments
 ===============================
 
 :Author: Adrin Jalali
-:Status: Draft
+:Status: Accepted
 :Type: Standards Track
 :Created: 2019-07-13
-:Vote opens: 2019-09-11
-:Vote closes: 2019-10-11
+:Vote opened: 2019-09-11
 
 Abstract
 ########
@@ -18,7 +17,7 @@ This proposal discusses the path to gradually forcing users to pass arguments,
 or most of them, as keyword arguments only. It talks about the status-quo, and
 the motivation to introduce the change. It shall cover the pros and cons of the
 change. The original issue starting the discussion is located
-`here <https://github.com/scikit-learn/scikit-learn/issues/12805>`_.
+`here <https://github.com/scikit-learn/scikit-learn/issues/12805>`__.
 
 Motivation
 ##########
@@ -111,8 +110,8 @@ following two definitions may also be confusing to some users:
 However, some other teams are already moving towards using the syntax, such as
 ``matplotlib`` which has introduced the syntax with a deprecation cycle using a
 decorator for this purpose in version 3.1. The related PRs can be found `here
-<https://github.com/matplotlib/matplotlib/pull/13601>`_ and `here
-<https://github.com/matplotlib/matplotlib/pull/14130>`_. Soon users will be
+<https://github.com/matplotlib/matplotlib/pull/13601>`__ and `here
+<https://github.com/matplotlib/matplotlib/pull/14130>`__. Soon users will be
 familiar with the syntax.
 
 IDE Support
@@ -152,7 +151,7 @@ An important open question is which functions/methods and/or parameters should
 follow this pattern, and which parameters should be keyword only. We can
 identify the following categories of functions/methods:
 
-- ``__init__``s
+- ``__init__``
 - Main methods of the API, *i.e.* ``fit``, ``transform``, etc.
 - All other methods, *e.g.* ``SpectralBiclustering.get_submatrix``
 - Functions
@@ -169,8 +168,8 @@ defined as either of the following two ways:
   the *easy* cases.
 - A set identified as being in the top 95% of the use cases, using some
   automated analysis such as `this one
-  <https://odyssey.readthedocs.io/en/latest/tutorial.html>`_ or `this one
-  <https://github.com/Quansight-Labs/python-api-inspect>`_.
+  <https://odyssey.readthedocs.io/en/latest/tutorial.html>`__ or `this one
+  <https://github.com/Quansight-Labs/python-api-inspect>`__.
 
 This way we would minimize the number of warnings the users would receive,
 which minimizes the friction cause by the change. This SLEP does not define

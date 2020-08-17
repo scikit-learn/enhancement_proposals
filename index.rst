@@ -9,15 +9,18 @@
     :maxdepth: 1
     :caption: Under review
 
-    under_review
     slep005/proposal
     SLEP009: Keyword-only arguments (voting until 11 Oct 2019) <slep009/proposal>
+    slep007/proposal
+    slep012/proposal
+    slep013/proposal
 
 .. toctree::
     :maxdepth: 1
     :caption: Accepted
 
-    accepted
+    slep009/proposal
+    slep010/proposal
 
 .. toctree::
     :maxdepth: 1
@@ -28,6 +31,7 @@
     slep002/proposal
     slep003/proposal
     slep004/proposal
+    slep006/proposal
 
 .. toctree::
     :maxdepth: 1
