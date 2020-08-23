@@ -1,8 +1,8 @@
 .. _slep_003:
 
-======================================
-Consistent inspection for transformers
-======================================
+===============================================
+SLEP003: Consistent inspection for transformers
+===============================================
 
 . topic:: **Summary**
 
