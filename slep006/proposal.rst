@@ -1,8 +1,8 @@
 .. _slep_006:
 
-================================
-Routing sample-aligned meta-data 
-================================
+==========================================
+SLEP005: Routing sample-aligned meta-data 
+==========================================
 
 :Author: Joel Nothman
 :Status: Draft
