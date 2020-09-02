@@ -33,7 +33,7 @@ Desirable features we do not currently support include:
   validation
 * (maybe in scope) passing sample properties (e.g. `sample_weight`) to some
   scorers and not others in a multi-metric cross-validation setup
-* (likley out of scope) passing sample properties to non-fit methods, for
+* (likely out of scope) passing sample properties to non-fit methods, for
   instance to index grouped samples that are to be treated as a single sequence
   in prediction.
 
@@ -118,7 +118,7 @@ Keyword arguments vs. a single argument
 
 Currently, sample properties are provided as keyword arguments to a `fit`
 method. In redeveloping sample properties, we can instead accept a single
-parameter (named `props` or `sample_props` or `etc`, for example) which maps
+parameter (named `props` or `sample_props`, for example) which maps
 string keys to arrays of the same length (a "DataFrame-like").
 
 Keyword arguments::
@@ -127,7 +127,7 @@ Keyword arguments::
 
 Single argument::
 
-    >>> gs.fit(X, y, prop={'groups': groups, 'weight': weight})
+    >>> gs.fit(X, y, props={'groups': groups, 'weight': weight})
 
 While drafting this document, we will assume the latter notation for clarity.
 
@@ -204,8 +204,8 @@ Without changing scikit-learn, the following hack can be used:
 If `y` is represented with a Pandas datatype, then its index can be used to
 access required elements from props stored in a global namespace (or otherwise
 made available to the estimator before fitting). This is possible everywhere
-that a gold-standard `y` is passed, including fit, split and score.  A similar
-solution with `X` is also possible for handling predict-time props, if all
+that a ground-truth `y` is passed, including fit, split, score, and metrics.
+A similar solution with `X` is also possible (except for metrics), if all
 Pipeline components retain the original Pandas Index.
 
 Issues:
@@ -253,7 +253,7 @@ In short, this is a simple solution, but prone to risk.
 Solution 2: Specify routes at call
 ----------------------------------
 
-Similar to the legacy behavior of fit parameters in
+Similar to the current behavior of fit parameters in
 :class:`sklearn.pipeline.Pipeline`, this requires the user to specify the
 path for each "prop" to follow when calling `fit`.  For example, to pass
 a prop named 'weights' to a step named 'spam' in a Pipeline, you might use
@@ -268,8 +268,8 @@ Advantages:
 
 Issues:
 
-* The user needs to know the deep internal structure, or it is easy to fail to
-  pass a prop to a specific estimator.
+* The user needs to know the nested internal structure, or it is easy to fail
+  to pass a prop to a specific estimator.
 * A corollary is that prop keys need changing when the developer modifies their
   estimator structure (see case C).
 * This gets especially tricky or impossible where the available routes
@@ -321,7 +321,7 @@ Issues:
   failures may be hard to identify and debug.
 * For estimators to be cloned, this routing information needs to be cloned with
   it. This implies one of: the routing information be stored as a constructor
-  paramerter; or `clone` is extended to explicitly copy routing information.
+  parameter; or `clone` is extended to explicitly copy routing information.
 
 Possible public syntax:
 
@@ -336,12 +336,12 @@ named keys passed to the meta-estimator.
 Solution 4: Each child requests
 -------------------------------
 
-Here the meta-estimator provides only what its each of its children requests.
+Here the meta-estimator provides only what each of its children requests.
 The meta-estimator would also need to request, on behalf of its children,
 any prop that descendant consumers require. 
 
-Each object in a situation that could receive props would have a method like
-`_get_prop_requests()` which would return a list of prop names (or perhaps a
+Each object that could receive props would have a method like
+`get_prop_request()` which would return a list of prop names (or perhaps a
 mapping for more sophisticated use-cases). Group* CV splitters would default to
 returning `['groups']`, for example.  Estimators supporting weighted fitting
 may return `[]` by default, but may have a parameter `request_props` which
@@ -378,7 +378,7 @@ Disadvantages:
   feature.)
 * For estimators to be cloned, this request information needs to be cloned with
   it. This implies one of: the request information be stored as a constructor
-  paramerter; or `clone` is extended to explicitly copy request information.
+  parameter; or `clone` is extended to explicitly copy request information.
 
 Possible public syntax:
 
