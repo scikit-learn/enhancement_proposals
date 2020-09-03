@@ -253,7 +253,7 @@ In short, this is a simple solution, but prone to risk.
 Solution 2: Specify routes at call
 ----------------------------------
 
-Similar to the current behavior of fit parameters in
+Similar to the legacy behavior of fit parameters in
 :class:`sklearn.pipeline.Pipeline`, this requires the user to specify the
 path for each "prop" to follow when calling `fit`.  For example, to pass
 a prop named 'weights' to a step named 'spam' in a Pipeline, you might use
