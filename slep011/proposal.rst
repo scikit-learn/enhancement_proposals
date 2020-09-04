@@ -116,7 +116,7 @@ the subset to be the same for all calls to `fit` in this case. The fix was
 to store a private seed that was generated the first time `fit` is called.
 
 This is a typical example of many other similar bugs that we need to
-monkey-patch with potentially overly complex logic.
+patch with potentially overly complex logic.
 
 Cloning may return a different estimator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
