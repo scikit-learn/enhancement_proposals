@@ -216,7 +216,10 @@ Depending on the intended behaviour of the parameter search, this may or may
 not be a good thing. This is typically a bug if we implement successive
 halving + warm start (details ommitted here, you may refer to `this issue
 <https://github.com/scikit-learn/scikit-learn/issues/15125>`_ for some more
-details).
+details). Currently, the `Successive Halving implementation
+<https://github.com/scikit-learn/scikit-learn/pull/13900>`_ **forbids users
+from using stateful splitters**, e.g. `KFolds(5, shuffle=True,
+random_state=None)` is forbidden.
 
 Proposed Solution
 =================
