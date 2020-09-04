@@ -42,6 +42,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'sphinx_issues',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -165,3 +166,7 @@ texinfo_documents = [
 # -- Options for intersphinx extension ---------------------------------------
 
 intersphinx_mapping = {'sklearn': ('http://scikit-learn.org/stable', None)}
+
+# -- Sphinx-Issues configuration --
+
+issues_github_path = "scikit-learn/scikit-learn"
