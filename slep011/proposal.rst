@@ -167,7 +167,19 @@ CV-splitters are stateful::
 `a` and `b` are different splits, because of how `split` is implemented (see
 introduction above).
 
-This behaviour is inconsistent for two reasons.
+This means that the following code is very likely incorrect::
+
+    rng = np.random.RandomState(0)
+    cv = KFold(shuffle=True, random_state=rng)
+    estimators = [...]  # the estimators you want to compare
+    for est in estimators:
+        cross_val_score(est, X, y, cv=cv)
+
+Users might not realize it, but **the estimators will be evaluated on
+different splits**, even though they think they've set the random state by
+passing a carefuly crafted instance. They should have passed an int.
+
+The behaviour of the splitters is inconsistent for two reasons.
 
 The first one is that if `rng` were an int, then `a` and `b` would have been
 equal. As a result, the behaviour of the CV splitter depends on the
@@ -216,13 +228,18 @@ Depending on the intended behaviour of the parameter search, this may or may
 not be a good thing. This is typically a bug if we implement successive
 halving + warm start (details ommitted here, you may refer to `this issue
 <https://github.com/scikit-learn/scikit-learn/issues/15125>`_ for some more
-details). Currently, the `Successive Halving implementation
+details). Currently, in order to prevent any potential bug and misconception
+from users, the `Successive Halving implementation
 <https://github.com/scikit-learn/scikit-learn/pull/13900>`_ **forbids users
 from using stateful splitters**, e.g. `KFolds(5, shuffle=True,
 random_state=None)` is forbidden.
 
 Proposed Solution
 =================
+
+.. note::
+    This proposed solution is a work in progress and there is room for
+    improvement.
 
 We need a solution that fixes the statefulness of the estimators and the
 splitters. Most of the remaining issues would be fixed as a consequence.
@@ -331,6 +348,13 @@ Drawbacks:
 
 Alternative solutions
 =====================
+
+Change the default of all random_state from `None` to a hardcoded int
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This doesn't solve much: it might limit pitfalls in users code, but does not
+address the core issue, which is the statefulness of splitters and
+estimators.
 
 Store a seed instead of a state
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
