@@ -12,25 +12,34 @@ SLEP011: Fixing randomness handling
 Abstract
 ========
 
-This SLEP aims at fixing the issues related to how scikit-learn handles
-randomness of estimators and CV splitters.
+This SLEP aims at fixing various issues related to how scikit-learn handles
+randomness in estimators and Cross-Validation (CV) splitters. These issues
+include hard-to-find bugs, surprising results, and potentially misuses and
+misunderstanding from users. They are described in more details in a
+dedicated section below.
 
+This SLEP is *not* about:
+
+- what the default value of `random_state` should be
+- whether we should allow RandomState instances and None to be passed.
+
+TODO: update this
 The proposed solution is to make estimators and splitter stateless, by
 storing the state of the `random_state` parameter that is passed in
 `__init__`.
 
-More than anything, this SLEP's goal is to *inform* the discussions related
-to randomness handling: if we end up going with the status quo (i.e. keep
-estimators and splitters stateful), then at least we are all aware of the
-price we're paying.
+.. More than anything, this SLEP's goal is to *inform* the discussions related
+.. to randomness handling: if we end up going with the status quo (i.e. keep
+.. estimators and splitters stateful), then at least we are all aware of the
+.. price we're paying.
 
 Background: How we currently handle randomness
 ==============================================
 
 `random_state` parameters are used commonly in estimators, and in CV
 splitters. They can be either int, RandomState instances, or None. The
-parameter is stored as an attribute in init and never changes, as per our
-convention.
+parameter is stored as an attribute in `__init__` and never changes, as per
+our convention.
 
 `fit` and `split` methods typically look like this::
 
@@ -39,7 +48,6 @@ convention.
         ...
         rng.some_method()  # directly use instance, e.g. for sampling
         some_function_or_class(random_state=rng)  # pass it down to other tools
-                                                  # e.g. if self is a meta-estimator
 
 `check_random_state` behaves as follows::
 
@@ -48,34 +56,96 @@ convention.
         if x is a RandomState instance, return x
         if x is None, return numpy's RandomState singleton instance
 
-Accepting RandomState instances or None comes with different complications,
-listed below. `None` is the current default for all estimators / splitters.
+Accepting RandomState instances or None comes with different complications
+and potentially surpring behavior that are listed below. `None` is the
+current default for all estimators / splitters.
+
+.. note::
+    Since passing `random_state=None` is equivalent to passing the global
+    `RandomState` instance from `numpy`
+    (`random_state=np.random.mtrand._rand`), we will not explicitly mention
+    None here, but everything that applies to instances also applies to
+    using None.
+
+Key use-cases and requirements
+==============================
+
+.. note::
+    In what follows, *legacy* design means what is supported in the curent
+    scikit-learn master branch, i.e. `0.24.dev`.
+
+There are a few use-cases that are made possible by the legacy design and
+that we will want to keep supporting in the new design:
+
+- A. Allow for consistent results across executions. This is a natural
+  requirement for any implementation: we want users to be able to get
+  consistently reproducible results across multiple program executions. This
+  is currently supported by passing down integers or RandomState instances to
+  every `random_state` parameter.
+- B. Allow for maximum variability and different results across executions.
+  This is currently supported by passing `random_state=None`: multiple
+  program executions yield different results each time.
+- C. CV procedures where the estimator's RNG is exactly the same on each
+  fold. This is currently supported by passing an int to the `random_state`
+  parameter of the estimator.
+- D. CV procedures where the estimator's RNG is different for each fold. This
+  is useful to, e.g., increase the statistical significance of CV results.
+  This is currently supported by passing a RandomState instance or None to the
+  `random_state` parameter of the estimator.
+- E. Obtain *strict* clones, i.e. clones that will yield exactly the same
+  results when called on the same data. This is currently supported by
+  calling `clone` if the estimator's `random_state` is an int.
+- F. Obtain *statistical* clones, i.e. estimators
+  that are identical but that will yield different results, even when called
+  on the same data. This is currently supported by calling `clone` if
+  the estimator's `random_state` is an instance or None.
+- G. Easily obtain different splits with the same characteristics from a
+  splitter. By "same characteristics", we mean same number of splits, same
+  choice of stratification, etc. This is useful to implement e.g.
+  boostrapping. This is currently supported by calling `split` multiple times
+  on the same `cv` instance, if `cv.random_state` is an instance, or None.
+
+.. note::
+    C and D are currently mutually exclusive: a given estimator can only do C
+    and not D, or only D and not C.
+    Also, C and E are very related: C is supported via creating strict clones
+    (E). Similarly, D is supported by creating statistical clones (F).
+
+    In the proposed design, all estimators will support C and D. Also, strict
+    and statistical clones can be obtained from any estimator.
 
 Problems with passing RandomState instances or None
 ===================================================
 
+.. note::
+    Some of the issues described here will also be described in the docs
+    if/when `#18363
+    <https://github.com/scikit-learn/scikit-learn/pull/18363>`_ gets merged.
+    Note however that this is a recent PR.
+    In this PR, we recommend users to pass integers everywhere to avoid
+    potential mistakes.
+
 The main issue with RandomState instances and None is that it makes the
-estimators and the splitters stateful accross calls to `fit` or `split`. As
-a result, different calls to `fit` or `split` on the same instance yield
-different results. Almost all the other issues are consequences of this
-fact.
+estimators and the splitters stateful accross calls to `fit` and `split`. As
+a result, different calls to `fit` and `split` on the same instance yield
+different results. Almost all the other issues are consequences of this fact.
 
 Statefulness and violation of fit idempotence
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Estimators should be stateless. That is, any call to `fit` should forget
-whatever happened to previous calls to `fit`, provided that no warm-start is
-hapenning. Whether CV splitters should be stateful or not is debatable, and
-that point is discussed below.
+whatever happened to previous calls to `fit`, provided that warm-start is
+off. Whether CV splitters should be stateful or not is debatable, and that
+point is discussed below.
 
 Another related convention is that the `fit` method should be idempotent:
 calling `est.fit(X, y)` and then `est.fit(X, y)` again should yield the same
 model both times.
 
-These properties are key for enforcing reproducibility. We have a common
-checks for them.
+These properties are key for enforcing reproducibility. There is a dedicated
+check in the `check_estimator` suite.
 
-If a `RandomState` instance or None are used, the idemptency property may be
+If a `RandomState` instance is used, the idemptency property may be
 violated::
 
     rng = RandomState(0)
