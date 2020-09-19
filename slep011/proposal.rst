@@ -23,7 +23,8 @@ users. Various issues are:
     behaviour of seemingly unrelated procedures like `cross_val_score`, or
     meta-estimators like `RFE` and `SequentialFeatureSelection`. To understand
     these subtleties, users need to know inner details of these CV procedures
-    and meta-estimators: namely, they need to know *when* `fit` is called.
+    and meta-estimators: namely, they need to know *when* `fit` and `clone`
+    are called.
   - Similarly, users are required to know how many times `split` is called in
     a CV procedure (e.g `GridSearchCV.fit`), or there is a risk that they may
     make unsound performance comparison.
@@ -43,15 +44,15 @@ SLEP is *not* about:
   `split`. Neither `fit` nor `split` need to be changed. This will
   allow users and developers to reason about `random_state` with a simpler
   mental model.
-- Let users explicitly request *strict* or *statistical* clones, with the
-  introduction of a new `use_exact_clones` parameter to each CV procedure and
-  meta-estimator where relevant (name open for discussion).
+- Let users explicitly choose the strategy executed by CV procedures and
+  meta-estimators, by introducing new parameters, where relevant. A candidate
+  parameter name is `use_exact_clones` (name open for discussion).
   
   This will **explicitly** expose the choice of the CV and meta-estimator
   strategy to users, instead of **implicitly** relying on the type of the
   estimator's `random_state`. Moreover, unlike in the legacy design, both
-  strategies (using strict or statistical clones) will be supported by any
-  estimator, no matter the type of the `random_state` attribute.
+  all strategies will be supported by any estimator, no matter the type of
+  the `random_state` attribute.
 
 .. note::
     The *legacy* design refers to the design as used in the current
@@ -97,9 +98,8 @@ The next sections describe:
 
 - Issues that illustrate how `random_state` implictly affects CV procedures
   and meta-estimators in insiduous ways.
-- The numerous bugs that `random_state` has caused (:ref:`next section
-  <bugs>`), which are another sign that the legacy design might be too
-  complex, even for core devs.
+- Examples of bugs that `random_state` has caused, which are another sign
+  that the legacy design might be too complex, even for core devs.
 
 Before reading these sections, please make sure to read `#18363
 <https://github.com/scikit-learn/scikit-learn/pull/18363>`_ which provides
@@ -145,8 +145,8 @@ still constant across candidates, i.e. something like::
     RandomState instances or None can achieve this.
 
 Unfortunately, there is now way for users to figure out what strategy is used
-until they look at the code, and it is not just a documentation problem. The
-core problem here is that **the behaviour of the CV procedure is implicitly
+until they look at the code. It is not just a documentation problem. The core
+problem here is that **the behaviour of the CV procedure is implicitly
 dictated by the estimator's** `random_state`.
 
 There are similar issues in meta-estimators, like `RFE` or
@@ -533,7 +533,8 @@ A deprecation path could be to start introducing the `use_exact_clones`
 parameters without introducing the seed drawing in `__init__` yet. This would
 however require a temporary deprecation of RandomState instances as well.
 
-The easiest way might be allow for a breaking change.
+The easiest way might be allow for a breaking change, which means that the
+SLEP would be implemented for a new major version of scikit-learn.
 
 Alternative solutions
 =====================
