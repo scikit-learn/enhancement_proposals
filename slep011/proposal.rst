@@ -127,20 +127,27 @@ The same is true for any procedure that performs cross-validation (manual CV,
 when a RandomState instance is used, a new RNG is used on each fold, **but
 also for each candidate**::
 
-    fold 0: use different RNG across candidates
-    fold 1: use different RNG across candidates (different RNGs from fold 0)
-    ...
+    fold 0: use different RNGs across candidates
+    fold 1: use different RNGs across candidates (different RNGs from fold 0)
+    fold 2: use different RNGs across candidates (different RNGs from folds 0 and 1)
+    etc...
+
 Users might actually expect that the RNG would be different on each fold, but
 still constant across candidates, i.e. something like::
 
     fold 0: use same RNG for all candidates
     fold 1: use same RNG for all candidates (different RNG from fold 0)
-    fold 2: use same RNG for all candidates (different RNG from folds 0 and 0)
+    fold 2: use same RNG for all candidates (different RNG from folds 0 and 1)
     etc...
 
-How are users supposed to understand or even acknowledge those differences?
-The core problem here is that **the behaviour of the CV procedure is
-implicitly dictated by the estimator's** `random_state`.
+.. note::
+    This strategy is in fact not even supported right now: neither integers,
+    RandomState instances or None can achieve this.
+
+Unfortunately, there is now way for users to figure out what strategy is used
+until they look at the code, and it is not just a documentation problem. The
+core problem here is that **the behaviour of the CV procedure is implicitly
+dictated by the estimator's** `random_state`.
 
 There are similar issues in meta-estimators, like `RFE` or
 `SequentialFeatureSelection`: these are iterative feature selection
