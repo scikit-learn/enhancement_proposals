@@ -410,8 +410,7 @@ in estimators and splitters::
 `fit`, `split`, and `get_params` are unchanged.
 
 In order to **explicitly** support use-cases C and D, CV procedures like
-`cross_val_score` should be updated with a new `use_exact_clones` parameter
-(name up for discussion)::
+`cross_val_score` should be updated with a new `use_exact_clones` parameter::
 
     def _check_statistical_clone_possible(est):
       if 'random_state' not in est.get_params():
@@ -436,9 +435,17 @@ In order to **explicitly** support use-cases C and D, CV procedures like
             for train, test in cv.split(X, y)
         ]
 
+.. note::
+    The name `use_exact_clones` is just a placeholder for now, and the final
+    name is up for discussion. A more descriptive name for `cross_val_score`
+    could be e.g. `estimator_randomness={'constant', 'splitwise'}`. The name
+    doesn't have to be the same throughout all CV procedures.
+
 Meta-estimators should be updated in a similar fashion to make their two
-alternative behaviors explicit. The `clone` function needs to be updated so
-that one can explicitly request exact or statistical clones::
+alternative behaviors explicit.
+
+As can be seen from the above snippet, the `clone` function needs to be
+updated so that one can explicitly request exact or statistical clones::
 
     def clone(est, statistical=False):
         # Return a strict clone or a statistical clone.
@@ -459,6 +466,10 @@ that one can explicitly request exact or statistical clones::
             params['random_state'] = _sample_seed(check_random_state(rng))
             
         return est.__class__(**params)
+
+Note how one can pass a RandomState instance to `statistical` in order to
+obtain a sequence of estimators that have different RNGs. This is used in
+particular in `cross_val_score`.
 
 Use-cases support
 -----------------
@@ -574,6 +585,21 @@ are using.
 
 This also introduces a private attribute, so we would need more intrusive
 changes to `set_params`, `get_params`, and `clone`.
+
+Add a new parameter to estimators instead of adding a parameter to CV procedures and meta-estimators
+----------------------------------------------------------------------------------------------------
+
+Instead of updating each CV procedure and meta-estimator with the
+`use_exact_clones` parameter, we could instead add this parameter to the
+estimators that have a `random_state` attribute, and let `clone` detect what
+kind of clone it needs to output depending on the estimators' corresponding
+attribute.
+
+However, the strategy used by CV procedures and estimators would still be
+somewhat implicit, and making these strategies explicit is one of the main
+goal of this SLEP. It is also easier to document and to expose the different
+possible strategies of a CV procedure when there is a dedicated parameter in
+that procedure.
 
 .. References and Footnotes
 .. ------------------------
