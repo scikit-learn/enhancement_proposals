@@ -45,8 +45,9 @@ SLEP is *not* about:
   allow users and developers to reason about `random_state` with a simpler
   mental model.
 - Let users explicitly choose the strategy executed by CV procedures and
-  meta-estimators, by introducing new parameters, where relevant. A candidate
-  parameter name is `use_exact_clones` (name open for discussion).
+  meta-estimators, by introducing new parameters in those procedures, where
+  relevant. A candidate parameter name is `use_exact_clones` (name open for
+  discussion).
   
   This will **explicitly** expose the choice of the CV and meta-estimator
   strategy to users, instead of **implicitly** relying on the type of the
@@ -122,6 +123,8 @@ selects the same subset of features across folds. In the second one, the
 estimator RNG varies across folds and the random subset of selected features
 will vary. In other words, the CV strategy that `cross_val_score` uses
 implicitly depends on the type of the estimators' `random_state` parameter.
+This is unexpected, since the behaviour of `cross_val_predict` should
+preferably be determined by parameters passed to `cross_val_predict`.
 
 The same is true for any procedure that performs cross-validation (manual CV,
 `GridSearchCV`, etc.). Things are particularly ambiguous in `GridSearchCV`:
@@ -145,22 +148,23 @@ still constant across candidates, i.e. something like::
     This strategy is in fact not even supported right now: neither integers,
     RandomState instances or None can achieve this.
 
-Unfortunately, there is now way for users to figure out what strategy is used
+Unfortunately, there is no way for users to figure out what strategy is used
 until they look at the code. It is not just a documentation problem. The core
 problem here is that **the behaviour of the CV procedure is implicitly
 dictated by the estimator's** `random_state`.
 
 There are similar issues in meta-estimators, like `RFE` or
 `SequentialFeatureSelection`: these are iterative feature selection
-algorithms that will use either *exact* or *statistical* clones depending on
-the estimator's `random_state`, which leads to two significantly different
-strategies. Here again, **how they behave is only implicitly dictated by the
+algorithms that will use either *exact* or *statistical* clones at each
+iteration, depending on the estimator's `random_state`. Exact and statistical
+clones lead to two significantly different strategies. Here again, the
+behavior of these meta-estimators **is only implicitly dictated by the
 estimator's** `random_state`.
 
-In addition, since the estimator's `random_state` type dictates the strategy,
-users are bound to one single strategy once the estimator has been created:
-it is for example impossible for an estimator to use a different RNG across
-folds if that estimator was initialized with an integer.
+In addition, since the sub-estimator's `random_state` type dictates the
+strategy, users are bound to one single strategy once the estimator has been
+created: it is for example impossible for an estimator to use a different RNG
+across folds if that estimator was initialized with an integer.
 
 It is unlikely that users have a perfect understanding of these subtleties.
 For users to actually understand how `random_state` impacts the CV procedures
@@ -270,7 +274,7 @@ third-party library wants to implement its own parameter search strategy, it
 needs to subclass `BaseSearchCV` and call a built-in function
 `evaluate_candidates(candidates)` once, or multiple times.
 `evaluate_candidates` internally calls `split` once. If
-`evalute_candidates` is called more than once, this means that **the
+`evaluate_candidates` is called more than once, this means that **the
 candidate parameters are evaluated on different splits each time**.
 
 This is a quite subtle issue that third-party developers might easily
@@ -285,13 +289,14 @@ implement successive halving + warm start (details ommitted here, you may
 refer to `this issue
 <https://github.com/scikit-learn/scikit-learn/issues/15125>`_).
 
-In order to prevent any potential future bug and to prevent users
-from making erroneous comparisons between the candidates scores, the
-`Successive Halving implementation
-<https://scikit-learn.org/dev/modules/generated/sklearn.model_selection.HalvingGridSearchCV.html#sklearn.model_selection.HalvingGridSearchCV>`_
-forbids users from using stateful splitters, just like
-`SequentialFeatureSelection` (see the note in the docstring for the `cv`
-parameter).
+.. note::
+    In order to prevent any potential future bug and to prevent users from
+    making erroneous comparisons between the candidates scores, the
+    `Successive Halving implementation
+    <https://scikit-learn.org/dev/modules/generated/sklearn.model_selection.HalvingGridSearchCV.html#sklearn.model_selection.HalvingGridSearchCV>`_
+    forbids users from using stateful splitters, just like
+    `SequentialFeatureSelection` (see the note in the docstring for the `cv`
+    parameter).
 
 Other issues
 ------------
@@ -312,7 +317,7 @@ when RandomState instances are used.
 `clone` 's behaviour is implicit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Much like CV procedures and meta-estimatorws, what clone returns implicitly
+Much like CV procedures and meta-estimators, what `clone` returns implicitly
 depends on the estimators' `random_state`: it may return an exact clone or a
 statistical clone. Statistical clones share a common RandomState instance and
 thus are inter-dependent, as detailed in `#18363
@@ -364,15 +369,18 @@ these use-cases in the rest of the document:
   choice of stratification, etc. This is useful to implement e.g.
   boostrapping. This is currently supported by calling `split` multiple times
   on the same `cv` instance, if `cv.random_state` is an instance, or None.
+  This can also be achieved by just creating multiple splitter instances with
+  different `random_state` values (which could be integers).
 
 .. note::
-    C and E are very related: C is supported via creating strict clones (E).
-    Similarly, D is supported by creating statistical clones (F).
+    C and E are very related: in `cross_val_score`, C is supported by
+    creating strict clones (E). Similarly, D is supported by creating
+    statistical clones (F).
 
-    In legacy, C and D are mutually exclusive: a given estimator can only do
-    C and not D, or only D and not C. Also, a given estimator can only
-    produce strict clones or only statistical clones, but not both. In the
-    proposed design, all estimators will support both C and D. Similarly,
+    In the legacy design, C and D are mutually exclusive: a given estimator
+    can only do C and not D, or only D and not C. Also, a given estimator can
+    only produce strict clones or only statistical clones, but not both. In
+    the proposed design, all estimators will support both C and D. Similarly,
     strict and statistical clones can be obtained from any estimator.
 
 Proposed Solution
@@ -452,7 +460,8 @@ Meta-estimators should be updated in a similar fashion to make their two
 alternative behaviors explicit.
 
 As can be seen from the above snippet, the `clone` function needs to be
-updated so that one can explicitly request exact or statistical clones::
+updated so that one can explicitly request exact or statistical clones
+(use-cases E and F)::
 
     def clone(est, statistical=False):
         # Return a strict clone or a statistical clone.
@@ -503,7 +512,7 @@ Advantages
 - Users do not need to know the internals of CV procedures or meta estimators
   anymore. Any potential ambiguity is now made explicit and exposed to them
   by a new parameter, which will also make documentation easier.
-  *This is the main point of this SLEP*.
+  *Removing ambiguity is the main point of this SLEP*.
 
 - The mental model is simpler: no matter what is passed as `random_state`
   (int, RandomState instances, or None), results are constant across calls to
@@ -514,13 +523,11 @@ Advantages
   idempotent.
 
 - Users now have explicit control on the CV procedures and meta-estimators,
-  instead of implicitly relying on the estimator's `random_state`.
+  instead of implicitly relying on the estimator's `random_state`. These
+  procedures are not ambiguous anymore.
 
 - Since CV splitters always yield the same splits, the chances of performing
   erroneous score comparison is limited.
-
-- It is possible to preserve full backward-compatibility of behaviors in
-  cases where an int was passed.
 
 - `fit`, `split`, and `get_params` are unchanged.
 
@@ -528,34 +535,72 @@ Drawbacks
 ---------
 
 - We break our convention that `__init__` should only ever store attributes,
-  as they are passed in. Note however that the reason we have this convention
-  is that we want the semantic of `__init__` and `set_params` are the same,
-  and we want to enable people to change public attributes without having
-  surprising behaviour. **This is still respected here.** So this isn't
-  really an issue.
+  as they are passed in (for integers, this convention is still respected).
+  Note however that the reason we have this convention is that we want the
+  semantic of `__init__` and `set_params` to be the same. **This is still
+  respected here.** So this isn't really an issue.
 
 - CV procedures and meta-estimators must be updated. There is however no way
   around this, if we want to explicitly expose the different possible
   strategies.
 
-Backward compatibility
-----------------------
+Backward compatibility and possible roadmap for adoption
+--------------------------------------------------------
 
-When an integer was used as `random_state`, all backward compatibility in
-terms of results can be preserved (this will depend on the default value of
-the `use_exact_clones` parameter)
+There are two main changes proposed here:
 
-Similarly, when an instance was used, results may be backward compatible for
-CV procedures and meta-estimators depending on the default. However,
-successive calls to `fit` will not yield backward-compatible results.
-Similarly for splitters, backward compatibility cannot be preserved.
+1. Making estimators and splitters stateless
+2. Introducing the `use_exact_clones` (or alternative names) parameter to CV
+   procedures and meta-estimators.
 
-A deprecation path could be to start introducing the `use_exact_clones`
-parameters without introducing the seed drawing in `__init__` yet. This would
-however require a temporary deprecation of RandomState instances as well.
+A possible deprecation path for 1) would be to warn the user the second time
+`fit` (or `split`) is called, when `random_state` is an instance. There is no
+need for a warning if `random_state` is an integer since estimators and
+splitters are already stateless in this case. The warning would suggest users
+to explicitly create a statistical clone (using `clone`) instead of calling
+`fit` twice on the same instance. For splitters, we would just suggest the
+creation of a new instance.
 
-The easiest way might be allow for a breaking change, which means that the
-SLEP would be implemented for a new major version of scikit-learn.
+However, making estimators stateless without supporting item 2) would mean
+dropping support for use-case D. So item 2) should be implemented before item
+1).
+
+Item 2) can be implemented in a backward-compatible fashion by introducing
+the `use_exact_clones` parameter where relevant with a default 'warn', which
+would tell users that they should be setting this parameter explictly from
+now on::
+
+    def cross_val_score(..., use_exact_clones='warn'):
+        if use_exact_clones == 'warn':
+            warn("The use_exact_clones parameter was introduced in ..."
+                 "you should explicitly set it to True or False...")
+            # proceed as before in a backward compatible way
+        elif use_exact_clones is True:
+            # build exact clones (probably by sampling a seed from the estimator's random_state)
+        else:
+            # build statistical clones (probably by creating a local RandomState instance)
+
+However if 1) isn't implemented yet, this is not fully satisfactory: if
+estimators are still stateful, this means for example that the seed drawn in
+the `elif` block would be different across calls to `cross_val_score`, since
+the estimator's `random_state` would have been mutated. This is not
+desirable: once 1) is implemented and the estimators become stateless,
+multiple calls to `cross_val_score` would result in consistent results (as
+expected).
+
+As a result, 1) must be implemented before 2). But since 2) must also be
+implemented before 1)... we have a chicken and egg problem.
+
+The path with the least amount of friction would likely be to implement both
+1) and 2) at the same time, and accept the fact that `cross_val_score` and
+similar procedures might temporarily give different results across calls, in
+cases where the estimator is still stateful (i.e. if its `random_state` is an
+instance). The number of user codes where results may change once the
+estimators become stateless is likely to be quite small. This may be
+acceptable with a reasonable amount of outreach.
+
+An easier but more brutal adoption path is to just break backward
+compatibility and release this in a new major version, e.g. 1.0 or 2.0.
 
 Alternative solutions
 =====================
