@@ -69,10 +69,9 @@ follows::
        'cat__pet_dog', 'cat__pet_snake', 'num__distance']
 
 Note that ``get_feature_names_out`` does not require ``feature_names_in``
-because the feature names was stored in the first step of the pipeline and
-will be passed along each step. All other steps will be passed a
-``feature_names_in`` from the output of ``get_feature_names_out`` from the
-step before.
+because the feature names was stored in the pipeline itself. These
+features will be passed to each step's `get_feature_names_out` method to
+obtain the output feature names of the `Pipeline` itself.
 
 Enabling Functionality
 ######################
@@ -94,13 +93,6 @@ through the ``Pipeline``.
 
 Considerations
 ##############
-
-This SLEP requires all estimators to store ``feature_names_in_` for all
-estimators, which will increase the size of the estimators. By default, a
-``Pipeline`` will only store ``feature_names_in_`` in the first step and
-the rest can be computed by slicing the pipeline at different steps. In other
-words, the additional space used will be at a minimal because only the
-input feature names from the first step are stored.
 
 The ``get_feature_names_out`` will be constructed using the name generation
 specification from [slep_007]_.
