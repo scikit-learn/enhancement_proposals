@@ -12,7 +12,7 @@ SLEP015: Feature Names Propagation
 Abstract
 ########
 
-This SLEP proposes adding the `feature_names_in_` attribute for all estimators
+This SLEP proposes adding the ``feature_names_in_`` attribute for all estimators
 and the ``get_feature_names_out`` method to all transformers.
 
 Motivation
