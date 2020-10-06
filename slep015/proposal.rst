@@ -135,7 +135,12 @@ There have been many attempts to address this issue:
 2. [slep_007]_ : For ``SLEP007`` to function it still requires a mechanism to
    pass feature names through a pipeline such as ``array_out``.
    Furthermore, ``feature_names_out_`` would not be needed because it can be
-   computed with ``get_feature_names_out``.
+   computed with ``get_feature_names_out``. The benefit of the
+   ``get_feature_names_out`` method is that it can be used when the input names
+   are not passed in ``fit``. This can happen in a pipeline when transformers
+   output ndarrays or sparse matrices without names. With a
+   ``feature_names_out_`` attribute, the estimator would require an array
+   container with feature names for ``feature_names_out_`` to be defined.
 
 3. [slep_012] : The ``InputArray`` was developed to work around the overhead
     of using a pandas ``DataFrame`` or an xarray ``DataArray``. The
