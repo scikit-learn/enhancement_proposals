@@ -13,7 +13,7 @@ Abstract
 ########
 
 This SLEP proposes adding the `feature_names_in_` attribute for all estimators
-and the ``get_feature_names_out`` method too all transformers.
+and the ``get_feature_names_out`` method to all transformers.
 
 Motivation
 ##########
@@ -58,17 +58,16 @@ be used for validation during non-``fit`` methods such as ``transform`` or
 ``predict``. If the ``X`` is not a recognized container, then
 ``feature_names_in_`` would be set to ``None``.
 
-Secondly, this SLEP proposes adding
-``get_feature_names_out(feature_names_in=None)`` to all transformers. By
-default, the input features will be determined by the ``feature_names_in_``
-attribute. The feature names of a pipeline can then be easily extracted as
-follows::
+Secondly, this SLEP proposes adding ``get_feature_names_out(input_names=None)``
+to all transformers. By default, the input features will be determined by the
+``feature_names_in_`` attribute. The feature names of a pipeline can then be
+easily extracted as follows::
 
     pipe[:-1].get_feature_names_out()
     # ['cat__letter_a', 'cat__letter_b', 'cat__letter_c',
        'cat__pet_dog', 'cat__pet_snake', 'num__distance']
 
-Note that ``get_feature_names_out`` does not require ``feature_names_in``
+Note that ``get_feature_names_out`` does not require ``input_names``
 because the feature names was stored in the pipeline itself. These
 features will be passed to each step's `get_feature_names_out` method to
 obtain the output feature names of the `Pipeline` itself.
@@ -79,17 +78,26 @@ Enabling Functionality
 The following enhancements are **not** a part of this SLEP. These features are
 made possible if this SLEP gets accepted.
 
-1. Transformers in a pipeline may wish to have feature names passed in as
-``X``. This can be enabled by adding a ``array_input`` parameter to
-``Pipeline``::
+1. This SLEP enables the ``array_out`` keyword in the ``transform`` method
+   to specific the array container outputted by ``transform``. An
+   implementation of ``array_out`` requires ``feature_names_in_`` to
+   validate that the names in ``fit`` and ``transform`` are consistent.
+   With the implementation of ``array_out`` needs a way to map from
+   the input feature names to output feature names, which is provided by
+   ``get_feature_names_out``.
 
-    pipe = make_pipeline(ct, MyTransformer(), LogisticRegression(),
-                         array_input='pandas')
+2. An alternative to ``array_out``: Transformers in a pipeline may wish to have
+   feature names passed in as ``X``. This can be enabled by adding a
+   ``array_input`` parameter to ``Pipeline``::
 
-In this case, the pipeline will construct a pandas DataFrame to be inputted
-into ``MyTransformer`` and ``LogisticRegression``. The feature names
-will be constructed by calling ``get_feature_names_out`` as data is passed
-through the ``Pipeline``.
+        pipe = make_pipeline(ct, MyTransformer(), LogisticRegression(),
+                             array_input='pandas')
+
+   In this case, the pipeline will construct a pandas DataFrame to be inputted
+   into ``MyTransformer`` and ``LogisticRegression``. The feature names
+   will be constructed by calling ``get_feature_names_out`` as data is passed
+   through the ``Pipeline``. This feature implies that ``Pipeline`` is
+   doing the construction of the DataFrame.
 
 Considerations
 ##############
