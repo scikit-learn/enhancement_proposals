@@ -118,10 +118,10 @@ Backward compatibility
    introduction of ``get_feature_names_out``, ``get_feature_names`` will
    be deprecated.
 
-2. The inclusion of ``get_feature_names_out`` will not introduce any overhead
-   to estimators.
+2. The inclusion of a ``get_feature_names_out`` method will not introduce any
+   overhead to estimators.
 
-2. The inclusion of ``feature_names_in_`` will increase the size of
+2. The inclusion of a ``feature_names_in_`` attribute will increase the size of
    estimators because they would store the feature names.
 
 Community Adoption
@@ -141,14 +141,16 @@ There have been many attempts to address this issue:
    which introduces more burden for third party estimator maintainers. This
    SLEP is easier to implement because it requires less changes. Furthermore,
    ``array_out`` with sparse data will introduce an overhead when being passed
-   along in a ``Pipeline``.
+   along in a ``Pipeline``. This overhead comes from the construction of the
+   sparse data container that has the feature names.
 
 2. [slep_007]_ : ``SLEP007`` introduces a ``feature_names_out_`` attribute
    while this SLEP proposes a ``get_feature_names_out`` method to accomplish
    the same task. The benefit of the ``get_feature_names_out`` method is that
-   it can be used even if the feature names were not passed in ``fit`` with
-   a dataframe. This can happen in a ``Pipeline`` when a step outputs
-   ndarrays or sparse matrices which is used as input for the follow step.
+   it can be used even if the feature names were not passed in ``fit`` with a
+   dataframe. For example, in a ``Pipeline`` the feature names are not passed
+   through to each step and a ``get_feature_names_out`` method can be used to
+   get the names of each step with slicing.
 
 3. [slep_012] : The ``InputArray`` was developed to work around the overhead
     of using a pandas ``DataFrame`` or an xarray ``DataArray``. The
