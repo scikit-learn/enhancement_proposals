@@ -78,7 +78,13 @@ Enabling Functionality
 The following enhancements are **not** a part of this SLEP. These features are
 made possible if this SLEP gets accepted.
 
-1. This SLEP enables us to implement an ``array_out`` keyword argument to
+1. As an alternative to slicing, we can add a
+   ``Pipeline.get_feature_names_in_at`` method to get the names at a specific
+   step. This can be a simple alternative to slicing::
+
+      pipe.get_feature_names_in_at(-1)
+
+2. This SLEP enables us to implement an ``array_out`` keyword argument to
    all ``transform`` methods to specify the array container outputted by
    ``transform``. An implementation of ``array_out`` requires
    ``feature_names_in_`` to validate that the names in ``fit`` and
@@ -86,7 +92,7 @@ made possible if this SLEP gets accepted.
    a way to map from the input feature names to output feature names, which is
    provided by ``get_feature_names_out``.
 
-2. An alternative to ``array_out``: Transformers in a pipeline may wish to have
+3. An alternative to ``array_out``: Transformers in a pipeline may wish to have
    feature names passed in as ``X``. This can be enabled by adding a
    ``array_input`` parameter to ``Pipeline``::
 
@@ -103,7 +109,7 @@ Considerations
 ##############
 
 1. The ``get_feature_names_out`` will be constructed using the name generation
-   specification from [slep_007]_.
+   specification from :ref:`slep_007`.
 
 2. For a ``Pipeline`` with only one estimator, slicing will not work and one
    would need to access the feature names directly::
@@ -121,7 +127,7 @@ Backward compatibility
 2. The inclusion of a ``get_feature_names_out`` method will not introduce any
    overhead to estimators.
 
-2. The inclusion of a ``feature_names_in_`` attribute will increase the size of
+3. The inclusion of a ``feature_names_in_`` attribute will increase the size of
    estimators because they would store the feature names.
 
 Community Adoption
@@ -138,13 +144,12 @@ There have been many attempts to address this issue:
 
 1. ``array_out`` in keyword parameter in ``transform`` : This approach requires
    third party estimators to unwrap and wrap array containers in transform,
-   which introduces more burden for third party estimator maintainers. This
-   SLEP is easier to implement because it requires less changes. Furthermore,
-   ``array_out`` with sparse data will introduce an overhead when being passed
-   along in a ``Pipeline``. This overhead comes from the construction of the
-   sparse data container that has the feature names.
+   which introduces more burden for third party estimator maintainers.
+   Furthermore, ``array_out`` with sparse data will introduce an overhead when
+   being passed along in a ``Pipeline``. This overhead comes from the
+   construction of the sparse data container that has the feature names.
 
-2. [slep_007]_ : ``SLEP007`` introduces a ``feature_names_out_`` attribute
+2. :ref:`slep_007` : ``SLEP007`` introduces a ``feature_names_out_`` attribute
    while this SLEP proposes a ``get_feature_names_out`` method to accomplish
    the same task. The benefit of the ``get_feature_names_out`` method is that
    it can be used even if the feature names were not passed in ``fit`` with a
@@ -152,10 +157,10 @@ There have been many attempts to address this issue:
    through to each step and a ``get_feature_names_out`` method can be used to
    get the names of each step with slicing.
 
-3. [slep_012] : The ``InputArray`` was developed to work around the overhead
-    of using a pandas ``DataFrame`` or an xarray ``DataArray``. The
-    introduction of another data structure into the Python Data Ecosystem,
-    would lead to more burden for third party estimator maintainers.
+3. :ref:`slep_012` : The ``InputArray`` was developed to work around the
+   overhead of using a pandas ``DataFrame`` or an xarray ``DataArray``. The
+   introduction of another data structure into the Python Data Ecosystem, would
+   lead to more burden for third party estimator maintainers.
 
 
 References and Footnotes
