@@ -69,8 +69,8 @@ easily extracted as follows::
 
 Note that ``get_feature_names_out`` does not require ``input_names``
 because the feature names was stored in the pipeline itself. These
-features will be passed to each step's `get_feature_names_out` method to
-obtain the output feature names of the `Pipeline` itself.
+features will be passed to each step's ``get_feature_names_out`` method to
+obtain the output feature names of the ``Pipeline`` itself.
 
 Enabling Functionality
 ######################
@@ -78,13 +78,13 @@ Enabling Functionality
 The following enhancements are **not** a part of this SLEP. These features are
 made possible if this SLEP gets accepted.
 
-1. This SLEP enables the ``array_out`` keyword in the ``transform`` method
-   to specific the array container outputted by ``transform``. An
-   implementation of ``array_out`` requires ``feature_names_in_`` to
-   validate that the names in ``fit`` and ``transform`` are consistent.
-   With the implementation of ``array_out`` needs a way to map from
-   the input feature names to output feature names, which is provided by
-   ``get_feature_names_out``.
+1. This SLEP enables us to implement an ``array_out`` keyword argument to
+   all ``transform`` methods to specify the array container outputted by
+   ``transform``. An implementation of ``array_out`` requires
+   ``feature_names_in_`` to validate that the names in ``fit`` and
+   ``transform`` are consistent. With the implementation of ``array_out`` needs
+   a way to map from the input feature names to output feature names, which is
+   provided by ``get_feature_names_out``.
 
 2. An alternative to ``array_out``: Transformers in a pipeline may wish to have
    feature names passed in as ``X``. This can be enabled by adding a
@@ -102,24 +102,27 @@ made possible if this SLEP gets accepted.
 Considerations
 ##############
 
-The ``get_feature_names_out`` will be constructed using the name generation
-specification from [slep_007]_.
+1. The ``get_feature_names_out`` will be constructed using the name generation
+   specification from [slep_007]_.
 
-For a ``Pipeline`` with only one estimator, slicing will not work and one
-would need to access the feature names directly::
+2. For a ``Pipeline`` with only one estimator, slicing will not work and one
+   would need to access the feature names directly::
 
-    pipe = make_pipeline(LogisticRegression())
-    pipe[-1].feature_names_in_
+      pipe = make_pipeline(LogisticRegression())
+      pipe[-1].feature_names_in_
 
 Backward compatibility
 ######################
 
-This SLEP is fully backward compatibility with previous versions. With the
-introduction of ``get_feature_names_out``, ``get_feature_names`` will
-be deprecated.
+1. This SLEP is fully backward compatible with previous versions. With the
+   introduction of ``get_feature_names_out``, ``get_feature_names`` will
+   be deprecated.
 
-The inclusion of ``get_feature_names_out`` and ``feature_names_in_`` will
-not introduce any overhead to ``Pipeline``.
+2. The inclusion of ``get_feature_names_out`` will not introduce any overhead
+   to estimators.
+
+2. The inclusion of ``feature_names_in_`` will increase the size of
+   estimators because they would store the feature names.
 
 Community Adoption
 ##################
@@ -134,26 +137,23 @@ Alternatives
 There have been many attempts to address this issue:
 
 1. ``array_out`` in keyword parameter in ``transform`` : This approach requires
-   third party estimators to unwrap and wrap array containers to in transform,
+   third party estimators to unwrap and wrap array containers in transform,
    which introduces more burden for third party estimator maintainers. This
    SLEP is easier to implement because it requires less changes. Furthermore,
    ``array_out`` with sparse data will introduce an overhead when being passed
    along in a ``Pipeline``.
 
-2. [slep_007]_ : For ``SLEP007`` to function it still requires a mechanism to
-   pass feature names through a pipeline such as ``array_out``.
-   Furthermore, ``feature_names_out_`` would not be needed because it can be
-   computed with ``get_feature_names_out``. The benefit of the
-   ``get_feature_names_out`` method is that it can be used when the input names
-   are not passed in ``fit``. This can happen in a pipeline when transformers
-   output ndarrays or sparse matrices without names. With a
-   ``feature_names_out_`` attribute, the estimator would require an array
-   container with feature names for ``feature_names_out_`` to be defined.
+2. [slep_007]_ : ``SLEP007`` introduces a ``feature_names_out_`` attribute
+   while this SLEP proposes a ``get_feature_names_out`` method to accomplish
+   the same task. The benefit of the ``get_feature_names_out`` method is that
+   it can be used even if the feature names were not passed in ``fit`` with
+   a dataframe. This can happen in a ``Pipeline`` when a step outputs
+   ndarrays or sparse matrices which is used as input for the follow step.
 
 3. [slep_012] : The ``InputArray`` was developed to work around the overhead
     of using a pandas ``DataFrame`` or an xarray ``DataArray``. The
     introduction of another data structure into the Python Data Ecosystem,
-    would be lead to more burden for third party estimator maintainers.
+    would lead to more burden for third party estimator maintainers.
 
 
 References and Footnotes
