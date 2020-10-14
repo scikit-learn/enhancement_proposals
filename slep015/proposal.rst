@@ -49,7 +49,7 @@ passed into ``LogisticRegression``. As demonstrated above, the process of
 extracting ``feature_names`` requires knowing the order of the selected
 categories in the ``ColumnTransformer``. Furthermore, if there is feature
 selection in the pipeline, such as ``SelectKBest``, the ``get_support`` method
-would need to be used to select column names that were selected.
+would need to be used to infer the column names that were selected.
 
 Solution
 ########
@@ -57,7 +57,7 @@ Solution
 This SLEP proposes adding the ``feature_names_in_`` attribute to all estimators
 that will extract the feature names of ``X`` during ``fit``. This will also
 be used for validation during non-``fit`` methods such as ``transform`` or
-``predict``. If the ``X`` is not a recognized container, then
+``predict``. If the ``X`` is not a recognized container with columns, then
 ``feature_names_in_`` can be undefined. If ``feature_names_in_`` is undefined,
 then it will not be validated.
 
@@ -85,7 +85,7 @@ made possible if this SLEP gets accepted.
    all ``transform`` methods to specify the array container outputted by
    ``transform``. An implementation of ``array_out`` requires
    ``feature_names_in_`` to validate that the names in ``fit`` and
-   ``transform`` are consistent. With the implementation of ``array_out`` needs
+   ``transform`` are consistent. An implementation of ``array_out`` needs
    a way to map from the input feature names to output feature names, which is
    provided by ``get_feature_names_out``.
 
