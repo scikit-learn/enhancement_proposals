@@ -12,8 +12,10 @@ SLEP015: Feature Names Propagation
 Abstract
 ########
 
-This SLEP proposes adding the ``feature_names_in_`` attribute for all estimators
-and the ``get_feature_names_out`` method to all transformers.
+This SLEP proposes adding the ``get_feature_names_out`` method to all
+transformers and the ``feature_names_in_`` attribute for all estimators.
+The ``feature_names_in_`` attribute is set during ``fit`` if the input, ``X``,
+contains the feature names.
 
 Motivation
 ##########
@@ -78,13 +80,7 @@ Enabling Functionality
 The following enhancements are **not** a part of this SLEP. These features are
 made possible if this SLEP gets accepted.
 
-1. As an alternative to slicing, we can add a
-   ``Pipeline.get_feature_names_in_at`` method to get the names at a specific
-   step. This can be a simple alternative to slicing::
-
-      pipe.get_feature_names_in_at(-1)
-
-2. This SLEP enables us to implement an ``array_out`` keyword argument to
+1. This SLEP enables us to implement an ``array_out`` keyword argument to
    all ``transform`` methods to specify the array container outputted by
    ``transform``. An implementation of ``array_out`` requires
    ``feature_names_in_`` to validate that the names in ``fit`` and
@@ -92,7 +88,7 @@ made possible if this SLEP gets accepted.
    a way to map from the input feature names to output feature names, which is
    provided by ``get_feature_names_out``.
 
-3. An alternative to ``array_out``: Transformers in a pipeline may wish to have
+2. An alternative to ``array_out``: Transformers in a pipeline may wish to have
    feature names passed in as ``X``. This can be enabled by adding a
    ``array_input`` parameter to ``Pipeline``::
 
@@ -105,8 +101,8 @@ made possible if this SLEP gets accepted.
    through the ``Pipeline``. This feature implies that ``Pipeline`` is
    doing the construction of the DataFrame.
 
-Considerations
-##############
+Considerations and Limitations
+##############################
 
 1. The ``get_feature_names_out`` will be constructed using the name generation
    specification from :ref:`slep_007`.
@@ -114,8 +110,16 @@ Considerations
 2. For a ``Pipeline`` with only one estimator, slicing will not work and one
    would need to access the feature names directly::
 
-      pipe = make_pipeline(LogisticRegression())
-      pipe[-1].feature_names_in_
+      pipe1 = make_pipeline(StandardScaler(), LogisticRegression())
+      pipe[:-1].feature_names_in_  # Works
+
+      pipe2 = make_pipeline(LogisticRegression())
+      pipe[:-1].feature_names_in_  # Does not work
+
+   This is because `pipe2[:-1]` raises an error because it will result in
+   a pipeline with no steps. We can work around this by allowing pipelines
+   with no steps.
+
 
 Backward compatibility
 ######################
@@ -128,14 +132,9 @@ Backward compatibility
    overhead to estimators.
 
 3. The inclusion of a ``feature_names_in_`` attribute will increase the size of
-   estimators because they would store the feature names.
-
-Community Adoption
-##################
-
-We can enforce the ``feature_names_in_`` attribute and
-``get_feature_names_out`` method with additional tests to
-``check_estimator``.
+   estimators because they would store the feature names. Users can remove
+   the attribute by calling ``del est.feature_names_in_`` if they want to
+   remove the feature and disable validation.
 
 Alternatives
 ############
