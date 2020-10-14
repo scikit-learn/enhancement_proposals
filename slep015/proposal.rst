@@ -121,7 +121,10 @@ Considerations and Limitations
    a pipeline with no steps. We can work around this by allowing pipelines
    with no steps.
 
-3. Meta-estimators will delegate the setting and validation of
+3. ``feature_names_in_`` can be any 1-D ``Sequence``, such as an list or
+   an ndarray.
+
+4. Meta-estimators will delegate the setting and validation of
    ``feature_names_in_`` to its inner estimators. The meta-estimator will
    define ``feature_names_in_`` by referencing its inner estimators. For
    example, the ``Pipeline`` can use ``steps[0].feature_names_in_`` as
