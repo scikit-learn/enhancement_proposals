@@ -58,7 +58,8 @@ This SLEP proposes adding the ``feature_names_in_`` attribute to all estimators
 that will extract the feature names of ``X`` during ``fit``. This will also
 be used for validation during non-``fit`` methods such as ``transform`` or
 ``predict``. If the ``X`` is not a recognized container, then
-``feature_names_in_`` would be set to ``None``.
+``feature_names_in_`` can be undefined. If ``feature_names_in_`` is undefined,
+then it will not be validated.
 
 Secondly, this SLEP proposes adding ``get_feature_names_out(input_names=None)``
 to all transformers. By default, the input features will be determined by the
@@ -120,6 +121,13 @@ Considerations and Limitations
    a pipeline with no steps. We can work around this by allowing pipelines
    with no steps.
 
+3. Meta-estimators will delegate the setting and validation of
+   ``feature_names_in_`` to its inner estimators. The meta-estimator will
+   define ``feature_names_in_`` by referencing its inner estimators. For
+   example, the ``Pipeline`` can use ``steps[0].feature_names_in_`` as
+   the input feature names. If the inner estimators do not define
+   ``feature_names_in_`` then the meta-estimator will not defined
+   ``feature_names_in_`` as well.
 
 Backward compatibility
 ######################
