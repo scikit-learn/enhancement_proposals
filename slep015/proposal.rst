@@ -134,7 +134,9 @@ Backward compatibility
 
 1. This SLEP is fully backward compatible with previous versions. With the
    introduction of ``get_feature_names_out``, ``get_feature_names`` will
-   be deprecated.
+   be deprecated. Note that ``get_feature_names_out``'s signature will
+   always contain ``input_features`` which can be used or ignored. This
+   helps standardize the interface for the get feature names method.
 
 2. The inclusion of a ``get_feature_names_out`` method will not introduce any
    overhead to estimators.
