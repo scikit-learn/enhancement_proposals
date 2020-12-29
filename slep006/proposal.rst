@@ -338,7 +338,7 @@ Solution 4: Each child requests
 
 Here the meta-estimator provides only what each of its children requests.
 The meta-estimator would also need to request, on behalf of its children,
-any prop that descendant consumers require. 
+any prop that descendant consumers require.
 
 Each object that could receive props would have a method like
 `get_prop_request()` which would return a list of prop names (or perhaps a
@@ -433,6 +433,15 @@ Having considered the above solutions, we propose:
   details of the solution.
 * Props will be known simply as Metadata.
 * `**kw` syntax will be used to pass props by key.
+* Default requests: A group splitter should return `['groups']` by default
+  because requiring `groups` is essential to their functionality. In other
+  cases, as for `sample_weight` where an estimator or scorer can operate
+  without it, no default request should be assumed, and the consumer should
+  have an explicit request for the prop. In the absence of an explicit request,
+  or explicit request to disregard a prop: if a consumer is capable of
+  requesting some prop by key `p`, and a prop called `p` is passed by the user,
+  an error should be raised by the meta-estimator. This forces the user to be
+  explicit about whether or not a consumer should be passed `p`.
 
 TODO:
 
