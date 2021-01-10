@@ -9,7 +9,6 @@ SLEP006: Routing sample-aligned meta-data
 :Type: Standards Track
 :Created: 2019-03-07
 
-
 Scikit-learn has limited support for information pertaining to each sample
 (henceforth "sample properties") to be passed through an estimation pipeline.
 The user can, for instance, pass fit parameters to all members of a
@@ -148,6 +147,12 @@ Advantages of a single argument:
 * we can consider the use of keys that are not limited to strings or valid
   identifiers (and hence are not limited to using ``_`` as a delimiter).
 
+Naming
+------
+
+"Sample props" has become a name understood internally to the Scikit-learn
+development team. For ongoing usage we propose to use as naming ``metadata``.
+
 Test case setup
 ---------------
 
@@ -181,168 +186,30 @@ TODO: case involving props passed at test time, e.g. to pipe.transform (???).
 TODO: case involving score() method, e.g. not specifying scoring in
 cross_val_score when wrapping an estimator with weighted score func ...
 
+.. Adrin please motivate this case D
+
 Solution sketches will import these definitions:
 
 .. literalinclude:: defs.py
 
-Status quo solution 0a: additional feature
-------------------------------------------
+The following solution has emerged as the way to move forward,
+yet others where considered. See :ref:`slep_006_other`.
 
-Without changing scikit-learn, the following hack can be used:
+Solution: Each child requests
+-----------------------------
 
-Additional numeric features representing sample props can be appended to the
-data and passed around, being handled specially in each consumer of features
-or sample props.
+.. note::
 
-.. literalinclude:: cases_opt0a.py
+  This solution was known as solution 4 during the discussions.
 
-Status quo solution 0b: Pandas Index and global resources
----------------------------------------------------------
-
-Without changing scikit-learn, the following hack can be used:
-
-If `y` is represented with a Pandas datatype, then its index can be used to
-access required elements from props stored in a global namespace (or otherwise
-made available to the estimator before fitting). This is possible everywhere
-that a ground-truth `y` is passed, including fit, split, score, and metrics.
-A similar solution with `X` is also possible (except for metrics), if all
-Pipeline components retain the original Pandas Index.
-
-Issues:
-
-* use of global data source
-* requires Pandas data types and indices to be maintained
-
-.. literalinclude:: cases_opt0b.py
-
-Solution 1: Pass everything
----------------------------
-
-This proposal passes all props to all consumers (estimators, splitters,
-scorers, etc). The consumer would optionally use props it is familiar with by
-name and disregard other props.
-
-We may consider providing syntax for the user to control the interpretation of
-incoming props:
-
-* to require that some prop is provided (for an estimator where that prop is
-  otherwise optional)
-* to disregard some provided prop
-* to treat a particular prop key as having a certain meaning (e.g. locally
-  interpreting 'scoring_sample_weight' as 'sample_weight').
-
-These constraints would be checked by calling a helper at the consumer.
-
-Issues:
-
-* Error handling: if a key is optional in a consumer, no error will be
-  raised for misspelling. An introspection API might change this, allowing a
-  user or meta-estimator to check if all keys passed are to be used in at least
-  one consumer.
-* Forwards compatibility: newly supporting a prop key in a consumer will change
-  behaviour. Other than a ChangedBehaviorWarning, I don't see any way around
-  this.
-* Introspection: not inherently supported. Would need an API like
-  ``get_prop_support(names: List[str]) -> Dict[str, Literal["supported", "required", "ignored"]]``.
-
-In short, this is a simple solution, but prone to risk.
-
-.. literalinclude:: cases_opt1.py
-
-
-Solution 2: Specify routes at call
-----------------------------------
-
-Similar to the legacy behavior of fit parameters in
-:class:`sklearn.pipeline.Pipeline`, this requires the user to specify the
-path for each "prop" to follow when calling `fit`.  For example, to pass
-a prop named 'weights' to a step named 'spam' in a Pipeline, you might use
-`my_pipe.fit(X, y, props={'spam__weights': my_weights})`.
-
-SLEP004's syntax to override the common routing scheme falls under this
-solution.
-
-Advantages:
-
-* Very explicit and robust to misspellings.
-
-Issues:
-
-* The user needs to know the nested internal structure, or it is easy to fail
-  to pass a prop to a specific estimator.
-* A corollary is that prop keys need changing when the developer modifies their
-  estimator structure (see case C).
-* This gets especially tricky or impossible where the available routes
-  change mid-fit, such as where a grid search considers estimators with
-  different   structures.
-* We would need to find a different solution for :issue:`2630` where a Pipeline
-  could not be the base estimator of AdaBoost because AdaBoost expects the base
-  estimator to accept a fit param keyed 'sample_weight'.
-* This may not work if a meta-estimator were to have the role of changing a
-  prop, e.g. a meta-estimator that passes `sample_weight` corresponding to
-  balanced classes onto its base estimator.  The meta-estimator would need a
-  list of destinations to pass modified props to, or a list of keys to modify.
-* We would need to develop naming conventions for different routes, which may
-  be more complicated than the current conventions; while a GridSearchCV
-  wrapping a Pipeline currently takes parameters with keys like
-  `{step_name}__{prop_name}`, this explicit routing, and conflict with
-  GridSearchCV routing destinations, implies keys like
-  `estimator__{step_name}__{prop_name}`.
-
-.. literalinclude:: cases_opt2.py
-
-
-Solution 3: Specify routes on metaestimators
---------------------------------------------
-
-Each meta-estimator is given a routing specification which it must follow in
-passing only the required parameters to each of its children. In this context,
-a GridSearchCV has children including `estimator`, `cv` and (each element of)
-`scoring`.
-
-Pull request :pr:`9566` and its extension in :pr:`15425` are partial
-implementations of this approach.
-
-A major benefit of this approach is that it may allow only prop routing
-meta-estimators to be modified, not prop consumers.
-
-All consumers would be required to check that 
-
-Issues:
-
-* Routing may be hard to get one's head around, especially since the prop
-  support belongs to the child estimator but the parent is responsible for the
-  routing.
-* Need to design an API for specifying routings.
-* As in Solution 2, each local destination for routing props needs to be given
-  a name.
-* Every router along the route will need consistent instructions to pass a
-  specific prop to a consumer. If the prop is optional in the consumer, routing
-  failures may be hard to identify and debug.
-* For estimators to be cloned, this routing information needs to be cloned with
-  it. This implies one of: the routing information be stored as a constructor
-  parameter; or `clone` is extended to explicitly copy routing information.
-
-Possible public syntax:
-
-Each meta-estimator has a `prop_routing` parameter to encode local routing
-rules, and a set of named children which it routes to. In :pr:`9566`, the
-`prop_routing` entry for each child may be a white list or black list of
-named keys passed to the meta-estimator.
-
-.. literalinclude:: cases_opt3.py
-
-
-Solution 4: Each child requests
--------------------------------
-
-Here the meta-estimator provides only what each of its children requests.
-The meta-estimator would also need to request, on behalf of its children,
+A meta-estimator provides only what each of its children requests.
+A meta-estimator would also need to request, on behalf of its children,
 any prop that descendant consumers require. 
 
-Each object that could receive props would have a method like
-`get_prop_request()` which would return a list of prop names (or perhaps a
-mapping for more sophisticated use-cases). Group* CV splitters would default to
+Each object that could receive metadata should have a method called
+`get_metadata_request()` which returns a dict that specify which
+metadata is consumed by each of its methods (keys are of this dictionary
+are therefore method names). Group* CV splitters default to
 returning `['groups']`, for example.  Estimators supporting weighted fitting
 may return `[]` by default, but may have a parameter `request_props` which
 may be set to `['weight']` if weight is sought, or perhaps just boolean
@@ -351,10 +218,10 @@ enabling weighted scoring.
 
 Advantages:
 
-* This will not need to affect legacy estimators, since no props will be
-  passed when a props request is not available.
+* This solution does not affect legacy estimators, since no metadata will be
+  passed when a metadata request is not available.
 * This does not require defining a new syntax for routing.
-* The implementation changes in meta-estimators may be easy to provide via a
+* The implementation changes in meta-estimators should be easy to provide via a
   helper or two (perhaps even `call_with_props(method, target, props)`).
 * Easy to reconfigure what props an estimator gets in a grid search.
 * Could make use of existing `**fit_params` syntax rather than introducing new
@@ -363,7 +230,8 @@ Advantages:
 Disadvantages:
 
 * This will require modifying every estimator that may want props, as well as
-  all meta-estimators. We could provide a mixin or similar to add prop-request
+  all meta-estimators. It is proposed to implement this with a mixin class
+  or similar to add prop-request
   support to a legacy estimator; or `BaseEstimator` could have a
   `set_props_request` method (instead of the `request_props` constructor
   parameter approach) such that all legacy base estimators are
@@ -382,11 +250,14 @@ Disadvantages:
 
 Possible public syntax:
 
-* `BaseEstimator` will have methods `set_props_request` and `get_props_request`
+* `BaseEstimator` will have a method `get_metadata_request`
+* Estimators that can consume `sample_weights` will have a `request_sample_weight`
+  method available via a mixin.
 * `make_scorer` will have a `request_props` parameter to set props required by
   the scorer.
-* `get_props_request` will return a dict. It maps the key that the user
+* `get_metadata_request` will return a dict. It maps the key that the user
   passes to the key that the estimator expects.
+.. XXX should be amended
 * `set_props_request` will accept either such a dict or a sequence `s` to be
   interpreted as the identity mapping for all elements in `s`
   (`{x: x for x in s}`). It will return `self` to enable chaining.
@@ -412,17 +283,6 @@ Extensions and alternatives to the syntax considered while working on
 These are demonstrated together in the following:
 
 .. literalinclude:: cases_opt4b.py
-
-Naming
-------
-
-"Sample props" has become a name understood internally to the Scikit-learn
-development team. For ongoing usage we have several choices for naming:
-
-* Sample meta
-* Sample properties
-* Sample props
-* Sample extra
 
 Proposal
 --------
