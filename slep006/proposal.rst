@@ -22,7 +22,8 @@ prefixing::
     ...          clf__sample_weight=[.5, .7])  # doctest: +SKIP
 
 Several other meta-estimators, such as GridSearchCV, support forwarding these
-fit parameters to their base estimator when fitting.
+fit parameters to their base estimator when fitting. Yet a number of important
+use cases are currently not supported.
 
 Features we currently do not support and which to include:
 
@@ -55,10 +56,10 @@ key
     A label passed along with sample metadata to indicate how it should be
     interpreted (e.g. "weight").
 .. XXX : remove router?
-router
-    An estimator or function that passes metadata on to some other router or
-    consumer, potentially selecting which metadata to pass to which destination,
-    and by what key.
+.. router
+..     An estimator or function that passes metadata on to some other router or
+..     consumer, potentially selecting which metadata to pass to which destination,
+..     and by what key.
 
 History
 -------
@@ -93,7 +94,7 @@ Other related issues include: :issue:`1574`, :issue:`2630`, :issue:`3524`,
 Desiderata
 ----------
 
-We will consider the following aspects to develop and compare solutions:
+The following aspects have been considered to propose the following solution:
 
 .. XXX : maybe phrase this in an affirmative way
 Usability
@@ -120,8 +121,10 @@ Forwards compatibility
 Introspection
    If sensible to do so (e.g. for improved efficiency), can a
    meta-estimator identify whether its base estimator (recursively) would
-   handle some particular sample metadata (e.g. so a meta-estimator can choose
-   between weighting and resampling, or for automated invariance testing)?
+   handle some particular sample metadata.
+
+.. (e.g. so a meta-estimator can choose
+.. between weighting and resampling, or for automated invariance testing)?
 
 Keyword arguments vs. a single argument
 ---------------------------------------
@@ -141,13 +144,13 @@ vs. using keyword arguments::
 
 Advantages of a single argument:
 
-* we could consider kwargs to `fit` that are not sample-aligned, so that
-  we could add further functionality (some that have been proposed:
-  `with_warm_start`, `feature_names_in`, `feature_meta`).
 * we would be able to redefine the default routing of weights etc. without being
   concerned by backwards compatibility.
 * we could consider the use of keys that are not limited to strings or valid
   identifiers (and hence are not limited to using ``_`` as a delimiter).
+* we could also consider kwargs to `fit` that are not sample-aligned
+  (e.g. `with_warm_start`, `feature_names_in`, `feature_meta`) without
+  restricting valid keys for sample metadata.
 
 Advantages of multiple keyword arguments:
 
@@ -168,7 +171,7 @@ Case A
 Cross-validate a ``LogisticRegressionCV(cv=GroupKFold(), scoring='accuracy')``
 with weighted scoring and weighted fitting, while using groups in splitter.
 
-Error handling: what would guarantee that if the user misspelled `sample_weight`
+Error handling: we would guarantee that if the user misspelled `sample_weight`
 as `sample_eight` a meaningful error is raised.
 
 Case B
@@ -178,7 +181,7 @@ Cross-validate a ``LogisticRegressionCV(cv=GroupKFold(), scoring='accuracy')``
 with weighted scoring and unweighted fitting.
 
 Error handling: if `sample_weight` is required only in scoring and not in fit
-of the sub-estimator the user should make explicit that it's not required
+of the sub-estimator the user should make explicit that it is not required
 by the sub-estimator.
 
 Case C
@@ -195,7 +198,7 @@ Different weights for scoring and for fitting in Case A.
 
 Motivation: You can have groups used in a CV, which contains batches of data as groups,
 and then an estimator which takes groups as sensitive attributes to a
-fairness related model. Also in a third party library a estimator may have
+fairness related model. Also in a third party library an estimator may have
 the same name for a parameter, but with completely different semantics.
 
 .. TODO: case involving props passed at test time, e.g. to pipe.transform
@@ -220,18 +223,20 @@ Solution: Each consumer requests
 
   This solution was known as solution 4 during the discussions.
 
-A meta-estimator provides only what each of its children requests.
-A meta-estimator would also need to request, on behalf of its children,
+A meta-estimator provides along to its children only what they request.
+A meta-estimator needs to request, on behalf of its children,
 any metadata that descendant consumers request. 
 
 Each object that could receive metadata should have a method called
 `get_metadata_request()` which returns a dict that specifies which
 metadata is consumed by each of its methods (keys of this dictionary
-are therefore method names, e.g. `fit`, `transform` etc.). `Group*CV`
-splitters default to returning `{'split': 'groups'}`, for example.  Estimators
-supporting weighted fitting may return `{}` by default, but have a
+are therefore method names, e.g. `fit`, `transform` etc.).
+Estimators supporting weighted fitting may return `{}` by default, but have a
 method called `request_sample_weight` which allows the user to specify
 the requested `sample_weight` in each of its methods.
+
+`Group*CV` splitters default to returning `{'split': 'groups'}`.
+
 `make_scorer` accepts `request_metadata` as keyword parameter through
 which user can specify what metadata is requested.
 
@@ -241,7 +246,11 @@ Advantages:
   passed when a metadata request is not available.
 * The implementation changes in meta-estimators is easy to provide via two
   helpers ``build_method_metadata_params(children, routing, metadata)``
-  and ``build_router_metadata_request(children, routing)``.
+  and ``build_router_metadata_request(children, routing)``. Here ``routing``
+  consists of a list of requests between the meta-estimator and its
+  children. Note that this construct will be not visible to scikit-learn
+  users, yet should be understood by third party developers developping
+  custom meta-estimators.
 * Easy to reconfigure what metadata an estimator gets in a grid search.
 * Could make use of existing `**fit_params` syntax rather than introducing new
   `metadata` argument to `fit`.
@@ -253,7 +262,7 @@ Disadvantages:
   to add metadata-request support to a legacy estimator.
 * Aliasing is a bit confusing in this design, in that the consumer still
   accepts the fit param by its original name (e.g. `sample_weight`) even if it
-  has a request that specifies a different key given to the router (e.g.
+  has a request that specifies a different key given to the meta-estimator (e.g.
   `my_sample_weight`). This design has the advantage that the handling of
   metadata within a consumer is simple and unchanged; the complexity is in
   how it is forwarded to the sub-estimator by the meta-estimators. While
@@ -272,8 +281,8 @@ Proposed public syntax:
   metadata by the scorer.
 * `get_metadata_request` will return a dict, whose keys are names of estimator
   methods (`fit`, `predict`, `transform` or `inverse_transform`) and values are
-  dictionaries. These dictionaries map the input param names to requested
-  metadata name. Example:
+  dictionaries. These dictionaries map the input parameter names to requested
+  metadata keys. Example:
 
   >>> estimator.get_metadata_request()
   {'fit': {'my_sample_weight': {'sample_weight'}}, 'predict': {}, 'transform': {},
@@ -281,78 +290,59 @@ Proposed public syntax:
 
 * Methods like `request_sample_weight` will have a signature such as:
   `request_sample_weight(self, *, fit=None, score=None)` where fit keyword
-  parameter can be `None`, `True`, `False` or a `str`.
-  .. XXX explain
-  .. accept either such a dict or a sequence `s` to be
-  .. interpreted as the identity mapping for all elements in `s`
-  .. (`{x: x for x in s}`). It will return `self` to enable chaining.
+  parameter can be `None`, `True`, `False` or a `str`. `str` allows here
+  to request a metadata whose name is different from the keyword parameter.
+  Here ``None`` is a default, and ``False`` has a different semantic which
+  is that the metadata should not be provided.
 
-* `Group*` CV splitters will by default request the 'groups' prop, but its
-  mapping can be changed with their `set_props_request` method.
+* `Group*` CV splitters will by default request the 'groups' metadata, but its
+  mapping can be changed with their `set_metadata_request` method.
 
 Test cases:
 
-.. literalinclude:: cases_opt4.py
-
-Extensions and alternatives to the syntax considered while working on
-:pr:`16079`:
-
-* `set_prop_request` and `get_props_request` have lists of props requested
-  **for each method** i.e. fit, score, transform, predict and perhaps others.
-* `set_props_request` could be replaced by a method (or parameter) representing
-  the routing of each prop that it consumes. For example, an estimator that
-  consumes `sample_weight` would have a `request_sample_weight` method. One of
-  the difficulties of this approach is automatically introducing
-  `request_sample_weight` into classes inheriting from BaseEstimator without
-  too much magic (e.g. meta-classes, which might be the simplest solution).
-
-These are demonstrated together in the following:
-
 .. literalinclude:: cases_opt4b.py
 
-Proposal
---------
-
-Having considered the above solutions, we propose:
-
-* Solution 4 per :pr:`16079` which will be used to resolve further, specific
-  details of the solution.
-* Props will be known simply as Metadata.
-* `**kw` syntax will be used to pass props by key.
-* Default requests: A group splitter should return `['groups']` by default
-  because requiring `groups` is essential to their functionality. In other
-  cases, as for `sample_weight` where an estimator or scorer can operate
-  without it, no default request should be assumed, and the consumer should
-  have an explicit request for the prop. In the absence of an explicit request,
-  or explicit request to disregard a prop: if a consumer is capable of
-  requesting some prop by key `p`, and a prop called `p` is passed by the user,
-  an error should be raised by the meta-estimator. This forces the user to be
-  explicit about whether or not a consumer should be passed `p`.
-
-TODO:
-
-* if an estimator requests a prop, must it be not-null? Must it be provided or
-  explicitly passed as None?
+.. note:: if an estimator requests a metadata, we consider that it cannot
+  be ``None``.
 
 Backward compatibility
 ----------------------
 
 Under this proposal, consumer behaviour will be backwards compatible, but
-meta-estimators will change their routing behaviour.
+meta-estimators will change their routing behaviour. We will not support anymore
+the dunder (`__`) syntax, and enforce the use of explicit request method calls.
 
 By default, `sample_weight` will not be requested by estimators that support
 it. This ensures that addition of `sample_weight` support to an estimator will
 not change its behaviour.
 
-During a deprecation period, fit_params will be handled dually: Keys that are
-requested will be passed through the new request mechanism, while keys that are
-not known will be routed using legacy mechanisms. At completion of the
-deprecation period, the legacy handling will cease.
+During a deprecation period, fit_params using the dunder syntax will still
+work, yet will raise deprecation warnings while preventing the dual use of the
+new syntax. In other words it will not be possible to mix both old and new
+behaviour. At completion of the deprecation period, the legacy handling
+will cease.
 
 Similarly, during a deprecation period, `fit_params` in GridSearchCV and
 related utilities will be routed to the estimator's `fit` by default, per
 incumbent behaviour. After the deprecation period, an error will be raised for
-any params not explicitly requested.
+any params not explicitly requested. See following examples:
+
+>>> # This would raise a deprecation warning, that provided metadata
+>>> # is not requested
+>>> GridSearchCV(LogisticRegression()).fit(X, y, sample_weight=sw)
+>>> 
+>>> # this would work with no warnings
+>>> GridSearchCV(LogisticRegression().request_sample_weight(
+...     fit=True)
+... ).fit(X, y, sample_weight=sw)
+>>> 
+>>> # This will raise that LR could accept `sample_weight`, but has
+>>> # not been specified by the user
+>>> GridSearchCV(
+...     LogisticRegression(),
+...     scoring=make_scorer(accuracy_score,
+...                         request_metadata=['sample_weight'])
+... ).fit(X, y, sample_weight=sw)
 
 Grouped cross validation splitters will request `groups` since they were
 previously unusable in a nested cross validation context, so this should not
@@ -362,9 +352,9 @@ named `groups` served another purpose.
 Discussion
 ----------
 
-One benefit of the explicitness in Solution 4 is that even if it makes use of
+One benefit of the explicitness in this proposal is that even if it makes use of
 `**kw` arguments, it does not preclude keywords arguments serving other
-purposes in addition.  That is, in addition to requesting sample props, a
+purposes in addition.  That is, in addition to requesting sample metadata, a
 future proposal could allow estimators to request feature metadata or other
 keys.
 
