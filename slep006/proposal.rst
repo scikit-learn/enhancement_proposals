@@ -25,7 +25,7 @@ Several other meta-estimators, such as GridSearchCV, support forwarding these
 fit parameters to their base estimator when fitting. Yet a number of important
 use cases are currently not supported.
 
-Features we currently do not support and which to include:
+Features we currently do not support and wish to include:
 
 * passing sample properties (e.g. `sample_weight`) to a scorer used in
   cross-validation
