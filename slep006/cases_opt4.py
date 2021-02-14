@@ -1,4 +1,4 @@
-from defs import (accuracy, group_cv, make_scorer, SelectKBest,
+from defs import (accuracy_score, GroupKFold, make_scorer, SelectKBest,
                   LogisticRegressionCV, cross_validate,
                   make_pipeline, X, y, my_groups, my_weights,
                   my_other_weights)
@@ -11,12 +11,12 @@ from defs import (accuracy, group_cv, make_scorer, SelectKBest,
 # LogisticRegressionCV. Both of these consumers understand the meaning
 # of the key "sample_weight".
 
-weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+weighted_acc = make_scorer(accuracy_score, request_props=['sample_weight'])
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring=weighted_acc,
 ).set_props_request(['sample_weight'])
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props={'sample_weight': my_weights, 'groups': my_groups},
                scoring=weighted_acc)
 
@@ -30,12 +30,12 @@ cross_validate(lr, X, y, cv=group_cv,
 # Since LogisticRegressionCV requires that weights explicitly be requested,
 # removing that request means the fitting is unweighted.
 
-weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+weighted_acc = make_scorer(accuracy_score, request_props=['sample_weight'])
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring=weighted_acc,
 )
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props={'sample_weight': my_weights, 'groups': my_groups},
                scoring=weighted_acc)
 
@@ -45,14 +45,14 @@ cross_validate(lr, X, y, cv=group_cv,
 # Like LogisticRegressionCV, SelectKBest needs to request weights explicitly.
 # Here it does not request them.
 
-weighted_acc = make_scorer(accuracy, request_props=['sample_weight'])
+weighted_acc = make_scorer(accuracy_score, request_props=['sample_weight'])
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring=weighted_acc,
 ).set_props_request(['sample_weight'])
 sel = SelectKBest()
 pipe = make_pipeline(sel, lr)
-cross_validate(pipe, X, y, cv=group_cv,
+cross_validate(pipe, X, y, cv=GroupKFold(),
                props={'sample_weight': my_weights, 'groups': my_groups},
                scoring=weighted_acc)
 
@@ -63,13 +63,13 @@ cross_validate(pipe, X, y, cv=group_cv,
 # sample_weight, we can use aliases to pass different weights to different
 # consumers.
 
-weighted_acc = make_scorer(accuracy,
+weighted_acc = make_scorer(accuracy_score,
                            request_props={'scoring_weight': 'sample_weight'})
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring=weighted_acc,
 ).set_props_request({'fitting_weight': "sample_weight"})
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props={
                     'scoring_weight': my_weights,
                     'fitting_weight': my_other_weights,

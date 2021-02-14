@@ -1,5 +1,5 @@
 import pandas as pd
-from defs import (accuracy, group_cv, get_scorer, SelectKBest,
+from defs import (get_scorer, SelectKBest,
                   LogisticRegressionCV, cross_validate,
                   make_pipeline, X, y, my_groups, my_weights,
                   my_other_weights)
@@ -24,7 +24,7 @@ class WrappedGroupCV:
         return self.base_cv.get_n_splits(X, y, groups=MY_GROUPS.loc[X.index])
 
 
-wrapped_group_cv = WrappedGroupCV(group_cv)
+wrapped_group_cv = WrappedGroupCV(GroupKFold())
 
 
 class WeightedLogisticRegressionCV(LogisticRegressionCV):
