@@ -1,4 +1,4 @@
-from defs import (group_cv, SelectKBest, LogisticRegressionCV,
+from defs import (GroupKFold, SelectKBest, LogisticRegressionCV,
                   cross_validate, make_pipeline, X, y, my_groups,
                   my_weights, my_other_weights)
 
@@ -6,7 +6,7 @@ from defs import (group_cv, SelectKBest, LogisticRegressionCV,
 # Case A: weighted scoring and fitting
 
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
 )
 props = {'cv__groups': my_groups,
@@ -14,7 +14,7 @@ props = {'cv__groups': my_groups,
          'estimator__sample_weight': my_weights,
          'scoring__sample_weight': my_weights,
          'estimator__scoring__sample_weight': my_weights}
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props=props,
                scoring='accuracy')
 
@@ -25,14 +25,14 @@ cross_validate(lr, X, y, cv=group_cv,
 # Case B: weighted scoring and unweighted fitting
 
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
 )
 props = {'cv__groups': my_groups,
          'estimator__cv__groups': my_groups,
          'scoring__sample_weight': my_weights,
          'estimator__scoring__sample_weight': my_weights}
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props=props,
                scoring='accuracy')
 
@@ -40,7 +40,7 @@ cross_validate(lr, X, y, cv=group_cv,
 # Case C: unweighted feature selection
 
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
 )
 pipe = make_pipeline(SelectKBest(), lr)
@@ -49,7 +49,7 @@ props = {'cv__groups': my_groups,
          'estimator__logisticregressioncv__sample_weight': my_weights,
          'scoring__sample_weight': my_weights,
          'estimator__scoring__sample_weight': my_weights}
-cross_validate(pipe, X, y, cv=group_cv,
+cross_validate(pipe, X, y, cv=GroupKFold(),
                props=props,
                scoring='accuracy')
 
@@ -57,7 +57,7 @@ cross_validate(pipe, X, y, cv=group_cv,
 # Case D: different scoring and fitting weights
 
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
 )
 props = {'cv__groups': my_groups,
@@ -65,6 +65,6 @@ props = {'cv__groups': my_groups,
          'estimator__sample_weight': my_other_weights,
          'scoring__sample_weight': my_weights,
          'estimator__scoring__sample_weight': my_weights}
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props=props,
                scoring='accuracy')

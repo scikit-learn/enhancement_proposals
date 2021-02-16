@@ -1,12 +1,12 @@
-from defs import (accuracy, make_scorer, SelectKBest, LogisticRegressionCV,
-                  group_cv, cross_validate, make_pipeline, X, y, my_groups,
+from defs import (SelectKBest, LogisticRegressionCV,
+                  GroupKFold, cross_validate, make_pipeline, X, y, my_groups,
                   my_weights, my_other_weights)
 
 # %%
 # Case A: weighted scoring and fitting
 
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
     prop_routing={'cv': ['groups'],
                   'scoring': ['sample_weight'],
@@ -18,11 +18,11 @@ lr = LogisticRegressionCV(
 # Alternative syntax, which assumes cv receives 'groups' by default, and that a
 # method-based API is provided on meta-estimators:
 #   lr = LogisticRegressionCV(
-#       cv=group_cv,
+#       cv=GroupKFold(),
 #       scoring='accuracy',
 #   ).add_prop_route(scoring='sample_weight')
 
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props={'sample_weight': my_weights, 'groups': my_groups},
                scoring='accuracy',
                prop_routing={'estimator': '*',  # pass all props
@@ -40,7 +40,7 @@ cross_validate(lr, X, y, cv=group_cv,
 # Here we rename the sample_weight prop so that we can specify that it only
 # applies to scoring.
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
     prop_routing={'cv': ['groups'],
                   # read the following as "scoring should consume
@@ -48,7 +48,7 @@ lr = LogisticRegressionCV(
                   'scoring': {'sample_weight': 'scoring_weight'},
                   },
 )
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props={'scoring_weight': my_weights, 'groups': my_groups},
                scoring='accuracy',
                prop_routing={'estimator': '*',
@@ -60,7 +60,7 @@ cross_validate(lr, X, y, cv=group_cv,
 # Case C: unweighted feature selection
 
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
     prop_routing={'cv': ['groups'],
                   'scoring': ['sample_weight'],
@@ -68,7 +68,7 @@ lr = LogisticRegressionCV(
 pipe = make_pipeline(SelectKBest(), lr,
                      prop_routing={'logisticregressioncv': ['sample_weight',
                                                             'groups']})
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props={'sample_weight': my_weights, 'groups': my_groups},
                scoring='accuracy',
                prop_routing={'estimator': '*',
@@ -79,7 +79,7 @@ cross_validate(lr, X, y, cv=group_cv,
 # %%
 # Case D: different scoring and fitting weights
 lr = LogisticRegressionCV(
-    cv=group_cv,
+    cv=GroupKFold(),
     scoring='accuracy',
     prop_routing={'cv': ['groups'],
                   # read the following as "scoring should consume
@@ -87,7 +87,7 @@ lr = LogisticRegressionCV(
                   'scoring': {'sample_weight': 'scoring_weight'},
                   },
 )
-cross_validate(lr, X, y, cv=group_cv,
+cross_validate(lr, X, y, cv=GroupKFold(),
                props={'scoring_weight': my_weights, 'groups': my_groups,
                       'fitting_weight': my_other_weights},
                scoring='accuracy',
