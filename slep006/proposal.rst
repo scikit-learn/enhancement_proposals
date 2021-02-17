@@ -55,11 +55,6 @@ consumer
 key
     A label passed along with sample metadata to indicate how it should be
     interpreted (e.g. "weight").
-.. XXX : remove router?
-.. router
-..     An estimator or function that passes metadata on to some other router or
-..     consumer, potentially selecting which metadata to pass to which destination,
-..     and by what key.
 
 History
 -------
