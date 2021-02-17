@@ -84,7 +84,7 @@ Other related issues include: :issue:`1574`, :issue:`2630`, :issue:`3524`,
 :issue:`4632`, :issue:`4652`, :issue:`4660`, :issue:`4696`, :issue:`6322`,
 :issue:`7112`, :issue:`7646`, :issue:`7723`, :issue:`8127`, :issue:`8158`,
 :issue:`8710`, :issue:`8950`, :issue:`11429`, :issue:`12052`, :issue:`15282`,
-:issues:`15370`, :issue:`15425`, :issue:`18028`.
+:issue:`15370`, :issue:`15425`, :issue:`18028`.
 
 Desiderata
 ----------
