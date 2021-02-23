@@ -40,6 +40,33 @@ Features we currently do not support and wish to include:
 The last two items are considered in the API design, yet will not be considered
 in the first version of the implementation.
 
+This SLEP proposes an API where users can request certain metadata to be
+passed to its consumer by the meta-estimator it is wrapped in.
+
+The following example illustrates the new `request_metadata` parameter for
+making scorers, the `request_sample_weight` estimator method, the `metadata`
+parameter replacing `fit_params` in `cross_validate`, and the automatic passing
+of `groups` to `GroupKFold` to enable nested grouped cross validation. Here,
+the user requests that the `sample_weight` metadata key should be passed to a
+customised accuracy scorer (although a predefined 'weighted_accuracy' scorer
+could be introduced), and to the LogisticRegressionCV.
+`GroupKFold` requests `groups` by default.
+
+    >>> from sklearn.metrics import accuracy_score, make_scorer
+    >>> from sklearn.model_selection import cross_validate, GroupKFold
+    >>> from sklearn.linear_model import LogisticRegressionCV
+    >>> weighted_acc = make_scorer(accuracy_score,
+    ...                            request_metadata=['sample_weight'])
+    >>> group_cv = GroupKFold()
+    >>> lr = LogisticRegressionCV(
+    ...    cv=group_cv,
+    ...    scoring=weighted_acc,
+    ... ).request_sample_weight(fit=True)
+    >>> cross_validate(lr, X, y, cv=group_cv,
+    ...                metadata={'sample_weight': my_weights,
+    ...                          'groups': my_groups},
+    ...                scoring=weighted_acc)
+
 Naming
 ------
 
