@@ -49,6 +49,9 @@ key should be passed to a customised accuracy scorer (although a predefined
 Nested grouped cross validation is used since `GroupKFold` requests `groups` by
 default.
 
+    >>> from sklearn.metrics import accuracy_score, make_scorer
+    >>> from sklearn.model_selection import cross_validate, GroupKFold
+    >>> from sklearn.linear_model import LogisticRegressionCV
     >>> weighted_acc = make_scorer(accuracy_score,
     ...                            request_metadata=['sample_weight'])
     >>> group_cv = GroupKFold()
