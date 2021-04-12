@@ -50,7 +50,7 @@ meta-data is lost immediately after each operation and operations result in a
 ``numpy.ndarray``. This includes indexing and slicing, *i.e.* to avoid
 performance degradation, ``__getitem__`` is not overloaded and if the user
 wishes to preserve the meta-data, they shall do so via explicitly calling a
-method such as ``select()``. Operations between two ``InpuArray``s will not
+method such as ``select()``. Operations between two ``InpuArrays`` will not
 try to align rows and/or columns of the two given objects.
 
 ``pandas`` compatibility comes ideally as a ``pd.DataFrame(inputarray)``, for
