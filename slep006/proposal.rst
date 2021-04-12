@@ -5,7 +5,7 @@ SLEP006: Routing sample-aligned meta-data
 ==========================================
 
 :Author: Joel Nothman, Adrin Jalali, Alex Gramfort
-:Status: Under Review
+:Status: Accept
 :Type: Standards Track
 :Created: 2019-03-07
 
