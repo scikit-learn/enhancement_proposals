@@ -1,7 +1,7 @@
 .. _slep_006:
 
 ==========================================
-SLEP006: Routing sample-aligned meta-data 
+SLEP006: Routing sample-aligned meta-data
 ==========================================
 
 :Author: Joel Nothman, Adrin Jalali, Alex Gramfort
@@ -119,6 +119,7 @@ Desiderata
 The following aspects have been considered to propose the following solution:
 
 .. XXX : maybe phrase this in an affirmative way
+
 Usability
    Can the use cases be achieved in succinct, readable code? Can common use
    cases be achieved with a simple recipe copy-pasted from a QA forum?
@@ -247,7 +248,7 @@ Solution: Each consumer requests
 
 A meta-estimator provides along to its children only what they request.
 A meta-estimator needs to request, on behalf of its children,
-any metadata that descendant consumers request. 
+any metadata that descendant consumers request.
 
 Each object that could receive metadata should have a method called
 `get_metadata_request()` which returns a dict that specifies which
@@ -352,12 +353,12 @@ any params not explicitly requested. See following examples:
 >>> # This would raise a deprecation warning, that provided metadata
 >>> # is not requested
 >>> GridSearchCV(LogisticRegression()).fit(X, y, sample_weight=sw)
->>> 
+>>>
 >>> # this would work with no warnings
 >>> GridSearchCV(LogisticRegression().request_sample_weight(
 ...     fit=True)
 ... ).fit(X, y, sample_weight=sw)
->>> 
+>>>
 >>> # This will raise that LR could accept `sample_weight`, but has
 >>> # not been specified by the user
 >>> GridSearchCV(
