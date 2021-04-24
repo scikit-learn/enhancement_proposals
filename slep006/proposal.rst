@@ -187,9 +187,7 @@ alias the value is set to the alias. In this case
     ...            .set_request_metadata(fit={'sample_weight':
     ...                                       'my_sample_weight'})
     >>> log_reg.get_metadata_request()["fit"]
-    {
-        "fit": {'sample_weight': 'my_sample_weight'}
-    }
+    {'sample_weight': 'my_sample_weight'}
     >>> # Note that `sample_weight` is the key
     >>> log_reg.fit(X, y, sample_weight=metadata['my_sample_weight'])
 
