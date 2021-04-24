@@ -205,11 +205,11 @@ is `groups`::
     >>> group_fold.get_metadata_request()['split']
     {'groups': 'groups'}
 
-All the default values in `set_request_metadata` is to expect all metadata
-in it's methods. Recall that **producers** are not required to pass in the
-metadata to the **consumer**. Setting metadata request does not alter
-the behavior of the **consumer**. The **producer** is responsible for
-validating the passed in metadata.
+All the default values in `set_request_metadata` is to expect no metadata. The
+only exception is `Group*CV`, where it requires `groups` in it's `split`
+method. Setting metadata request does not alter the behavior of the
+**consumer**. The **producer** is responsible for validating the passed in
+metadata.
 
 Backward compatibility
 ----------------------
