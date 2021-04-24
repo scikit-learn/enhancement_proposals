@@ -17,5 +17,6 @@ jobs:
         with:
           target_branch: gh-pages
           build_dir: build/html
+          jekyll: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
