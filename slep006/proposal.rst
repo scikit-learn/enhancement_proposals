@@ -41,7 +41,7 @@ use cases are currently not supported.
 We define the following terms in this proposal:
 
 * **consumer**: An object that receives and consumes metadata, such as
-estimators, scorers, or CV splitters.
+  estimators, scorers, or CV splitters.
 
 * **producer**: An object that passes metadata to a **consumer**, such as
   be a meta-estimator or a function. (e.g. as `GridSearchCV` or
@@ -84,7 +84,7 @@ Usage and Impact
 
 This SLEP unlocks many machine learning use cases that were not possible
 before. The following examples demonstrates nested grouped cross validation
-where a scorer and an estimator requests `sample_weights` and `groups` is
+where a scorer and an estimator requests `sample_weight` and `groups` is
 automatically passed to `GroupKFold`. When the user passes in `metadata` to
 `cross_validate`, the function will use `get_metadata_request` to correctly
 pass metadata to the **consumers**::
@@ -138,7 +138,7 @@ This SLEP proposes to add `get_metadata_request` to all **consumers**,
 keyword parameter to `make_scorer`.
 
 `get_metadata_request` returns a dictionary that specifies what metadata is
-required by a **consumes**'s methods. For estimators, the relevant keys are:
+required by a **consumer**'s methods. For estimators, the relevant keys are:
 `fit`, `transform`, `predict`, `transform`, `score`, and `inverse_transform`.
 The only relevant key for CV splitters is `split` and the for scorers is
 `score`. The values of the metadata dictionary is another dictionary. This
@@ -245,8 +245,8 @@ metadata routing, while the dunder syntax is deprecated. Third-party
 estimators that contain **consumers** will need to define
 **get_metadata_request** that exposes the metadata of its **consumers**.
 Their methods will need to be updated to correctly route data to the
-**consumers**. Our implementation will provide utilities that provide
-utilities to help developers adopt this SLEP.
+**consumers**. Our implementation will provide utilities to help developers
+adopt this SLEP.
 
 Implementation
 --------------
@@ -284,7 +284,7 @@ Related issues and discussions include: :issue:`1574`, :issue:`2630`,
 :issue:`15282`, :issue:`15370`, :issue:`15425`, :issue:`18028`.
 
 One benefit of the explicitness in this proposal is that even if it makes use
-of `**kwwarg` arguments, it does not preclude keywords arguments serving other
+of `**kwarg` arguments, it does not preclude keywords arguments serving other
 purposes.  In addition to requesting sample metadata, a future proposal could
 allow estimators to request feature metadata or other keys.
 
