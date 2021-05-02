@@ -50,12 +50,12 @@ We define the following terms in this proposal:
 * **key**: A label passed along with the metadata (e.g. `sample_weight`).
 
 This SLEP proposes to add `get_metadata_request` to all **consumers**,
-`set_request_metadata` to estimators and CV splitters, and a `request_metadata`
-keyword parameter to `make_scorer`. `set_request_metadata` configures an
+`*_request` to estimators and CV splitters, and a `request_metadata`
+keyword parameter to `make_scorer`. `score_request` configures an
 estimator to request metadata::
 
     >>> log_reg = LogisticRegression()
-    >>> log_reg.set_request_metadata(fit=['sample_weight'])
+    >>> log_reg.fit_request(sample_weight='sample_weight')
 
 `get_metadata_request` are used by **producers** to inspect
 the metadata needed by  **consumers**::
@@ -71,11 +71,11 @@ the metadata needed by  **consumers**::
         'inverse_transform': {}
      }
 
-The `request_metadata` are provided to scorers through `make_scorer` and
+The `score_request` are provided to scorers through `make_scorer` and
 `get_metadata_request` provides the metadata::
 
     >>> weighted_acc = make_scorer(accuracy_score,
-    ...                            request_metadata=['sample_weight'])
+    ...                            score_request=['sample_weight'])
     >>> weighted_acc.get_metadata_request()['score']
     {'score': {'sample_weight': 'sample_weight'}}
 
@@ -90,10 +90,10 @@ automatically passed to `GroupKFold`. When the user passes in `metadata` to
 pass metadata to the **consumers**::
 
     >>> weighted_acc = make_scorer(accuracy_score,
-    ...                            request_metadata=['sample_weight'])
+    ...                            score_request=['sample_weight'])
     >>> group_cv = GroupKFold()
     >>> lr_weight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
-    ...              .set_metadata_request(fit=['sample_weight']))
+    ...              .fit_request(sample_weight=True]))
     >>> cross_validate(lr_weight, X, y, cv=group_cv,
     ...                metadata={'sample_weight': weights, 'groups': groups},
     ...                scoring=weighted_acc)
@@ -101,7 +101,7 @@ pass metadata to the **consumers**::
 To support unweighted fitting and weighted scoring::
 
     >>> lr_unweight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
-    ...                .set_metadata_request(fit={'sample_weight': False}))
+    ...                .fit_request(sample_weight=False))
     >>> cross_validate(lr, X, y, cv=group_cv,
     ...                metadata={'sample_weight': weights, 'groups': groups},
     ...                scoring=weighted_acc)
@@ -114,8 +114,7 @@ different metadata. In the following example, the scorer needs a
     ...     accuracy_score,
     ...     request_metadata={'sample_weight': 'scoring_weight'})
     >>> lr_weight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
-    ...              .set_metadata_request(
-    ...                   fit={'sample_weight': 'fitting_weight'}))
+    ...              .fit_request(sample_weight='fitting_weight'))
     >>> lr_weight.get_metadata_request()
     {
         'fit': {'sample_weight': 'fitting_weight',
@@ -134,7 +133,7 @@ Detailed description
 --------------------
 
 This SLEP proposes to add `get_metadata_request` to all **consumers**,
-`set_request_metadata` to estimators and CV splitters, and a `request_metadata`
+`*_request` to estimators and CV splitters, and a `request_metadata`
 keyword parameter to `make_scorer`.
 
 `get_metadata_request` returns a dictionary that specifies what metadata is
@@ -154,47 +153,47 @@ Note that it is optional for **producers** to pass in the metadata to the
 **consumer**. For scorers, the `'score'` **key** provides metadata for
 calling scorer itself and not a `score` method.
 
-`set_request_metadata` configures the metadata requested by a **consumer**'s
-method. `set_request_metadata's` signature maps from the method name
-to a list or dictionary. When the value is a list, the **consumers** method is
-configured to expect metadata associate with all the values in the list to be
-passed in. The following configures `est` to expect `sample_weight`
-and `groups` to be passed in to `fit`::
+`*_request` configures the metadata requested by a **consumer**'s method. For
+example, `fit_request` configures the metadata to be routed to `fit`.
+`fit_request's` signature maps **keys** to a `bool`, `str`, or `None` value.
+When the value is `None`, the **consumer** does not output any metadata
+request.
 
-    >>> est.set_metadata_request(fit=['sample_weight', 'groups'])
+    >>> est.fit_request(sample_weight=None)
+    >>> est.get_metadata_request()['fit']
+    {}
+
+ When the value is a `True`, it configures the **consumer** to expect the `key`
+ as metadata. For example, the following configures `est` to expect
+ `sample_weight` and `groups` to be passed into `fit`::
+
+    >>> est.fit_request(sample_weight=True, groups=True)
     >>> est.get_metadata_request()['fit']
     { 'sample_weight': 'sample_weight', 'groups': 'groups'}
 
-When the value is a dictionary, it configures the **consumer**'s method
-based on the structure of the dictionary. To configure the **consumer**,
-to not expect metadata, the value of the dictionary is set to `False`::
+If the value is `False`, it configures the **consumer** to *not* expect the
+`key` as metadata::
 
-    >>> est.set_request_metadata(fit={'sample_weight': False})
-    >>> est.get_metadata_request()["fit"]
+    >>> est.fit_request(sample_weight=False)
+    >>> est.get_metadata_request()['fit']
     {'sample_weight': False}
 
-To configure the **consumer** to expect metadata, the value of the dictionary
-is set to `True`. Note this is the same behavior as using a list::
-
-    >>> est.set_request_metadata(fit={'sample_weight': True})
-    >>> est.get_metadata_request()["fit"]
-    {'sample_weight': 'sample_weight'}
-
-To configure the **consumer** to have an key alias, the value is the
-alias the value is set to the alias. In this case
+If the value is a `str`, that string is used as the **key** alias for that
+metadata. For example, the following configures `log_reg` to
+expect a **key** alias `'my_sample_weight'` that should be passed to
+`sample_weight`::
 
     >>> log_reg = (LogisticRegression()
-    ...            .set_request_metadata(fit={'sample_weight':
-    ...                                       'my_sample_weight'})
+    ...            .fit_request(sample_weight='my_sample_weight')
     >>> log_reg.get_metadata_request()["fit"]
     {'sample_weight': 'my_sample_weight'}
     >>> # Note that `sample_weight` is the key
     >>> log_reg.fit(X, y, sample_weight=metadata['my_sample_weight'])
 
-For scorers, `make_scorer` accepts `request_metadata` to configure the
+For scorers, `make_scorer` accepts `score_request` to configure the
 metadata it accepts::
 
-    >>> acc = make_scorer(accuracy_score, request_metadata='sample_weight')
+    >>> acc = make_scorer(accuracy_score, score_request='sample_weight')
     >>> acc.get_metadata_request()['score']
     {'sample_weight': 'sample_weight'}
 
@@ -205,11 +204,10 @@ is `groups`::
     >>> group_fold.get_metadata_request()['split']
     {'groups': 'groups'}
 
-All the default values in `set_request_metadata` is to expect no metadata. The
-only exception is `Group*CV`, where it requires `groups` in it's `split`
-method. Setting metadata request does not alter the behavior of the
-**consumer**. The **producer** is responsible for validating the passed in
-metadata.
+With the exception of `Group*CV`, the default values in `*_request` is set to
+`None`. By default, `Group*CV` will require `groups` in it's `split` method .
+Setting metadata request does not alter the behavior of the **consumer**. The
+**producer** is responsible for validating the passed in metadata.
 
 Backward compatibility
 ----------------------
