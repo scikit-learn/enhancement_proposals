@@ -112,14 +112,14 @@ different metadata. In the following example, the scorer needs a
 
     >>> weighted_acc = make_scorer(
     ...     accuracy_score,
-    ...     request_metadata={'scoring_weight': 'sample_weight'})
+    ...     request_metadata={'sample_weight': 'scoring_weight'})
     >>> lr_weight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
     ...              .fit_request(sample_weight='fitting_weight'))
     >>> lr_weight.get_metadata_request()
     {
-        'fit': {'fitting_weight': 'sample_weight',
+        'fit': {'sample_weight': 'fitting_weight',
                 'scoring_weight': 'scoring_weight'}
-        'score': {'scoring_weight': 'sample_weight'}
+        'score': {'sample_weight': 'sample_weight'}
         'split': {'groups': 'groups'}
         ...
     }
@@ -146,7 +146,7 @@ following asks the **producer** to pass in the metadata associated with
 `'fitting_sample_weight'` as the `sample_weight` for `estimator.fit`::
 
     >>> estimator.get_metadata_request()['fit']
-    {'fitting_sample_weight': 'sample_weight'}
+    {'sample_weight': 'fitting_sample_weight'}
     >>> estimator.fit(X, y, sample_weight=metadata['fitting_sample_weight'])
 
 Note that it is optional for **producers** to pass in the metadata to the
@@ -186,7 +186,7 @@ expect a **key** alias `'my_sample_weight'` that should be passed to
     >>> log_reg = (LogisticRegression()
     ...            .fit_request(sample_weight='my_sample_weight')
     >>> log_reg.get_metadata_request()['fit']
-    {'my_sample_weight': 'sample_weight'}
+    {'sample_weight': 'my_sample_weight'}
     >>> # Note that `sample_weight` is the key
     >>> log_reg.fit(X, y, sample_weight=metadata['my_sample_weight'])
 
