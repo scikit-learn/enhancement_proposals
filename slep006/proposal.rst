@@ -207,7 +207,7 @@ is `groups`::
 With the exception of `Group*CV`, the default values in `*_request` is set to
 `None`. By default, `Group*CV` will require `groups` in it's `split` method .
 Setting metadata request does not alter the behavior of the **consumer**. The
-**producer** is responsible for validating the passed in metadata.
+**producer** is responsible for validating the metadata passed in *exists*.
 
 Backward compatibility
 ----------------------
