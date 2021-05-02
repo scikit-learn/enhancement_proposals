@@ -41,7 +41,7 @@ use cases are currently not supported.
 We define the following terms in this proposal:
 
 * **consumer**: An object that receives and consumes metadata, such as
-  estimators, scorers, or CV splitters.
+  estimators, meta-estimators, scorers, or CV splitters.
 
 * **producer**: An object that passes metadata to a **consumer**, such as
   be a meta-estimator or a function. (e.g. as `GridSearchCV` or
