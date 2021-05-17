@@ -43,7 +43,7 @@ We define the following terms in this proposal:
 * **consumer**: An object that receives and consumes metadata, such as
   estimators, meta-estimators, scorers, or CV splitters.
 
-* **producer**: An object that passes metadata to a **consumer**, such as
+* **router**: An object that passes metadata to a **consumer**, such as
   be a meta-estimator or a function. (e.g. as `GridSearchCV` or
   `cross_validate`)
 
@@ -57,7 +57,7 @@ estimator to request metadata::
     >>> log_reg = LogisticRegression()
     >>> log_reg.request_for_fit(sample_weight='sample_weight')
 
-`get_metadata_request` are used by **producers** to inspect
+`get_metadata_request` are used by **routers** to inspect
 the metadata needed by  **consumers**::
 
     >>> log_reg.get_metadata_request()
@@ -142,14 +142,14 @@ required by a **consumer**'s methods. For estimators, the relevant keys are:
 The only relevant key for CV splitters is `split` and the for scorers is
 `score`. The values of the metadata dictionary is another dictionary. This
 inner dictionary maps from a **key** to a **key** alias. For example, the
-following asks the **producer** to pass in the metadata associated with
+following asks the **router** to pass in the metadata associated with
 `'fitting_sample_weight'` as the `sample_weight` for `estimator.fit`::
 
     >>> estimator.get_metadata_request()['fit']
     {'sample_weight': 'fitting_sample_weight'}
     >>> estimator.fit(X, y, sample_weight=metadata['fitting_sample_weight'])
 
-Note that it is optional for **producers** to pass in the metadata to the
+Note that it is optional for **routers** to pass in the metadata to the
 **consumer**. For scorers, the `'score'` **key** provides metadata for
 calling scorer itself and not a `score` method.
 
@@ -207,7 +207,7 @@ is `groups`::
 With the exception of `Group*CV`, the default values in `request_for_*` is set to
 `None`. By default, `Group*CV` will require `groups` in it's `split` method .
 Setting metadata request does not alter the behavior of the **consumer**. The
-**producer** is responsible for validating the metadata passed in *exists*
+**router** is responsible for validating the metadata passed in *exists*
 or not *exists*. For example, calling `fit` with the following pipeline will
 raise an error, because `sample_weight` is passed to `fit`, but `SVC`
 did not specify if it requires `sample_weight`.
