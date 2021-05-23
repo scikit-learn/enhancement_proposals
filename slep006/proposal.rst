@@ -13,9 +13,9 @@ Abstract
 --------
 
 This SLEP proposes an API to configure estimators, scorers, and CV splitters to
-request metadata in method calls. Meta-estimators or functions that consume
-estimators, scorers, or CV splitters will use this API to inspect and pass in
-the requested metadata.
+request metadata for calling methods such as `fit`. Meta-estimators or
+functions that consume estimators, scorers, or CV splitters will use this API
+to pass in the requested metadata.
 
 Motivation and Scope
 --------------------
@@ -33,32 +33,36 @@ use cases are currently not supported.
 
 * Passing metadata (e.g. `sample_weight`) to a scorer used in cross-validation
 * Passing metadata (e.g. `groups`) to a CV splitter in nested cross-validation
-* Passing metadata (e.g. `sample_weight`) to some scorers and not others in a
-  multi-metric cross-validation setup.
-* Passing metadata to non-fit methods. For example, passing group indices
+* Passing metadata (e.g. `sample_weight`) to some scorers and not others in
+  multi-metric cross-validation.
+* Passing metadata to non-`fit` methods. For example, passing group indices
   for samples that are to be treated as a single sequence in prediction.
 
 We define the following terms in this proposal:
 
 * **consumer**: An object that receives and consumes metadata, such as
-  estimators, meta-estimators, scorers, or CV splitters.
+  estimators, scorers, or CV splitters.
 
-* **router**: An object that passes metadata to a **consumer**, such as
-  be a meta-estimator or a function. (e.g. as `GridSearchCV` or
+* **router**: An object that passes metadata to a **consumer**. Examples of
+  **routers** include meta-estimators or functions. (e.g. as `GridSearchCV` or
   `cross_validate`)
 
 * **key**: A label passed along with the metadata (e.g. `sample_weight`).
 
-This SLEP proposes to add `get_metadata_request` to all **consumers**,
-`request_for_*` to estimators and CV splitters, and a `request_metadata`
-keyword parameter to `make_scorer`. `request_metadata` configures an
-estimator to request metadata::
+This SLEP proposes to add
+
+* `get_metadata_request` to all **consumers**,
+* `request_for_*` to estimators and CV splitters, where `*` is method that
+  requires metadata. (e.g. `request_for_fit`)
+* `request_metadata` keyword parameter to `make_scorer`
+
+For example, `request_for_fit` configures an estimator to request metadata::
 
     >>> log_reg = LogisticRegression()
     >>> log_reg.request_for_fit(sample_weight='sample_weight')
 
-`get_metadata_request` are used by **routers** to inspect
-the metadata needed by  **consumers**::
+`get_metadata_request` are used by **routers** to inspect the metadata needed
+by  **consumers**::
 
     >>> log_reg.get_metadata_request()
     {
@@ -98,7 +102,8 @@ pass metadata to the **consumers**::
     ...                metadata={'sample_weight': weights, 'groups': groups},
     ...                scoring=weighted_acc)
 
-To support unweighted fitting and weighted scoring::
+To support unweighted fitting and weighted scoring, metadata is set to `False`
+in `request_for_fit`::
 
     >>> lr_unweight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
     ...                .request_for_fit(sample_weight=False))
@@ -106,8 +111,8 @@ To support unweighted fitting and weighted scoring::
     ...                metadata={'sample_weight': weights, 'groups': groups},
     ...                scoring=weighted_acc)
 
-Finally, the API can support key alias, which is useful when **consumers** need
-different metadata. In the following example, the scorer needs a
+Finally, the API can support **key** alias, which is useful when **consumers**
+need different metadata. In the following example, the scorer needs a
 `'scoring_weight'` while the estimator needs a different `'fitting_weight'`::
 
     >>> weighted_acc = make_scorer(
@@ -132,32 +137,26 @@ different metadata. In the following example, the scorer needs a
 Detailed description
 --------------------
 
-This SLEP proposes to add `get_metadata_request` to all **consumers**,
-`request_for_*` to estimators and CV splitters, and a `request_metadata`
-keyword parameter to `make_scorer`.
-
 `get_metadata_request` returns a dictionary that specifies what metadata is
 required by a **consumer**'s methods. For estimators, the relevant keys are:
 `fit`, `transform`, `predict`, `transform`, `score`, and `inverse_transform`.
-The only relevant key for CV splitters is `split` and the for scorers is
-`score`. The values of the metadata dictionary is another dictionary. This
-inner dictionary maps from a **key** to a **key** alias. For example, the
-following asks the **router** to pass in the metadata associated with
-`'fitting_sample_weight'` as the `sample_weight` for `estimator.fit`::
+The only relevant key for CV splitters is `split` and scorers is `score`. The
+values of the metadata dictionary is another dictionary. The inner dictionary
+maps from a **key** to a **key** alias. For example, the following asks the
+**router** to pass in the metadata associated with `'fitting_sample_weight'` as
+the `sample_weight` for `estimator.fit`::
 
     >>> estimator.get_metadata_request()['fit']
     {'sample_weight': 'fitting_sample_weight'}
     >>> estimator.fit(X, y, sample_weight=metadata['fitting_sample_weight'])
 
-Note that it is optional for **routers** to pass in the metadata to the
-**consumer**. For scorers, the `'score'` **key** provides metadata for
-calling scorer itself and not a `score` method.
+For scorers, the `'score'` **key** provides metadata for calling scorer itself
+and not a `score` method.
 
 `request_for_*` configures the metadata requested by a **consumer**'s method. For
 example, `request_for_fit` configures the metadata to be routed to `fit`.
 `request_for_fit's` signature maps **keys** to a `bool`, `str`, or `None` value.
-When the value is `None`, the **consumer** does not output any metadata
-request.
+When the value is `None`, the **consumer** is not requesting any metadata::
 
     >>> est.request_for_fit(sample_weight=None)
     >>> est.get_metadata_request()['fit']
@@ -171,8 +170,8 @@ request.
     >>> est.get_metadata_request()['fit']
     { 'sample_weight': 'sample_weight', 'groups': 'groups'}
 
-If the value is `False`, it configures the **consumer** to *not* expect the
-`key` as metadata::
+When the value is `False`, it configures the **consumer** to *not* expect the
+`key` as metadata.::
 
     >>> est.request_for_fit(sample_weight=False)
     >>> est.get_metadata_request()['fit']
@@ -204,16 +203,17 @@ is `groups`::
     >>> group_fold.get_metadata_request()['split']
     {'groups': 'groups'}
 
-With the exception of `Group*CV`, the default values in `request_for_*` is set to
-`None`. By default, `Group*CV` will require `groups` in it's `split` method .
-Setting metadata request does not alter the behavior of the **consumer**. The
-**router** is responsible for validating the metadata passed in *exists*
-or not *exists*. For example, calling `fit` with the following pipeline will
-raise an error, because `sample_weight` is passed to `fit`, but `SVC`
-did not specify if it requires `sample_weight`.
+With the exception of `Group*CV`, the default values in `request_for_*` is set
+to `None`. By default, `Group*CV` will require `groups` in it's `split` method
+. Setting metadata request does not alter the behavior of the **consumer**. The
+**router** is responsible for verifying that the requested metadata is passed
+in correctly. For example, calling `fit` with the following pipeline will raise
+an error, because `sample_weight` is passed to `fit`, but `SVC` did not specify
+if it requires `sample_weight`.
 
     >>> pipe = make_pipeline(
     ...             StandardScaler().request_for_fit(sample_weight=True), SVC())
+    >>> # Raises a error
     >>> pipe.fit(X, y, sample_weight=sample_weight)
 
 To avoid this error, one needs to require the metadata in `SVC`::
@@ -246,7 +246,7 @@ To avoid the warning, one would need to specify the request in
     >>> grid.fit(X, y, sample_weight=sw)
 
 Meta-estimators such as `GridSearchCV` will check that the metadata requested
-and will error when metadata is passed in, but the inner estimator is
+and will error when metadata is passed in and the inner estimator is
 not configured to request it::
 
     >>> grid = GridSearchCV(
