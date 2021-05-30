@@ -52,7 +52,8 @@ We define the following terms in this proposal:
 
 This SLEP proposes to add
 
-* `get_metadata_request` to all **consumers**,
+* `get_metadata_request` to all **consumers** and **routers**
+  (i.e. all estimators supporting this API)
 * `request_for_*` to estimators and CV splitters, where `*` is method that
   requires metadata. (e.g. `request_for_fit`)
 * `request_metadata` keyword parameter to `make_scorer`
