@@ -215,7 +215,7 @@ if it requires `sample_weight`.
 
     >>> pipe = make_pipeline(
     ...             StandardScaler().request_for_fit(sample_weight=True), SVC())
-    >>> # Raises a error
+    >>> # Raises a TypeError
     >>> pipe.fit(X, y, sample_weight=sample_weight)
 
 To avoid this error, one needs to request the metadata in `SVC` or, as in
@@ -233,7 +233,7 @@ following should raise an error because `sample_weight` is misspelt:
     >>> pipe = make_pipeline(
     ...             StandardScaler().request_for_fit(sample_weight=True),
     ...             SVC().request_for_fit(sample_weight=False))
-    >>> # Raises a ?TypeError
+    >>> # Raises a TypeError
     >>> pipe.fit(X, y, sample_weihgt=sample_weight)
 Backward compatibility
 ----------------------
@@ -254,21 +254,35 @@ a deprecation warning is raised::
 To avoid the warning, one would need to specify the request in
 `LogisticRegressionCV`::
 
-    >>> grid = GridSearchCV(LogisticRegression().request_for_fit(fit=True), ...)
+    >>> grid = GridSearchCV(
+    >>>     LogisticRegression().request_for_fit(sample_weight=True), ...)
     >>> grid.fit(X, y, sample_weight=sw)
 
 Meta-estimators such as `GridSearchCV` will check that the metadata requested
 and will error when metadata is passed in and the inner estimator is
 not configured to request it::
 
-    >>> grid = GridSearchCV(
-    ...     LogisticRegression(), ...,
-    ...     scoring=make_scorer(accuracy_score,
-    ...                         request_metadata=['sample_weight'])
-    ... )
-    >>> # Raise that LR could accept `sample_weight`, but has
-    >>> # not been specified by the user
-    >> grid.fit(X, y, sample_weight=sw)
+    >>> weighted_scorer = make_scorer(accuracy_score,
+    ...                               request_metadata=['sample_weight'])
+    >>> log_reg = LogisticRegression()
+    >>> grid = GridSearchCV(log_reg, ..., scoring=weighted_scorer)
+    >>> # Raise a TypeError that log_reg is not specified with any routing
+    >>> metadata for `sample_weight`, but sample_weight has been passed in to
+    >>> `grid.fit`.
+    >>> grid.fit(X, y, sample_weight=sw)
+
+To avoid the error, `LogisticRegression` must specify its metadata request by calling
+`request_for_fit`::
+
+    >>> # Request sample weights
+    >>> log_reg_weights = LogisticRegression().request_for_fit(sample_weight=True)
+    >>> grid = GridSearchCV(log_reg_with_weights, ...)
+    >>> grid.fit(X, , sample_weight=sw)
+    >>>
+    >>> # Do not request sample_weights
+    >>> log_reg_no_weights = LogisticRegression().request_for_fit(sample_weight=False)
+    >>> grid = GridSearchCV(log_reg_no_weights, ...)
+    >>> grid.fit(X, , sample_weight=sw)
 
 Third-party estimators will need to adopt this SLEP in order to support
 metadata routing, while the dunder syntax is deprecated. Third-party
