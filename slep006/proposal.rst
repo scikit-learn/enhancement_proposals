@@ -13,8 +13,8 @@ Abstract
 --------
 
 This SLEP proposes an API to configure estimators, scorers, and CV splitters to
-request metadata for calling methods such as `fit`. Meta-estimators or
-functions that consume estimators, scorers, or CV splitters will use this API
+request metadata when calling methods such as `fit`. Meta-estimators or
+functions that wrap estimators, scorers, or CV splitters will use this API
 to pass in the requested metadata.
 
 Motivation and Scope
@@ -43,9 +43,10 @@ We define the following terms in this proposal:
 * **consumer**: An object that receives and consumes metadata, such as
   estimators, scorers, or CV splitters.
 
-* **router**: An object that passes metadata to a **consumer**. Examples of
-  **routers** include meta-estimators or functions. (e.g. as `GridSearchCV` or
-  `cross_validate`)
+* **router**: An object that passes metadata to a **consumer** or
+  another **router**. Examples of **routers** include meta-estimators or
+  functions. (For example `GridSearchCV` or `cross_validate` route sample
+  weights, cross validation groups, etc. to consumers)
 
 * **key**: A label passed along with the metadata (e.g. `sample_weight`).
 
@@ -111,7 +112,7 @@ in `request_for_fit`::
     ...                metadata={'sample_weight': weights, 'groups': groups},
     ...                scoring=weighted_acc)
 
-Finally, the API can support **key** alias, which is useful when **consumers**
+Finally, the API supports **key** aliasing, which is useful when **consumers**
 need different metadata. In the following example, the scorer needs a
 `'scoring_weight'` while the estimator needs a different `'fitting_weight'`::
 
@@ -138,13 +139,13 @@ Detailed description
 --------------------
 
 `get_metadata_request` returns a dictionary that specifies what metadata is
-required by a **consumer**'s methods. For estimators, the relevant keys are:
+required by a **consumer**'s methods. For estimators, this dict has keys
 `fit`, `transform`, `predict`, `transform`, `score`, and `inverse_transform`.
 The only relevant key for CV splitters is `split` and scorers is `score`. The
 values of the metadata dictionary is another dictionary. The inner dictionary
 maps from a **key** to a **key** alias. For example, the following asks the
-**router** to pass in the metadata associated with `'fitting_sample_weight'` as
-the `sample_weight` for `estimator.fit`::
+**router** that wraps `estimator` to pass the metadata called
+`'fitting_sample_weight'` as the `sample_weight` for `estimator.fit`::
 
     >>> estimator.get_metadata_request()['fit']
     {'sample_weight': 'fitting_sample_weight'}
@@ -204,8 +205,8 @@ is `groups`::
     {'groups': 'groups'}
 
 With the exception of `Group*CV`, the default values in `request_for_*` is set
-to `None`. By default, `Group*CV` will require `groups` in it's `split` method
-. Setting metadata request does not alter the behavior of the **consumer**. The
+to `None`. By default, `Group*CV` will require `groups` in its `split` method.
+Setting metadata request does not alter the behavior of the **consumer**. The
 **router** is responsible for verifying that the requested metadata is passed
 in correctly. For example, calling `fit` with the following pipeline will raise
 an error, because `sample_weight` is passed to `fit`, but `SVC` did not specify
@@ -216,13 +217,23 @@ if it requires `sample_weight`.
     >>> # Raises a error
     >>> pipe.fit(X, y, sample_weight=sample_weight)
 
-To avoid this error, one needs to require the metadata in `SVC`::
+To avoid this error, one needs to request the metadata in `SVC` or, as in
+this case, request that it not be passed::
 
     >>> pipe = make_pipeline(
     ...             StandardScaler().request_for_fit(sample_weight=True),
     ...             SVC().request_for_fit(sample_weight=False))
     >>> pipe.fit(X, y, sample_weight=sample_weight)
 
+The **router** is also responsible for raising an error if the user
+provides metadata with a key that is not requested anywhere. Thus the
+following should raise an error because `sample_weight` is misspelt:
+
+    >>> pipe = make_pipeline(
+    ...             StandardScaler().request_for_fit(sample_weight=True),
+    ...             SVC().request_for_fit(sample_weight=False))
+    >>> # Raises a ?TypeError
+    >>> pipe.fit(X, y, sample_weihgt=sample_weight)
 Backward compatibility
 ----------------------
 
