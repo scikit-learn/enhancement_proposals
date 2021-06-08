@@ -255,7 +255,7 @@ To avoid the warning, one would need to specify the request in
 `LogisticRegressionCV`::
 
     >>> grid = GridSearchCV(
-    >>>     LogisticRegression().request_for_fit(sample_weight=True), ...)
+    ...     LogisticRegression().request_for_fit(sample_weight=True), ...)
     >>> grid.fit(X, y, sample_weight=sw)
 
 Meta-estimators such as `GridSearchCV` will check that the metadata requested
@@ -267,8 +267,8 @@ not configured to request it::
     >>> log_reg = LogisticRegression()
     >>> grid = GridSearchCV(log_reg, ..., scoring=weighted_scorer)
     >>> # Raise a TypeError that log_reg is not specified with any routing
-    >>> metadata for `sample_weight`, but sample_weight has been passed in to
-    >>> `grid.fit`.
+    >>> # metadata for `sample_weight`, but sample_weight has been passed in to
+    >>> # `grid.fit`.
     >>> grid.fit(X, y, sample_weight=sw)
 
 To avoid the error, `LogisticRegression` must specify its metadata request by calling
