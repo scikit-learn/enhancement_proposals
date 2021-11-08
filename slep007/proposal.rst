@@ -106,7 +106,7 @@ original features:
 - Algorithms that create combinations of a fixed number of features, *e.g.*
   ``PolynomialFeatures``, as opposed to all of
   them where there are many. Note that verbosity considerations and
-  ``verbose_feature_names`` as explained later can apply here.
+  ``verbose_feature_names_out`` as explained later can apply here.
 
 This proposal talks about how feature names are generated and not how they are
 propagated.
@@ -244,21 +244,22 @@ However, the following examples produce a somewhat redundant feature names::
 Extensions
 ##########
 
-verbose_feature_names
-*********************
+verbose_feature_names_out
+*************************
+
 To provide more control over feature names, we could add a boolean
-``verbose_feature_names`` constructor argument to certain transformers.
+``verbose_feature_names_out`` constructor argument to certain transformers.
 The default would reflect the description above, but changes would allow more verbose
 names in some transformers, say having ``StandardScaler`` map ``'age'`` to ``'scale(age)'``.
 
-In case of the ``ColumnTransformer`` example above ``verbose_feature_names``
+In case of the ``ColumnTransformer`` example above ``verbose_feature_names_out``
 could remove the estimator names, leading to shorter and less redundant names::
 
     [model, make, numeric0, ..., numeric100] ->
         make_column_transformer(
             (OneHotEncoder(), ['model', 'make']),
             (PCA(n_components=3), ['numeric0', ..., 'numeric100']),
-            verbose_feature_names=False
+            verbose_feature_names_out=False
         )
     get_feature_names_out(): ['model_100', 'model_200', ...,
                               'make_ABC', 'make_XYZ', ...,
