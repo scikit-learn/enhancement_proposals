@@ -5,9 +5,11 @@ SLEP007: Feature names, their generation and the API
 ====================================================
 
 :Author: Adrin Jalali
-:Status: Under vote for rejection or acceptance
+:Status: Accepted
 :Type: Standards Track
 :Created: 2019-04
+:Vote opened: 2021-10-26
+:Vote closed: 2021-11-29
 
 Abstract
 ########
