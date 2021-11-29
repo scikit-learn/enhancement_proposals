@@ -144,7 +144,9 @@ accepted – see the next section for details. At this point the status becomes
 
 Once a SLEP has been ``Accepted``, the reference implementation must be
 completed. When the reference implementation is complete and incorporated into
-the main source code repository, the status will be changed to ``Final``.
+the main source code repository, the status will be changed to ``Final``. Since
+most SLEPs deal with a part of scikit-learn's API, another way of viewing a
+SLEP as ``Final`` is when its corresponding API interface is considered stable.
 
 To allow gathering of additional design and interface feedback before
 committing to long term stability for a feature or API, a SLEP may also be
