@@ -131,17 +131,19 @@ Input Feature Names
 The input feature names are stored in a fitted estimator in a
 ``feature_names_in_`` attribute, and are taken from the given input data, for
 instance a ``pandas`` data frame. This attribute will be ``None`` if the input
-provides no feature names.
+provides no feature names. The ``feature_names_in_`` attribute is a 1d NumPy
+array with object dtype and all elements in the array are strings.
 
 Output Feature Names
 ####################
 
 A fitted estimator exposes the output feature names through the
-``get_feature_names_out`` method. Here we discuss more in detail how these
-feature names are generated. Since for most estimators there are multiple ways
-to generate feature names, this SLEP does not intend to define how exactly
-feature names are generated for all of them. It is instead a guideline on how
-they could generally be generated.
+``get_feature_names_out`` method. The output of ``get_feature_names_out`` is a
+1d NumPy array with object dtype and all elements in the array are strings. Here
+we discuss more in detail how these feature names are generated. Since for most
+estimators there are multiple ways to generate feature names, this SLEP does not
+intend to define how exactly feature names are generated for all of them. It is
+instead a guideline on how they could generally be generated.
 
 As detailed bellow, some generated output features names are the same or a
 derived from the input feature names. In such cases, if no input feature names
