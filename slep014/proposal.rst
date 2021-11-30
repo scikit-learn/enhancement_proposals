@@ -1,7 +1,7 @@
 .. _slep_014:
 
 =======================================
-SLEP014: parameter spaces on estimators
+SLEP014: Parameter Spaces on Estimators
 =======================================
 
 :Author: Joel Nothman
@@ -14,7 +14,7 @@ Abstract
 
 This proposes to simplify the specification of parameter searches by allowing
 the user to store candidate values for each parameter on each estimator.
-The ``*SearchCV`` estimators would then having a setting to extract the
+The ``*SearchCV`` estimators would then have a setting to construct the
 parameter grid or distribution from a traversal of the supplied estimator.
 
 Detailed description
