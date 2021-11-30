@@ -66,15 +66,20 @@ scikit-learn.
 general guidelines or information to the scikit-learn community, but does not
 propose a new feature. Informational SLEPs do not necessarily represent a
 scikit-learn community consensus or recommendation, so users and implementers
-are free to ignore Informational SLEPs or follow their advice.
+are free to ignore Informational SLEPs or follow their advice. For instance, an
+informational SLEP could be one explaining how people can write a third party
+estimator, one to explain the usual process of adding a package to the contrib
+org, or what our inclusion criteria are for scikit-learn and
+scikit-learn-extra.
 
 3. A Process SLEP describes a process surrounding scikit-learn, or proposes a
 change to (or an event in) a process. Process SLEPs are like Standards Track
 SLEPs but apply to areas other than the scikit-learn library itself. They may
 propose an implementation, but not to scikit-learn’s codebase; they require
 community consensus. Examples include procedures, guidelines, changes to the
-decision-making process, and changes to the tools or environment used in
-scikit-learn development. Any meta-SLEP is also considered a Process SLEP.
+decision-making process and the governance document, and changes to the tools
+or environment used in scikit-learn development. Any meta-SLEP is also
+considered a Process SLEP.
 
 
 SLEP Workflow
