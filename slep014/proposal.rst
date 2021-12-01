@@ -118,6 +118,36 @@ Implementation
 
 TODO
 
+Four public methods will be added to ``BaseEstimator``::
+
+    def set_grid(self, **grid: List[object]):
+        """Sets candidate values for parameters in a search
+
+        These candidates are used in grid search when a paameter grid is not
+        explicitly specified. They are also used in randomized search in the
+        case where set_distribution has not been used for the corresponding
+        parameter.
+
+        As with :meth:`set_params`, update semantics apply, such that
+        ``set_grid(param1=['a', 'b'], param2=[1, 2]).set_grid(param=['a'])``
+        will retain the candidates set for ``param2``. To reset the grid,
+        each parameter's candidates should be set to ``[]``.
+
+        Parameters
+        ----------
+        grid : Dict[Str, List[object]]
+            Keyword arguments define the values to be searched for each
+            specified parameter.
+
+            Keywords must be valid parameter names from :meth:`get_params`.
+
+        Returns
+        -------
+        self : Estimator
+        """
+        ...
+
+
 setter, getter for grid.
 setter, getter for distribution.
 Overwriting behaviour
