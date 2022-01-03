@@ -116,14 +116,12 @@ Such functionality therefore allows users to:
 Implementation
 --------------
 
-TODO
-
 Four public methods will be added to ``BaseEstimator``::
 
     def set_grid(self, **grid: List[object]):
         """Sets candidate values for parameters in a search
 
-        These candidates are used in grid search when a paameter grid is not
+        These candidates are used in grid search when a parameter grid is not
         explicitly specified. They are also used in randomized search in the
         case where set_distribution has not been used for the corresponding
         parameter.
@@ -147,23 +145,103 @@ Four public methods will be added to ``BaseEstimator``::
         """
         ...
 
+    def get_grid(self):
+        """Retrieves current settings for parameters where search candidates are set
 
-setter, getter for grid.
-setter, getter for distribution.
-Overwriting behaviour
+        Note that this only reflects local parameter candidates, and a grid
+        including nested estimators can be constructed in combination with
+        `get_params`.
 
-Private attribute on estimator, dynamically allocated on request
+        Returns
+        -------
+        dict
+            A mapping from parameter name to a list of values. Each parameter
+            name should be a member of `self.get_params(deep=False).keys()`.
+        """
+        ...
 
-Grid Search update to handle param_grid='extract' using the algorithm
-and implementation from searchgrid [1]_. If an empty grid is extracted
-an error should be raised.
-Randomized Search update to handle param_distributions='extract', using ``get_grid``
-only to update the results of ``get_distribution``.
+    def set_distribution(self, **distribution):
+        """Sets candidate values for parameters in a search
+
+        These candidates are used in randomized search when a parameter
+        distribution is not explicitly specified. For parameters where
+        no distribution is defined and a grid is defined, those grid values
+        will also be used.
+
+        As with :meth:`set_params`, update semantics apply, such that
+        ``set_distribution(param1=['a', 'b'], param2=[1, 2]).set_grid(param=['a'])``
+        will retain the candidates set for ``param2``. To reset the grid,
+        each parameter's candidates should be set to ``[]``.
+
+        Parameters
+        ----------
+        distribution : mapping from str to RV or list
+            Keyword arguments define the distribution to be searched for each
+            specified parameter.
+            Distributions may be specified either as an object with the method
+            ``rvs`` (see :mod:`scipy.stats`) or a list of discrete values with
+            uniform distribution.
+
+            Keywords must be valid parameter names from :meth:`get_params`.
+
+        Returns
+        -------
+        self : Estimator
+        """
+        ...
+    
+    def get_distribution(self):
+        """Retrieves current settings for parameters where a search distribution is set
+
+        Note that this only reflects local parameter candidates, and a joint distribution
+        including nested estimators can be constructed in combination with
+        `get_params`.
+
+        For parameters where ``set_distribution`` has not been used, but ``set_grid``
+        has been, this will return the corresponding list of values specified in
+        ``set_grid``.
+
+        Returns
+        -------
+        dict
+            A mapping from parameter name to a scipy-compatible distribution
+            (i.e. with ``rvs``` method) or list of discrete values. Each parameter
+            name should be a member of `self.get_params(deep=False).keys()`.
+        """
+        ...
+
+The current distribution and grid values will be stored in a private
+attribute on the estimator, and ``get_grid`` may simply return this value,
+or an empty dict if undefined, while ``get_distribution`` will combine the
+stored attribute with ``get_grid`` values.
+The attribute will be undefined by default upon construction of the estimator.
 
 Parameter spaces should be copied in clone, so that a user can overwrite only
 one parameter's space without redefining everything.
+To facilitate this (in the absence of a polymorphic implementation of clone),
+we might need to store the candidate grids and distributions in a known instance
+attribute, or use a combination of `get_grid`, `get_distribution`, `get_params`
+and `set_grid`, `set_distribution` etc. to perform `clone`.
 
-expected behaviour when a parameter name with `__` is used.
+Search estimators in `sklearn.model_selection` will be updated such that the
+required `param_grid` and `param_distributions` parameters will now default
+to 'extract'. The 'extract' value instructs the search estimator to construct
+a complete search space from the provided estimator's `get_grid` (or
+`get_distribution`) return value together with `get_params`.
+It recursively calls `get_grid` (and `get_distribution`) on any parametrized
+objects (i.e. those with `get_params`) with this method that are descendent
+from the given estimator, including:
+* values in ``estimator.get_params(deep=True)``
+* elements of list values in ``x.get_grid()`` or ``x.get_distribution()``
+  as appropriate (disregarding rvs) for any `x` descendant of the estimator.
+
+See the implementation of ``build_param_grid`` in Searchgrid [1]_, which applies
+to the grid search case. This algorithm enables the specification of searches
+over components in a pipeline as well as their parameters.
+
+Where the search estimator perfoming the 'extract' algorithm extracts an empty
+grid or distribution altogether for the given estimator, it should raise a
+``ValueError``, indicative of likely user error.
 
 Backward compatibility
 ----------------------
@@ -189,6 +267,8 @@ searchgrid [1]_, Neuraxle [2]_
 
 Discussion
 ----------
+
+TODO
 
 raised in :issue:`19045`.
 
