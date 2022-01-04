@@ -9,6 +9,7 @@
     :maxdepth: 1
     :caption: Accepted
 
+    slep000/proposal
     slep007/proposal
     slep009/proposal
     slep010/proposal
