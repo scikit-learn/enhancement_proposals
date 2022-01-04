@@ -5,7 +5,7 @@ SLEP000: SLEP and its workflow
 ==============================
 
 :Author: Adrin Jalali
-:Status: Draft
+:Status: Accepted
 :Type: Process
 :Created: 2020-02-13
 
