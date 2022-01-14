@@ -52,89 +52,95 @@ We define the following terms in this proposal:
 
 This SLEP proposes to add
 
-* `get_metadata_request` to all **consumers** and **routers**
+* `get_metadata_routing` to all **consumers** and **routers**
   (i.e. all estimators supporting this API)
-* `request_for_*` to class-based consumers (including estimators and CV splitters),
-  where `*` is method that requires metadata. (e.g. `request_for_fit`)
-* `request_metadata` keyword parameter to `make_scorer`
+* `*_requests` to consumers (including estimators and CV splitters),
+  where `*` is method that requires metadata. (e.g. `fit_requests` or
+  `score_request`)
 
 For example, `request_for_fit` configures an estimator to request metadata::
 
-    >>> log_reg = LogisticRegression()
-    >>> log_reg.request_for_fit(sample_weight='sample_weight')
+    >>> log_reg = LogisticRegression().fit_requests(sample+weight=True)
 
-`get_metadata_request` are used by **routers** to inspect the metadata needed
-by  **consumers**::
-
-    >>> log_reg.get_metadata_request()
-    {
-        'fit': {'sample_weight': 'sample_weight'},
-        'partial_fit': {},
-        'predict': {},
-        'transform': {},
-        'score': {},
-        'split': {},
-        'inverse_transform': {}
-     }
-
-The `request_metadata` are provided to scorers through `make_scorer` and
-`get_metadata_request` provides the metadata::
-
-    >>> weighted_acc = make_scorer(accuracy_score,
-    ...                            request_metadata=['sample_weight'])
-    >>> weighted_acc.get_metadata_request()['score']
-    {'score': {'sample_weight': 'sample_weight'}}
+`get_metadata_routing` are used by **routers** to inspect the metadata needed
+by  **consumers**. `get_metadata_routing` returns a `MetadataRouter`
+object that stores and handles metadata routing.
 
 Usage and Impact
 ----------------
 
 This SLEP unlocks many machine learning use cases that were not possible
-before. The following examples demonstrates nested grouped cross validation
-where a scorer and an estimator requests `sample_weight` and `groups` is
-automatically passed to `GroupKFold`. When the user passes in `metadata` to
-`cross_validate`, the function will use `get_metadata_request` to correctly
-pass metadata to the **consumers**::
+before. In this section, we will focus on some workflows that are made possible
+by this SLEP.
 
-    >>> weighted_acc = make_scorer(accuracy_score,
-    ...                            request_metadata=['sample_weight'])
-    >>> group_cv = GroupKFold()
-    >>> lr_weight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
-    ...              .request_for_fit(sample_weight=True]))
-    >>> cross_validate(lr_weight, X, y, cv=group_cv,
-    ...                metadata={'sample_weight': weights, 'groups': groups},
-    ...                scoring=weighted_acc)
+Nested Grouped Cross Validation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following examples demonstrates nested grouped cross validation
+where a scorer and an estimator requests `sample_weight` and `GroupKFold`
+requests `groups` by default::
+
+    >>> weighted_acc = make_scorer(accuracy_score).score_request(sample_weight=True)
+    >>> lr = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
+    ...       .fit_requests(sample_weight=True))
+    >>> cv_results = cross_validate(
+    ...     lr,
+    ...     X,
+    ...     y,
+    ...     cv=GroupKFold(),
+    ...     props={"sample_weight": my_weights, "groups": my_groups},
+    ...     scoring=weighted_acc,
+    ... )
 
 To support unweighted fitting and weighted scoring, metadata is set to `False`
 in `request_for_fit`::
 
-    >>> lr_unweight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
-    ...                .request_for_fit(sample_weight=False))
-    >>> cross_validate(lr, X, y, cv=group_cv,
-    ...                metadata={'sample_weight': weights, 'groups': groups},
+    >>> lr = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
+    ...       .fit_request(sample_weight=False))
+    >>> cross_validate(lr, X, y, cv=GroupKFold(),
+    ...                props={'sample_weight': weights, 'groups': groups},
     ...                scoring=weighted_acc)
 
-Finally, the API supports **key** aliasing, which is useful when **consumers**
-need different metadata. In the following example, the scorer needs a
-`'scoring_weight'` while the estimator needs a different `'fitting_weight'`::
+Unweighted Feature selection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    >>> weighted_acc = make_scorer(
-    ...     accuracy_score,
-    ...     request_metadata={'sample_weight': 'scoring_weight'})
-    >>> lr_weight = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
-    ...              .request_for_fit(sample_weight='fitting_weight'))
-    >>> lr_weight.get_metadata_request()
-    {
-        'fit': {'sample_weight': 'fitting_weight',
-                'scoring_weight': 'scoring_weight'}
-        'score': {'sample_weight': 'sample_weight'}
-        'split': {'groups': 'groups'}
-        ...
-    }
-    >>> cross_validate(lr_weight, X, y, cv=group_cv,
-    ...                metadata={'scoring_weight': scoring_weights,
-    ...                          'fitting_weight': fitting_weight,
-    ...                          'groups': groups},
-    ...                scoring=weighted_acc)
+**Consumers** that do not accept weights during fitting such as `SelectKBest`
+will _not_ be routed weights::
+
+    >>> lr = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
+    ...       .fit_requests(sample_weight=True))
+    >>> sel = SelectKBest(k=2)
+    >>> pipe = make_pipeline(sel, lr)
+    >>> pipe.fit(X, y, sample_weight=weights, groups=groups)
+
+Different Scoring and Fitting Weights
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We can pass different weights for scoring and fitting by using an aliases. In
+this example, `scoring_weight` is passed to the scoring and `fitting_weight`
+is passed to `LogisticRegressionCV`::
+
+    >>> weighted_acc = (make_scorer(accuracy_score)
+    ...                 .score_requests(sample_weight="scoring_weight")
+    >>> lr = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
+    ...       .fit_requests(sample_weight="fitting_weight"))
+    >>> cv_results = cross_validate(
+    ...     lr,
+    ...     X,
+    ...     y,
+    ...     cv=GroupKFold(),
+    ...     props={
+    ...         "scoring_weight": my_weights,
+    ...         "fitting_weight": my_other_weights,
+    ...         "groups": my_groups,
+    ...     },
+    ...     scoring=weighted_acc,
+    ... )
+
+One more example
+~~~~~~~~~~~~~~~~
+
+
 
 Detailed description
 --------------------
@@ -235,6 +241,7 @@ following should raise an error because `sample_weight` is misspelt:
     ...             SVC().request_for_fit(sample_weight=False))
     >>> # Raises a TypeError
     >>> pipe.fit(X, y, sample_weihgt=sample_weight)
+
 Backward compatibility
 ----------------------
 
