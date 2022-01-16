@@ -153,7 +153,11 @@ Implementation
 
 This SLEP has a draft implementation at :pr:`22083` by :user:`adrinjalali`. The
 implementation provides utilities that is used by scikit-learn and available to
-third-party estimators for adopting this SLEP.
+third-party estimators for adopting this SLEP. Estimators that inherit
+`BaseEstimator` _and_ their method signature explicitly accepts metadata as an
+argument will automatically get a `get_metadata_routing`. **Routers** accepting
+`**kwargs` will need to explicitly define a `get_metadata_routing` to configure
+how metadata is routed to it's **consumers**.
 
 Backward compatibility
 ----------------------
@@ -204,12 +208,9 @@ To avoid the error, `LogisticRegression` must specify its metadata request by ca
     >>> grid.fit(X, , sample_weight=sw)
 
 Third-party estimators will need to adopt this SLEP in order to support metadata
-routing, while the dunder syntax is deprecated. Estimators that inherit
-`BaseEstimator` _and_ their method signature explicitly accepts metadata as an
-argument will automatically get a `get_metadata_routing`. **Routers** accepting
-`**kwargs` will need to explicitly define a `get_metadata_routing` to configure
-how metadata is routed to it's **consumers**. Our implementation will provide
-utilities to help developers adopt this SLEP.
+routing, while the dunder syntax is deprecated. Our implementation will provide
+developer APIs to trigger warnings and errors as described above to help with
+adopting this SLEP.
 
 Alternatives
 ------------
