@@ -153,11 +153,12 @@ Implementation
 
 This SLEP has a draft implementation at :pr:`22083` by :user:`adrinjalali`. The
 implementation provides utilities that is used by scikit-learn and available to
-third-party estimators for adopting this SLEP. Estimators that inherit
-`BaseEstimator` _and_ their method signature explicitly accepts metadata as an
-argument will automatically get a `get_metadata_routing`. **Routers** accepting
-`**kwargs` will need to explicitly define a `get_metadata_routing` to configure
-how metadata is routed to it's **consumers**.
+third-party estimators for adopting this SLEP. To help with adoption, estimators
+that inherit `BaseEstimator` _and_ their method signature explicitly accepts
+metadata as an argument will automatically get a `get_metadata_routing`.
+**Routers** accepting `**kwargs` will need to explicitly define a
+`get_metadata_routing` to configure how metadata is routed to it's
+**consumers**.
 
 Backward compatibility
 ----------------------
