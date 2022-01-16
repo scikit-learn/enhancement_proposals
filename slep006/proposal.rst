@@ -139,11 +139,12 @@ Since `GroupKFold` requests for groups by default, it can be passed to multiple
 both `RandomizedSearchCV` and `cross_validate` sets `cv=GroupKFold()` which enables
 grouped CV in the outer loop (`cross_validate`) and the inner random search::
 
-    >>> lr = LogisticRegression()
-    >>> distributions = dict(C=uniform(loc=0, scale=4),
-    ...                      penalty=['l2', 'l1'])
-    >>> random_search = RandomizedSearchCV(lr, distributions, cv=GroupKFold())
-    >>> cv_results = cross_validate(lr, X, y,
+    >>> log_reg = LogisticRegression()
+    >>> distributions = {"C": uniform(loc=0, scale=4),
+    ...                  "penalty": ['l2', 'l1']}
+    >>> random_search = RandomizedSearchCV(log_reg, distributions, cv=GroupKFold())
+    >>> cv_results = cross_validate(
+    ...     lr, X, y,
     ...     cv=GroupKFold(),
     ...     props={"groups": my_groups})
 
