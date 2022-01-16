@@ -144,7 +144,7 @@ grouped CV in the outer loop (`cross_validate`) and the inner random search::
     ...                  "penalty": ['l2', 'l1']}
     >>> random_search = RandomizedSearchCV(log_reg, distributions, cv=GroupKFold())
     >>> cv_results = cross_validate(
-    ...     lr, X, y,
+    ...     log_reg, X, y,
     ...     cv=GroupKFold(),
     ...     props={"groups": my_groups})
 
