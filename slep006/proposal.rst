@@ -13,9 +13,9 @@ Abstract
 --------
 
 This SLEP proposes an API to configure estimators, scorers, and CV splitters to
-request metadata when calling methods such as `fit`. Meta-estimators or
-functions that wrap estimators, scorers, or CV splitters will use this API
-to pass in the requested metadata.
+request metadata when calling methods such as `fit`, `predict`, etc.
+Meta-estimators or functions that wrap estimators, scorers, or CV splitters will
+use this API to pass in the requested metadata.
 
 Motivation and Scope
 --------------------
@@ -29,7 +29,7 @@ needs to specify the step using dunder (`__`)  prefixing::
 
 Several other meta-estimators, such as `GridSearchCV`, support forwarding these
 fit parameters to their base estimator when fitting. Yet a number of important
-use cases are currently not supported.
+use cases are currently not supported:
 
 * Passing metadata (e.g. `sample_weight`) to a scorer used in cross-validation
 * Passing metadata (e.g. `groups`) to a CV splitter in nested cross-validation
@@ -46,9 +46,7 @@ We define the following terms in this proposal:
 * **router**: An object that passes metadata to a **consumer** or
   another **router**. Examples of **routers** include meta-estimators or
   functions. (For example `GridSearchCV` or `cross_validate` route sample
-  weights, cross validation groups, etc. to consumers)
-
-* **key**: A label passed along with the metadata (e.g. `sample_weight`).
+  weights, cross validation groups, etc. to **consumers**)
 
 This SLEP proposes to add
 
@@ -120,7 +118,7 @@ this example, `scoring_weight` is passed to the scoring and `fitting_weight`
 is passed to `LogisticRegressionCV`::
 
     >>> weighted_acc = (make_scorer(accuracy_score)
-    ...                 .score_requests(sample_weight="scoring_weight")
+    ...                .score_requests(sample_weight="scoring_weight"))
     >>> log_reg = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
     ...           .fit_requests(sample_weight="fitting_weight"))
     >>> cv_results = cross_validate(
@@ -134,10 +132,11 @@ is passed to `LogisticRegressionCV`::
 Nested Grouped Cross Validation with SearchCV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since `GroupKFold` requests for groups by default, it can be passed to multiple
-**consumers** to enable nested grouped cross validation. In this example,
-both `RandomizedSearchCV` and `cross_validate` sets `cv=GroupKFold()` which enables
-grouped CV in the outer loop (`cross_validate`) and the inner random search::
+Since `GroupKFold` requests group metadata by default, `GroupKFold` can be
+passed to multiple **consumers** to enable nested grouped cross validation. In
+this example, both `RandomizedSearchCV` and `cross_validate` sets
+`cv=GroupKFold()` which enables grouped CV in the outer loop (`cross_validate`)
+and the inner random search::
 
     >>> log_reg = LogisticRegression()
     >>> distributions = {"C": uniform(loc=0, scale=4),
@@ -152,13 +151,10 @@ Implementation
 --------------
 
 This SLEP has a draft implementation at :pr:`22083` by :user:`adrinjalali`. The
-implementation provides utilities that is used by scikit-learn and available to
-third-party estimators for adopting this SLEP. To help with adoption, estimators
-that inherit `BaseEstimator` _and_ their method signature explicitly accepts
-metadata as an argument will automatically get a `get_metadata_routing`.
-**Routers** accepting `**kwargs` will need to explicitly define a
-`get_metadata_routing` to configure how metadata is routed to it's
-**consumers**.
+implementation provides developer utilities that is used by scikit-learn and
+available to third-party estimators for adopting this SLEP. Specifically, the
+draft implementation makes it easier to define `get_metadata_routing` and
+`*_requests` for **consumers** and **routers**.
 
 Backward compatibility
 ----------------------
@@ -178,8 +174,7 @@ a deprecation warning is raised::
 To avoid the warning, one would need to specify the request in
 `LogisticRegressionCV`::
 
-    >>> grid = GridSearchCV(
-    ...     LogisticRegression().fit_requests(sample_weight=True), ...)
+    >>> grid = GridSearchCV(LogisticRegression().fit_requests(sample_weight=True), ...)
     >>> grid.fit(X, y, sample_weight=sw)
 
 Meta-estimators such as `GridSearchCV` will check that the metadata requested
