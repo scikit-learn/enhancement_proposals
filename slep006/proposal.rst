@@ -34,9 +34,13 @@ use cases are currently not supported:
 * Passing metadata (e.g. `sample_weight`) to a scorer used in cross-validation
 * Passing metadata (e.g. `groups`) to a CV splitter in nested cross-validation
 * Passing metadata (e.g. `sample_weight`) to some scorers and not others in
-  multi-metric cross-validation.
-* Passing metadata to non-`fit` methods. For example, passing group indices
-  for samples that are to be treated as a single sequence in prediction.
+  multi-metric cross-validation. This is also required to handle fairness
+  related metrics which usually expect one or more sensitive attributes to be
+  passed to them along with the data.
+* Passing metadata to non-`fit` methods. For example, passing group indices for
+  samples that are to be treated as a single sequence in prediction, or passing
+  sensitive attributes to `predict` or `transform` of a fairness related
+  estimator.
 
 We define the following terms in this proposal:
 
@@ -51,18 +55,19 @@ We define the following terms in this proposal:
 This SLEP proposes to add
 
 * `get_metadata_routing` to all **consumers** and **routers**
-  (i.e. all estimators supporting this API)
-* `*_requests` to consumers (including estimators and CV splitters),
+  (i.e. all estimators, scorers, and splitters supporting this API)
+* `*_requests` to consumers (including estimators, scorers, and CV splitters),
   where `*` is a method that requires metadata. (e.g. `fit_requests`,
   `score_requests`, `transform_requests`, etc.)
 
 For example, `fit_requests` configures an estimator to request metadata::
 
-    >>> log_reg = LogisticRegression().fit_requests(sample+weight=True)
+    >>> log_reg = LogisticRegression().fit_requests(sample_weight=True)
 
 `get_metadata_routing` are used by **routers** to inspect the metadata needed
-by  **consumers**. `get_metadata_routing` returns a `MetadataRouter`
-object that stores and handles metadata routing.
+by **consumers**. `get_metadata_routing` returns a `MetadataRouter` or a
+`MetadataRequest` object that stores and handles metadata routing. See the
+draft implementation for more implementation details.
 
 Detailed description
 --------------------
@@ -109,6 +114,11 @@ will _not_ be routed weights::
     >>> sel = SelectKBest(k=2)
     >>> pipe = make_pipeline(sel, log_reg)
     >>> pipe.fit(X, y, sample_weight=weights, groups=groups)
+
+Note that if a _consumer_ or a _router_ starts accepting and consuming a
+certain metadata, the developer API allows the developers to raise a warning
+and avoid silent behavior changes in users' code. See the draft implementation
+for more details.
 
 Different Scoring and Fitting Weights
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
