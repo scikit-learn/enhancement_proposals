@@ -116,7 +116,7 @@ will _not_ be routed weights::
     >>> pipe.fit(X, y, sample_weight=weights, groups=groups)
 
 Note that if a _consumer_ or a _router_ starts accepting and consuming a
-certain metadata, the developer API allows the developers to raise a warning
+certain metadata, the developer API enables developers to raise a warning
 and avoid silent behavior changes in users' code. See the draft implementation
 for more details.
 
