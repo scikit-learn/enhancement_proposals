@@ -9,6 +9,7 @@
     :maxdepth: 1
     :caption: Accepted
 
+    slep006/proposal
     slep007/proposal
     slep009/proposal
     slep010/proposal
@@ -17,7 +18,6 @@
     :maxdepth: 1
     :caption: Under review
 
-    slep006/proposal
     slep012/proposal
     slep013/proposal
 

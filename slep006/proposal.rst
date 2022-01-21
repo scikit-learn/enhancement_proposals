@@ -5,7 +5,7 @@ SLEP006: Metadata Routing
 =========================
 
 :Author: Joel Nothman, Adrin Jalali, Alex Gramfort, Thomas J. Fan
-:Status: Under Review
+:Status: Accepted
 :Type: Standards Track
 :Created: 2019-03-07
 
