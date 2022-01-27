@@ -9,6 +9,8 @@
     :maxdepth: 1
     :caption: Accepted
 
+    slep005/proposal
+    SLEP009: Keyword-only arguments (voting until 11 Oct 2019) <slep009/proposal>
     slep007/proposal
     slep009/proposal
     slep010/proposal
