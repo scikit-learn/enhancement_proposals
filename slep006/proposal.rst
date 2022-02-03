@@ -89,7 +89,7 @@ requests `groups` by default::
     >>> cv_results = cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={"sample_weight": my_weights, "groups": my_groups},
+    ...     metadata={"sample_weight": my_weights, "groups": my_groups},
     ...     scoring=weighted_acc)
 
 To support unweighted fitting and weighted scoring, metadata is set to `False`
@@ -100,7 +100,7 @@ in `request_for_fit`::
     >>> cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={'sample_weight': weights, 'groups': groups},
+    ...     metadata={'sample_weight': weights, 'groups': groups},
     ...     scoring=weighted_acc)
 
 Unweighted Feature selection
@@ -134,7 +134,7 @@ is passed to `LogisticRegressionCV`::
     >>> cv_results = cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={"scoring_weight": my_weights,
+    ...     metadata={"scoring_weight": my_weights,
     ...            "fitting_weight": my_other_weights,
     ...            "groups": my_groups},
     ...     scoring=weighted_acc)
@@ -155,7 +155,7 @@ and the inner random search::
     >>> cv_results = cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={"groups": my_groups})
+    ...     metadata={"groups": my_groups})
 
 Implementation
 --------------
