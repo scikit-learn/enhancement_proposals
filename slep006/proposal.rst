@@ -161,7 +161,7 @@ Implementation
 --------------
 
 This SLEP has a draft implementation at :pr:`22083` by :user:`adrinjalali`. The
-implementation provides developer utilities that is used by scikit-learn and
+implementation provides developer utilities that are used by scikit-learn and
 available to third-party estimators for adopting this SLEP. Specifically, the
 draft implementation makes it easier to define `get_metadata_routing` and
 `*_requests` for **consumers** and **routers**.
@@ -182,12 +182,12 @@ a deprecation warning is raised::
     >>> GridSearchCV(LogisticRegression(), ...).fit(X, y, sample_weight=sw)
 
 To avoid the warning, one would need to specify the request in
-`LogisticRegressionCV`::
+`LogisticRegression`::
 
     >>> grid = GridSearchCV(LogisticRegression().fit_requests(sample_weight=True), ...)
     >>> grid.fit(X, y, sample_weight=sw)
 
-Meta-estimators such as `GridSearchCV` will check that the metadata requested
+Meta-estimators such as `GridSearchCV` will check which metadata is requested,
 and will error when metadata is passed in and the inner estimator is
 not configured to request it::
 
@@ -221,7 +221,7 @@ adopting this SLEP.
 Alternatives
 ------------
 
-Over the years, there has been many proposed alternatives before we landed
+Over the years, there have been many proposed alternatives before we landed
 on this SLEP:
 
 * :pr:`4696` A first implementation by :user:`amueller`
@@ -230,7 +230,7 @@ on this SLEP:
   by :user:`tguillemot`.
 * :pr:`9566` Another implementation (solution 3 from this SLEP)
   by :user:`jnothman`
-* This SLEP has emerged from many alternatives that is seen at
+* This SLEP has emerged from many alternatives detailed at
   :ref:`slep_006_other`.
 
 Discussion & Related work
@@ -238,7 +238,7 @@ Discussion & Related work
 
 This SLEP was drafted based on the discussions of potential solutions
 at the February 2019 development sprint in Paris. The overarching issue is
-fond at "Consistent API for attaching properties to samples" at :issue:`4497`.
+found at "Consistent API for attaching properties to samples" at :issue:`4497`.
 
 Related issues and discussions include: :issue:`1574`, :issue:`2630`,
 :issue:`3524`, :issue:`4632`, :issue:`4652`, :issue:`4660`, :issue:`4696`,
