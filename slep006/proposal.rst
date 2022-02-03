@@ -110,7 +110,7 @@ Unweighted Feature selection
 will _not_ be routed weights::
 
     >>> log_reg = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
-    ...           .fit_requests(sample_weight=True))
+    ...            .fit_requests(sample_weight=True))
     >>> sel = SelectKBest(k=2)
     >>> pipe = make_pipeline(sel, log_reg)
     >>> pipe.fit(X, y, sample_weight=weights, groups=groups)
@@ -128,9 +128,9 @@ this example, `scoring_weight` is passed to the scoring and `fitting_weight`
 is passed to `LogisticRegressionCV`::
 
     >>> weighted_acc = (make_scorer(accuracy_score)
-    ...                .score_requests(sample_weight="scoring_weight"))
+    ...                 .score_requests(sample_weight="scoring_weight"))
     >>> log_reg = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
-    ...           .fit_requests(sample_weight="fitting_weight"))
+    ...            .fit_requests(sample_weight="fitting_weight"))
     >>> cv_results = cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
@@ -206,12 +206,12 @@ To avoid the error, `LogisticRegression` must specify its metadata request by ca
     >>> # Request sample weights
     >>> log_reg_weights = LogisticRegression().fit_requests(sample_weight=True)
     >>> grid = GridSearchCV(log_reg_with_weights, ...)
-    >>> grid.fit(X, , sample_weight=sw)
+    >>> grid.fit(X, y, sample_weight=sw)
     >>>
     >>> # Do not request sample_weights
     >>> log_reg_no_weights = LogisticRegression().fit_requests(sample_weight=False)
     >>> grid = GridSearchCV(log_reg_no_weights, ...)
-    >>> grid.fit(X, , sample_weight=sw)
+    >>> grid.fit(X, y, sample_weight=sw)
 
 Third-party estimators will need to adopt this SLEP in order to support metadata
 routing, while the dunder syntax is deprecated. Our implementation will provide
