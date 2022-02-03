@@ -295,4 +295,4 @@ This document has been placed in the public domain [1]_.
 References and Footnotes
 ------------------------
 
-.. [1] _Open Publication License: https://www.opencontent.org/openpub/
+.. [1] Open Publication License: https://www.opencontent.org/openpub/
