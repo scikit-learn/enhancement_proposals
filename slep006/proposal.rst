@@ -142,9 +142,9 @@ is passed to `LogisticRegressionCV`::
 Nested Grouped Cross Validation with SearchCV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since `GroupKFold` requests group metadata by default, `GroupKFold` can be
-passed to multiple **consumers** to enable nested grouped cross validation. In
-this example, both `RandomizedSearchCV` and `cross_validate` sets
+Since `GroupKFold` requests group metadata by default, `GroupKFold` instances can
+be passed to multiple **routers** to enable nested grouped cross validation. In
+this example, both `RandomizedSearchCV` and `cross_validate` set
 `cv=GroupKFold()` which enables grouped CV in the outer loop (`cross_validate`)
 and the inner random search::
 
