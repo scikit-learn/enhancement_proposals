@@ -93,7 +93,7 @@ requests `groups` by default::
     ...     scoring=weighted_acc)
 
 To support unweighted fitting and weighted scoring, metadata is set to `False`
-in `request_for_fit`::
+in `fit_request`::
 
     >>> log_reg = (LogisticRegressionCV(cv=group_cv, scoring=weighted_acc)
     ...           .fit_request(sample_weight=False))
