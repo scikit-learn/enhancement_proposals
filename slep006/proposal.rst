@@ -69,6 +69,9 @@ by **consumers**. `get_metadata_routing` returns a `MetadataRouter` or a
 `MetadataRequest` object that stores and handles metadata routing. See the
 draft implementation for more implementation details.
 
+Note that in the core library nothing is requested by default, except
+``groups`` in ``Group*CV`` objects which request the ``groups`` metadata.
+
 Detailed description
 --------------------
 
@@ -200,8 +203,8 @@ not configured to request it::
     >>> # `grid.fit`.
     >>> grid.fit(X, y, sample_weight=sw)
 
-To avoid the error, `LogisticRegression` must specify its metadata request by calling
-`fit_requests`::
+To avoid the error, `LogisticRegression` must specify its metadata request by
+calling `fit_requests`::
 
     >>> # Request sample weights
     >>> log_reg_weights = LogisticRegression().fit_requests(sample_weight=True)
@@ -213,10 +216,13 @@ To avoid the error, `LogisticRegression` must specify its metadata request by ca
     >>> grid = GridSearchCV(log_reg_no_weights, ...)
     >>> grid.fit(X, , sample_weight=sw)
 
-Third-party estimators will need to adopt this SLEP in order to support metadata
-routing, while the dunder syntax is deprecated. Our implementation will provide
-developer APIs to trigger warnings and errors as described above to help with
-adopting this SLEP.
+Note that a meta-estimator will raise an error if the user passes a metadata
+which is not requested by any of the child objects of the meta-estimator.
+
+Third-party estimators will need to adopt this SLEP in order to support
+metadata routing, while the dunder syntax is deprecated. Our implementation
+will provide developer APIs to trigger warnings and errors as described above
+to help with adopting this SLEP.
 
 Alternatives
 ------------
