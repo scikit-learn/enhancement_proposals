@@ -66,11 +66,15 @@ For example, `fit_requests` configures an estimator to request metadata::
 
 `get_metadata_routing` are used by **routers** to inspect the metadata needed
 by **consumers**. `get_metadata_routing` returns a `MetadataRouter` or a
-`MetadataRequest` object that stores and handles metadata routing. See the
-draft implementation for more implementation details.
+`MetadataRequest` object that stores and handles metadata routing.
+`get_metadata_routing` returns enough information for a router to know what
+metadata is requested, and whether the metadata is sample aligned or not. See
+the draft implementation for more implementation details.
 
 Note that in the core library nothing is requested by default, except
-``groups`` in ``Group*CV`` objects which request the ``groups`` metadata.
+``groups`` in ``Group*CV`` objects which request the ``groups`` metadata. At
+the time of writing this proposal, all metadata requested in the core library
+are sample aligned.
 
 Detailed description
 --------------------
