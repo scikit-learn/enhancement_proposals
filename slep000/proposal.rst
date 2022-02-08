@@ -5,7 +5,7 @@ SLEP000: SLEP and its workflow
 ==============================
 
 :Author: Adrin Jalali
-:Status: Draft
+:Status: Accepted
 :Type: Process
 :Created: 2020-02-13
 
@@ -295,4 +295,4 @@ This document has been placed in the public domain [1]_.
 References and Footnotes
 ------------------------
 
-.. [1] _Open Publication License: https://www.opencontent.org/openpub/
+.. [1] Open Publication License: https://www.opencontent.org/openpub/
