@@ -5,7 +5,7 @@ SLEP006: Metadata Routing
 =========================
 
 :Author: Joel Nothman, Adrin Jalali, Alex Gramfort, Thomas J. Fan
-:Status: Under Review
+:Status: Accepted
 :Type: Standards Track
 :Created: 2019-03-07
 
@@ -56,18 +56,25 @@ This SLEP proposes to add
 
 * `get_metadata_routing` to all **consumers** and **routers**
   (i.e. all estimators, scorers, and splitters supporting this API)
-* `*_requests` to consumers (including estimators, scorers, and CV splitters),
-  where `*` is a method that requires metadata. (e.g. `fit_requests`,
-  `score_requests`, `transform_requests`, etc.)
+* `set_*_request` to consumers (including estimators, scorers, and CV
+  splitters), where `*` is a method that requires metadata. (e.g.
+  `set_fit_request`, `set_score_request`, `set_transform_request`, etc.)
 
-For example, `fit_requests` configures an estimator to request metadata::
+For example, `set_fit_request` configures an estimator to request metadata::
 
-    >>> log_reg = LogisticRegression().fit_requests(sample_weight=True)
+    >>> log_reg = LogisticRegression().set_fit_request(sample_weight=True)
 
 `get_metadata_routing` are used by **routers** to inspect the metadata needed
 by **consumers**. `get_metadata_routing` returns a `MetadataRouter` or a
-`MetadataRequest` object that stores and handles metadata routing. See the
-draft implementation for more implementation details.
+`MetadataRequest` object that stores and handles metadata routing.
+`get_metadata_routing` returns enough information for a router to know what
+metadata is requested, and whether the metadata is sample aligned or not. See
+the draft implementation for more implementation details.
+
+Note that in the core library nothing is requested by default, except
+``groups`` in ``Group*CV`` objects which request the ``groups`` metadata. At
+the time of writing this proposal, all metadata requested in the core library
+are sample aligned.
 
 Detailed description
 --------------------
@@ -85,11 +92,11 @@ requests `groups` by default::
 
     >>> weighted_acc = make_scorer(accuracy_score).score_request(sample_weight=True)
     >>> log_reg = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
-    ...           .fit_requests(sample_weight=True))
+    ...           .set_fit_request(sample_weight=True))
     >>> cv_results = cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={"sample_weight": my_weights, "groups": my_groups},
+    ...     metadata={"sample_weight": my_weights, "groups": my_groups},
     ...     scoring=weighted_acc)
 
 To support unweighted fitting and weighted scoring, metadata is set to `False`
@@ -100,7 +107,7 @@ in `fit_request`::
     >>> cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={'sample_weight': weights, 'groups': groups},
+    ...     metadata={'sample_weight': weights, 'groups': groups},
     ...     scoring=weighted_acc)
 
 Unweighted Feature selection
@@ -110,7 +117,7 @@ Unweighted Feature selection
 will _not_ be routed weights::
 
     >>> log_reg = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
-    ...            .fit_requests(sample_weight=True))
+    ...            .set_fit_request(sample_weight=True))
     >>> sel = SelectKBest(k=2)
     >>> pipe = make_pipeline(sel, log_reg)
     >>> pipe.fit(X, y, sample_weight=weights, groups=groups)
@@ -128,13 +135,13 @@ this example, `scoring_weight` is passed to the scoring and `fitting_weight`
 is passed to `LogisticRegressionCV`::
 
     >>> weighted_acc = (make_scorer(accuracy_score)
-    ...                 .score_requests(sample_weight="scoring_weight"))
+    ...                 .set_score_request(sample_weight="scoring_weight"))
     >>> log_reg = (LogisticRegressionCV(cv=GroupKFold(), scoring=weighted_acc)
-    ...            .fit_requests(sample_weight="fitting_weight"))
+    ...            .set_fit_request(sample_weight="fitting_weight"))
     >>> cv_results = cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={"scoring_weight": my_weights,
+    ...     metadata={"scoring_weight": my_weights,
     ...            "fitting_weight": my_other_weights,
     ...            "groups": my_groups},
     ...     scoring=weighted_acc)
@@ -155,7 +162,7 @@ and the inner random search::
     >>> cv_results = cross_validate(
     ...     log_reg, X, y,
     ...     cv=GroupKFold(),
-    ...     props={"groups": my_groups})
+    ...     metadata={"groups": my_groups})
 
 Implementation
 --------------
@@ -164,7 +171,7 @@ This SLEP has a draft implementation at :pr:`22083` by :user:`adrinjalali`. The
 implementation provides developer utilities that are used by scikit-learn and
 available to third-party estimators for adopting this SLEP. Specifically, the
 draft implementation makes it easier to define `get_metadata_routing` and
-`*_requests` for **consumers** and **routers**.
+`set_*_request` for **consumers** and **routers**.
 
 Backward compatibility
 ----------------------
@@ -184,7 +191,9 @@ a deprecation warning is raised::
 To avoid the warning, one would need to specify the request in
 `LogisticRegression`::
 
-    >>> grid = GridSearchCV(LogisticRegression().fit_requests(sample_weight=True), ...)
+    >>> grid = GridSearchCV(
+    ...     LogisticRegression().set_fit_request(sample_weight=True), ...
+    ... )
     >>> grid.fit(X, y, sample_weight=sw)
 
 Meta-estimators such as `GridSearchCV` will check which metadata is requested,
@@ -200,23 +209,26 @@ not configured to request it::
     >>> # `grid.fit`.
     >>> grid.fit(X, y, sample_weight=sw)
 
-To avoid the error, `LogisticRegression` must specify its metadata request by calling
-`fit_requests`::
+To avoid the error, `LogisticRegression` must specify its metadata request by
+calling `set_fit_request`::
 
     >>> # Request sample weights
-    >>> log_reg_weights = LogisticRegression().fit_requests(sample_weight=True)
+    >>> log_reg_weights = LogisticRegression().set_fit_request(sample_weight=True)
     >>> grid = GridSearchCV(log_reg_with_weights, ...)
     >>> grid.fit(X, y, sample_weight=sw)
     >>>
     >>> # Do not request sample_weights
-    >>> log_reg_no_weights = LogisticRegression().fit_requests(sample_weight=False)
+    >>> log_reg_no_weights = LogisticRegression().set_fit_request(sample_weight=False)
     >>> grid = GridSearchCV(log_reg_no_weights, ...)
     >>> grid.fit(X, y, sample_weight=sw)
 
-Third-party estimators will need to adopt this SLEP in order to support metadata
-routing, while the dunder syntax is deprecated. Our implementation will provide
-developer APIs to trigger warnings and errors as described above to help with
-adopting this SLEP.
+Note that a meta-estimator will raise an error if the user passes a metadata
+which is not requested by any of the child objects of the meta-estimator.
+
+Third-party estimators will need to adopt this SLEP in order to support
+metadata routing, while the dunder syntax is deprecated. Our implementation
+will provide developer APIs to trigger warnings and errors as described above
+to help with adopting this SLEP.
 
 Alternatives
 ------------
