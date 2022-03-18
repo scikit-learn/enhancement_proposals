@@ -67,21 +67,20 @@ root estimator (``pipe``) that will be passed to the grid search estimator,
 i.e. ``reduce_dim__k``.  To construct this fully qualified parameter name, the
 user must know that the ``SelectKBest`` estimator resides in a ``Pipeline``
 step named ``reduce_dim`` and that the Pipeline is not further nested in
-another estimator. Changing the name of ``reduce_dim`` would entail a change to
-5 lines in the above code snippet.
+another estimator. Changing the step identifier ``reduce_dim`` would entail
+a change to 5 lines in the above code snippet.
 
 We also see that the options for ``classify__C`` need to be specified twice.
-Were the candidate values for ``C`` something that belonged to the
-``LinearSVC`` estimator instance, rather than part of a grid specification, it
-would be possible to specify it only once. The use of a list of two separate
-dicts of parameter spaces is altogether avoidable, as the only reason the
+It should be possible to specify it only once. The use of a list of two separate
+dicts of parameter spaces is similarly cumbersome: the only reason the
 parameter space is duplicated is to handle the alternation of one step in the
 pipeline; for all other steps, it makes sense for the candidate parameter
 space to remain constant regardless of whether ``reduce_dim`` is a feature
 selector or a PCA.
 
-This SLEP proposes to allow the user to specify candidates or distributions for
-local parameters on a specific estimator estimator instance::
+This SLEP proposes to add a methods to estimators that allow the user
+to specify candidates or distributions for local parameters on a specific
+estimator estimator instance::
 
     svc = LinearSVC(dual=False, max_iter=10000).set_grid(C=C_OPTIONS)
     pipe = Pipeline(
@@ -112,6 +111,18 @@ Such functionality therefore allows users to:
 * more comfortably specify search spaces that include the alternation of a
   step in a Pipeline (or ColumnTransformer, etc.), creating a form of
   conditional dependency in the search space.
+
+History
+-------
+
+:issue:`5082`, :issue:`7608` and :issue:`19045` have all raised associating
+parameter search spaces directly with an estimator instance, while this
+has been supported by third party packages [1]_, [2]_. :issue:`21784` proposed
+a ``GridFactory``, but feedback suggested that methods on each estimator
+was more usable than an external utility.
+
+This proposal pertains to the Scikit-learn Roadmap entry "Better support for
+manual and automatic pipeline building" dating back to 2018.
 
 Implementation
 --------------
@@ -213,20 +224,20 @@ Four public methods will be added to ``BaseEstimator``::
 The current distribution and grid values will be stored in a private
 attribute on the estimator, and ``get_grid`` may simply return this value,
 or an empty dict if undefined, while ``get_distribution`` will combine the
-stored attribute with ``get_grid`` values.
+stored parameter distributions with ``get_grid`` values.
 The attribute will be undefined by default upon construction of the estimator.
 
-Parameter spaces should be copied in clone, so that a user can overwrite only
-one parameter's space without redefining everything.
+Parameter spaces should be copied in :ojb:`sklearn.base.clone`, so that a user
+can overwrite only one parameter's space without redefining everything.
 To facilitate this (in the absence of a polymorphic implementation of clone),
 we might need to store the candidate grids and distributions in a known instance
 attribute, or use a combination of `get_grid`, `get_distribution`, `get_params`
 and `set_grid`, `set_distribution` etc. to perform `clone`.
 
 Search estimators in `sklearn.model_selection` will be updated such that the
-required `param_grid` and `param_distributions` parameters will now default
+currently required `param_grid` and `param_distributions` parameters will now default
 to 'extract'. The 'extract' value instructs the search estimator to construct
-a complete search space from the provided estimator's `get_grid` (or
+a complete search space from the provided estimator's `get_grid` (respectively,
 `get_distribution`) return value together with `get_params`.
 It recursively calls `get_grid` (and `get_distribution`) on any parametrized
 objects (i.e. those with `get_params`) with this method that are descendent
@@ -251,29 +262,51 @@ No concerns
 Alternatives
 ------------
 
-TODO
+The fundamental change here is to associate parameter search configuration with each atomic estimator object.
 
-no methhods, but storing on est
-GridFactory (:issue:`21784`)
+Alternative APIs to do so include:
 
-Alternative syntaxes
+* Provide a function ``set_grid`` as Searchgrid [1]_ does, which takes an
+  estimator instance and a parameter space, and sets a private
+  attribute on the estimator object. This avoids cluttering the estimator's
+  method namespace.
+* Provide a `GridFactory` (see :issue:`21784`) which allows the user to
+  construct a mapping from atomic estimator instances to their search spaces.
+  Aside from not cluttering the estimator's namespace, this may have
+  theoretical benefit in allowing the user to construct multiple search spaces
+  for the same composite estimator. There are no known use cases for this
+  benefit.
 
-one call per param?
-duplicate vs single method for grid vs  distbn
+Another questionable design is the separation of ``set_grid`` and ``set_distribution``.
+These could be combined into a single method (``set_search_space``?), such that
+:class:`~sklearn.model_selection.GridSearchCV` rejects a call to `fit` where `rvs`
+appear. This would make it harder to predefine search spaces that could be used
+for either exhaustive or randomised searches, which may be a use case in Auto-ML.
 
-make_pipeline alternative or extension to avoid declaring 'passthrough'
+The design of using a keyword argument for each parameter in ``set_grid``
+encourages succinctness but reduces extensibility.
+For example, we could design the API to require a single call per parameter::
 
-searchgrid [1]_, Neuraxle [2]_
+  est.set_grid('alpha', [.1, 1, 10]).set_grid('l1_ratio', [.2, .4, .6., .8])
+
+This design would allow further parameters to be added to `set_grid` to enrich
+the use of this data, including whether or not it is intended for randomised search.
 
 Discussion
 ----------
 
-TODO
+There are several areas to extend upon the above changes, such as to allow
+easier construction of pipelines with alternative steps to be searched (see
+``searchgrid.make_pipeline``), and handling alternative steps having
+non-uniform distribution for randomised search.
 
-raised in :issue:`19045`.
+There are also several other limitatins of the proposed solution:
 
-:issue:`9610`: our solution does not directly meet the need for conditional
-dependencies within a single estimator, e.g::
+Limitation: tied parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Our solution does not directly meet the need for conditional
+dependencies within a single estimator raised in :issue:`9610`, e.g::
 
     param_grid = [
         {
@@ -286,24 +319,24 @@ dependencies within a single estimator, e.g::
             "C": [1, 10],
         }
     ]
-    
+
+Using the proposed API, the user would need to search over multiple instances
+of the estimator, setting the parameter grids that could be searched with
+conditional independence.
+
 That issue also raises a request to tie parameters across estimators. While
 the current proposal does not support this use case, the algorithm translating
 an estimator to its deep parameter grid/distribution could potentially be adjusted
 to recognise a ``TiedParam`` helper.
 
-searchgrid's implementation was mentioned in relation to
-https://github.com/scikit-learn/scikit-learn/issues/7707#issuecomment-392298478
+Limitation: continued use of ``__`` for search parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Not handled: ``__`` paths still used in ``cv_results_``
-
-Non-uniform distributions on categorical values.
-
-This section may just be a bullet list including links to any discussions
-regarding the SLEP:
-
-- This includes links to mailing list threads or relevant GitHub issues.
-
+While this proposal reduces the use of dunders (``__``) for specifying parameter
+spaces, they will still be rendered in ``*SearchCV``'s ``cv_results_`` attribute.
+``cv_results_`` is similarly affected by large changes to its keys when small
+changes are made to the composite model structure. Future work could provide
+tools to make ``cv_results_`` more accessible and invariant to model structure.
 
 References and Footnotes
 ------------------------
