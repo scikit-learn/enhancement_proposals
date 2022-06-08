@@ -77,8 +77,8 @@ the time of writing this proposal, all metadata requested in the core library
 are sample aligned.
 
 Also note that ``X``, ``y``, and ``Y`` input arguments are never automatically
-added to the routing mechanism and they are routed and passed around the way
-they have been passed around until now.
+added to the routing mechanism and are always passed into their respective
+methods.
 
 Detailed description
 --------------------
