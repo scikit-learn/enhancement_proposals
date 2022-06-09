@@ -28,8 +28,10 @@ pandas DataFrames::
    # X_trans_df is a pandas DataFrame
    X_trans_df = scalar.transform(X_df)
 
-For a pipeline, calling ``set_output`` on the pipeline will configure
-all steps in the pipeline::
+The index of the output DataFrame must match the index of the input.
+
+For a pipeline, calling ``set_output`` on the pipeline will configure all steps in the
+pipeline::
 
    num_prep = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
    num_preprocessor.set_output(transform="pandas")
@@ -37,17 +39,8 @@ all steps in the pipeline::
    # X_trans_df is a pandas DataFrame
    X_trans_df = num_preprocessor.fit_transform(X_df)
 
-By setting ``transform="pandas"`` calls to ``fit_transform`` will also return a
-pandas DataFrame::
-
-   num_prep = make_pipeline(
-      SimpleImputer(),
-      DependsOnPandasInputStandardScalar(),  # Depends on Pandas input to train
-   )
-   num_prep.set_output(transform="pandas")
-
-   # Pipeline calls ``SimpleImputer.fit_transform`` returning a pandas DataFrame
-   num_prep.fit(X_df)
+Meta-estimators that support ``set_output`` are required to configure all estimators
+by calling ``set_output``.
 
 Global Configuration
 ....................
@@ -76,8 +69,9 @@ Backward compatibility
 
 There are no backward compatibility concerns, because the ``set_output`` method
 is a new API. Third party estimators can opt-in to the API by defining
-``set_output``. The scikit-learn sparse container is backward compatible because
-it is a subclass of SciPy's sparse matrix.
+``set_output``. Meta-estimators that define ``set_output`` to configure
+it's inner estimators with ``set_output`` should error if any of the inner
+estimators do not define ``set_output``.
 
 Alternatives
 ------------
