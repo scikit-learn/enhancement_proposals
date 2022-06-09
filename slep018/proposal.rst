@@ -22,7 +22,7 @@ Currently, scikit-learn transformers return NumPy ndarrays or SciPy sparse matri
 This SLEP proposes adding a ``set_output`` method to configure a transformer to output
 pandas DataFrames::
 
-   scalar = StandardScalar().set_output(transform="pandas_or_namedsparse")
+   scalar = StandardScalar().set_output(transform="pandas")
    scalar.fit(X_df)
 
    # X_trans_df is a pandas DataFrame
@@ -32,7 +32,7 @@ For a pipeline, calling ``set_output`` on the pipeline will configure
 all steps in the pipeline::
 
    num_prep = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
-   num_preprocessor.set_output(transform="pandas_or_namedsparse")
+   num_preprocessor.set_output(transform="pandas")
 
    # X_trans_df is a pandas DataFrame
    X_trans_df = num_preprocessor.fit_transform(X_df)
@@ -44,31 +44,10 @@ pandas DataFrame::
       SimpleImputer(),
       DependsOnPandasInputStandardScalar(),  # Depends on Pandas input to train
    )
-   num_prep.set_output(transform="pandas_or_namedsparse")
+   num_prep.set_output(transform="pandas")
 
    # Pipeline calls ``SimpleImputer.fit_transform`` returning a pandas DataFrame
    num_prep.fit(X_df)
-
-Sparse Data
-...........
-
-The Pandas DataFrame is not suitable to provide column names because it has
-performance issues as shown in
-`#16772 <https://github.com/scikit-learn/scikit-learn/pull/16772#issuecomment-615423097>`__.
-This SLEP proposes a scikit-learn specific sparse container that subclasses SciPy's
-sparse matrices. This sparse container includes the sparse data, feature names and
-index. This enables pipelines with Vectorizers without performance issues::
-
-   pipe = make_pipeline(
-      CountVectorizer(),
-      TfidfTransformer(),
-      LogisticRegression(solver="liblinear")
-   )
-
-   pipe.set_output(transform="pandas_or_namedsparse")
-
-   # feature names for logistic regression
-   pipe[-1].feature_names_in_
 
 Global Configuration
 ....................
@@ -77,7 +56,7 @@ This SLEP proposes a global configuration flag that sets the output for
 all transformers::
 
    import sklearn
-   sklearn.set_config(transform_output="pandas_or_namedsparse")
+   sklearn.set_config(transform_output="pandas")
 
 The global default configuration is ``"default"`` where the estimator determines
 the output container.
@@ -122,6 +101,30 @@ A list of issues discussing Pandas output are:
 `#14315 <https://github.com/scikit-learn/scikit-learn/pull/14315>`__,
 `#20100 <https://github.com/scikit-learn/scikit-learn/pull/20100>`__, and
 `#23001 <https://github.com/scikit-learn/scikit-learn/issueas/23001>`__.
+
+Future Extensions
+-----------------
+
+Sparse Data
+...........
+
+The Pandas DataFrame is not suitable to provide column names because it has
+performance issues as shown in
+`#16772 <https://github.com/scikit-learn/scikit-learn/pull/16772#issuecomment-615423097>`__.
+A possible future extension to this SLEP is to have a ``"pandas_or_namedsparse"``
+option. This option will use a scikit-learn specific sparse container that subclasses SciPy's
+sparse matrices. This sparse container includes the sparse data, feature names and
+index. This enables pipelines with Vectorizers without performance issues::
+
+   pipe = make_pipeline(
+      CountVectorizer(),
+      TfidfTransformer(),
+      LogisticRegression(solver="liblinear")
+   )
+   pipe.set_output(transform="pandas_or_namedsparse")
+
+   # feature names for logistic regression
+   pipe[-1].feature_names_in_
 
 References and Footnotes
 ------------------------
