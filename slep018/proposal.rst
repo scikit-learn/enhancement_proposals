@@ -28,7 +28,9 @@ pandas DataFrames::
    # X_trans_df is a pandas DataFrame
    X_trans_df = scalar.transform(X_df)
 
-The index of the output DataFrame must match the index of the input.
+The index of the output DataFrame must match the index of the input. For this SLEP,
+``set_output`` will only configure the output for dense output. If an transformer
+returns sparse data, ``set_output`` will not influence the output container.
 
 For a pipeline, calling ``set_output`` on the pipeline will configure all steps in the
 pipeline::
@@ -105,8 +107,8 @@ Sparse Data
 The Pandas DataFrame is not suitable to provide column names because it has
 performance issues as shown in
 `#16772 <https://github.com/scikit-learn/scikit-learn/pull/16772#issuecomment-615423097>`__.
-A possible future extension to this SLEP is to have a ``"pandas_or_namedsparse"``
-option. This option will use a scikit-learn specific sparse container that subclasses SciPy's
+A future extension to this SLEP is to have a ``"pandas_or_namedsparse"`` option.
+This option will use a scikit-learn specific sparse container that subclasses SciPy's
 sparse matrices. This sparse container includes the sparse data, feature names and
 index. This enables pipelines with Vectorizers without performance issues::
 
