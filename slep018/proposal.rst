@@ -31,7 +31,7 @@ pandas DataFrames::
 The index of the output DataFrame must match the index of the input. For this
 SLEP, ``set_output`` will only configure the output for dense data. If a
 transformer returns sparse data, then ``transform`` will error if ``set_output``
-is to "pandas". If a transformer always returns sparse data, then calling
+is set to "pandas". If a transformer always returns sparse data, then calling
 `set_output="pandas"` may raise an error.
 
 For a pipeline, calling ``set_output`` on the pipeline will configure all steps in the
