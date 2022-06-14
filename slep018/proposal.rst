@@ -29,7 +29,7 @@ pandas DataFrames::
    X_trans_df = scalar.transform(X_df)
 
 The index of the output DataFrame must match the index of the input. For this SLEP,
-``set_output`` will only configure the output for dense output. If an transformer
+``set_output`` will only configure the container for dense output. If an transformer
 returns sparse data, ``set_output`` will not influence the output container.
 
 For a pipeline, calling ``set_output`` on the pipeline will configure all steps in the
