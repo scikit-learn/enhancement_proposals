@@ -64,12 +64,7 @@ determines the output container.
 Implementation
 --------------
 
-A prototype implementation was created to showcase different use cases for this
-SLEP, which is seen in `this rendered notebook
-<https://nbviewer.org/github/thomasjpfan/pandas-prototype-demo/blob/main/index.ipynb>`__
-and `this interactive notebook
-<https://colab.research.google.com/github/thomasjpfan/pandas-prototype-demo/blob/main/index.ipynb>`__.
-
+The implementation of this SLEP is in :pr:`23734`.
 
 Backward compatibility
 ----------------------
