@@ -45,7 +45,7 @@ in the pipeline::
 
    # X_trans_df is a pandas DataFrame
    X_trans_df = num_preprocessor.fit_transform(X_df)
-   
+
    # X_trans_df is again a pandas DataFrame
    X_trans_df = num_preprocessor[0].transform(X_df)
 
@@ -113,30 +113,6 @@ A list of issues discussing Pandas output are: `#14315
 <https://github.com/scikit-learn/scikit-learn/pull/20100>`__, and `#23001
 <https://github.com/scikit-learn/scikit-learn/issueas/23001>`__.
 
-Future Extensions
------------------
-For information only!
-Sparse Data
-...........
-
-The Pandas DataFrame is not suitable to provide column names for sparse data
-because it has performance issues as shown in `#16772
-<https://github.com/scikit-learn/scikit-learn/pull/16772#issuecomment-615423097>`__.
-A future extension to this SLEP is to have a ``"pandas_or_namedsparse"`` option.
-This option will use a scikit-learn specific sparse container that subclasses
-SciPy's sparse matrices. This sparse container includes the sparse data, feature
-names and index. This enables pipelines with Vectorizers without performance
-issues::
-
-   pipe = make_pipeline(
-      CountVectorizer(),
-      TfidfTransformer(),
-      LogisticRegression(solver="liblinear")
-   )
-   pipe.set_output(transform="pandas_or_namedsparse")
-
-   # feature names for logistic regression
-   pipe[-1].feature_names_in_
 
 References and Footnotes
 ------------------------
