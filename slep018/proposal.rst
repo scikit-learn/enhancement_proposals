@@ -12,7 +12,7 @@ SLEP018: Pandas Output for Transformers with set_output
 Abstract
 --------
 
-This SLEP proposes a ``set_output`` method to configure the output container of
+This SLEP proposes a ``set_output`` method to configure the output data container of
 scikit-learn transformers.
 
 Detailed description
@@ -32,9 +32,10 @@ The index of the output DataFrame must match the index of the input. If the
 transformer does not support ``transform="pandas"``, then it must raise a
 ``ValueError`` stating that it does not support the feature.
 
-For this SLEP, ``set_output`` will only configure the output for dense data.  If
-the transformer returns sparse data, then ``transform`` will raise a
-``ValueError`` if ``set_output(transform="pandas")``.
+This SLEP's only focus is dense data for ``set_output``. If a transformer returns
+sparse data, e.g. `OneHotEncoder(sparse=True), then ``transform`` will raise a
+``ValueError`` if ``set_output(transform="pandas")``. Dealing with sparse output
+might be the scope of another future SLEP.
 
 For a pipeline, calling ``set_output`` on the pipeline will configure all steps
 in the pipeline::
@@ -44,6 +45,9 @@ in the pipeline::
 
    # X_trans_df is a pandas DataFrame
    X_trans_df = num_preprocessor.fit_transform(X_df)
+   
+   # X_trans_df is again a pandas DataFrame
+   X_trans_df = num_preprocessor[0].transform(X_df)
 
 Meta-estimators that support ``set_output`` are required to configure all inner
 transformer by calling ``set_output``. If an inner transformer does not define
@@ -52,7 +56,7 @@ transformer by calling ``set_output``. If an inner transformer does not define
 Global Configuration
 ....................
 
-This SLEP proposes a global configuration flag that sets the output for all
+For ease of use, this SLEP proposes a global configuration flag that sets the output for all
 transformers::
 
    import sklearn
@@ -64,7 +68,7 @@ determines the output container.
 Implementation
 --------------
 
-The implementation of this SLEP is in :pr:`23734`.
+A possible implementation of this SLEP is worked out in :pr:`23734`.
 
 Backward compatibility
 ----------------------
@@ -99,7 +103,7 @@ A list of issues discussing Pandas output are: `#14315
 
 Future Extensions
 -----------------
-
+For information only!
 Sparse Data
 ...........
 
