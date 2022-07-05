@@ -65,6 +65,21 @@ transformers::
 The global default configuration is ``"default"`` where the transformer
 determines the output container.
 
+The configuration can also be set locally using the ``config_context`` context
+manager:
+
+   from sklearn import config_context
+   with config_context(transform_output="pandas"):
+      num_prep = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
+      num_preprocessor.fit_transform(X_df)
+
+The following specifies the precedence levels for the three ways to configure
+the output container:
+
+1. Locally configure a transformer: ``transformer.set_output``
+2. Context manager: ``config_context``
+3. Global configuration: ``set_config``
+
 Implementation
 --------------
 
@@ -84,10 +99,7 @@ Alternatives to this SLEP includes:
 
 1. `SLEP014 <https://github.com/scikit-learn/enhancement_proposals/pull/37>`__
    proposes that if the input is a DataFrame than the output is a DataFrame.
-2. :ref:`SLEP012 <slep_012>` proposes a custom scikit-learn container for dense
-   and sparse data that contains feature names. This SLEP also proposes a custom
-   container for sparse data, but pandas for dense data.
-3. Prototype `#20100
+2. Prototype `#20100
    <https://github.com/scikit-learn/scikit-learn/pull/20100>`__ showcases
    ``array_out="pandas"`` in `transform`. This API is limited because does not
    directly support fitting on a pipeline where the steps requires data frames
@@ -107,8 +119,8 @@ For information only!
 Sparse Data
 ...........
 
-The Pandas DataFrame is not suitable to provide column names because it has
-performance issues as shown in `#16772
+The Pandas DataFrame is not suitable to provide column names for sparse data
+because it has performance issues as shown in `#16772
 <https://github.com/scikit-learn/scikit-learn/pull/16772#issuecomment-615423097>`__.
 A future extension to this SLEP is to have a ``"pandas_or_namedsparse"`` option.
 This option will use a scikit-learn specific sparse container that subclasses
