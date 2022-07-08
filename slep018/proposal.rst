@@ -50,8 +50,12 @@ in the pipeline::
    X_trans_df = num_preprocessor[0].transform(X_df)
 
 Meta-estimators that support ``set_output`` are required to configure all inner
-transformer by calling ``set_output``. If an inner transformer does not define
-``set_output``, then an error is raised.
+transformer by calling ``set_output``. Specifically all fitted and non-fitted
+inner transformers must be configured with ``set_output``. This enables
+``transform``'s output to be a DataFrame before and after the meta-estimator is
+fitted. If an inner transformer does not define ``set_output``, then an error is
+raised.
+
 
 Global Configuration
 ....................
