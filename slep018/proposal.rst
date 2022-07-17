@@ -70,7 +70,7 @@ The global default configuration is ``"default"`` where the transformer
 determines the output container.
 
 The configuration can also be set locally using the ``config_context`` context
-manager:
+manager::
 
    from sklearn import config_context
    with config_context(transform_output="pandas"):
