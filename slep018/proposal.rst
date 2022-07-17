@@ -5,7 +5,7 @@ SLEP018: Pandas Output for Transformers with set_output
 =======================================================
 
 :Author: Thomas J. Fan
-:Status: Draft
+:Status: Accepted
 :Type: Standards Track
 :Created: 2022-06-22
 
