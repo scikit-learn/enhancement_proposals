@@ -39,25 +39,19 @@ might be the scope of another future SLEP.
 
 For a pipeline, calling ``set_output`` will configure all inner transformers::
 
-   num_preprocessor = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
-   num_preprocessor.set_output(transform="pandas")
-
-   # X_trans_df is a pandas DataFrame
-   X_trans_df = num_preprocessor.fit_transform(X_df)
-
-   # X_trans_df is again a pandas DataFrame
-   X_trans_df = num_preprocessor[0].transform(X_df)
-
-``set_output`` on a pipeline only configures transformers and does not configure
-non-transformers. This enables the following workflow::
-
    log_reg = make_pipeline(SimpleImputer(), StandardScalar(), LogisticRegression())
    log_reg.set_output(transform="pandas")
 
    # All transformers return DataFrames during fit
-   log_reg.fit(X_f, y)
+   log_reg.fit(X_df, y)
 
-   # The final step contains the feature names in
+   # X_trans_df is a pandas DataFrame
+   X_trans_df = log_reg[:-1].transform(X_df)
+
+   # X_trans_df is again a pandas DataFrame
+   X_trans_df = log_reg[0].transform(X_df)
+
+   # The classifier contains the feature names in
    log_reg[-1].feature_names_in_
 
 Meta-estimators that support ``set_output`` are required to configure all inner
