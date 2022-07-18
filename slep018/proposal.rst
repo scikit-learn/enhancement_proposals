@@ -37,7 +37,8 @@ sparse data, e.g. `OneHotEncoder(sparse=True), then ``transform`` will raise a
 ``ValueError`` if ``set_output(transform="pandas")``. Dealing with sparse output
 might be the scope of another future SLEP.
 
-For a pipeline, calling ``set_output`` will configure all inner transformers::
+For a pipeline, calling ``set_output`` will configure all inner transformers and
+does not configure non-transformers. This enables the following workflow::
 
    log_reg = make_pipeline(SimpleImputer(), StandardScalar(), LogisticRegression())
    log_reg.set_output(transform="pandas")
