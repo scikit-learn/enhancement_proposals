@@ -39,7 +39,7 @@ might be the scope of another future SLEP.
 
 For a pipeline, calling ``set_output`` will configure all inner transformers::
 
-   num_prep = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
+   num_preprocessor = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
    num_preprocessor.set_output(transform="pandas")
 
    # X_trans_df is a pandas DataFrame
