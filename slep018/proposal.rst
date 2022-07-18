@@ -48,6 +48,18 @@ For a pipeline, calling ``set_output`` will configure all inner transformers::
    # X_trans_df is again a pandas DataFrame
    X_trans_df = num_preprocessor[0].transform(X_df)
 
+``set_output`` on a pipeline only configures transformers and does not configure
+non-transformers. This enables the following workflow::
+
+   log_reg = make_pipeline(SimpleImputer(), StandardScalar(), LogisticRegression())
+   log_reg.set_output(transform="pandas")
+
+   # All transformers return DataFrames during fit
+   log_reg.fit(X_f, y)
+
+   # The final step contains the feature names in
+   log_reg[-1].feature_names_in_
+
 Meta-estimators that support ``set_output`` are required to configure all inner
 transformer by calling ``set_output``. Specifically all fitted and non-fitted
 inner transformers must be configured with ``set_output``. This enables
