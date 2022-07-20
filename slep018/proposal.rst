@@ -33,7 +33,7 @@ transformer does not support ``transform="pandas"``, then it must raise a
 ``ValueError`` stating that it does not support the feature.
 
 This SLEP's only focus is dense data for ``set_output``. If a transformer returns
-sparse data, e.g. `OneHotEncoder(sparse=True), then ``transform`` will raise a
+sparse data, e.g. ``OneHotEncoder(sparse=True)``, then ``transform`` will raise a
 ``ValueError`` if ``set_output(transform="pandas")``. Dealing with sparse output
 might be the scope of another future SLEP.
 
