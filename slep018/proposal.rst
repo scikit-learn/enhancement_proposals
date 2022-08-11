@@ -123,8 +123,9 @@ A list of issues discussing Pandas output are: `#14315
 <https://github.com/scikit-learn/scikit-learn/pull/20100>`__, and `#23001
 <https://github.com/scikit-learn/scikit-learn/issueas/23001>`__. This SLEP
 proposes configuring the output to be pandas because it is the DataFrame library
-that is most widely used and requested by users. The ``set_output`` can be
-extended to support support additional DataFrame libraries in the future.
+that is most widely used and requested by users. The ``set_output`` API can be
+extended to support additional DataFrame libraries and sparse data formats in
+the future.
 
 References and Footnotes
 ------------------------
