@@ -22,7 +22,7 @@ Currently, scikit-learn transformers return NumPy ndarrays or SciPy sparse
 matrices. This SLEP proposes adding a ``set_output`` method to configure a
 transformer to output pandas DataFrames::
 
-   scalar = StandardScalar().set_output(transform="pandas")
+   scalar = StandardScaler().set_output(transform="pandas")
    scalar.fit(X_df)
 
    # X_trans_df is a pandas DataFrame
@@ -40,7 +40,7 @@ might be the scope of another future SLEP.
 For a pipeline, calling ``set_output`` will configure all inner transformers and
 does not configure non-transformers. This enables the following workflow::
 
-   log_reg = make_pipeline(SimpleImputer(), StandardScalar(), LogisticRegression())
+   log_reg = make_pipeline(SimpleImputer(), StandardScaler(), LogisticRegression())
    log_reg.set_output(transform="pandas")
 
    # All transformers return DataFrames during fit
@@ -80,7 +80,7 @@ manager::
 
    from sklearn import config_context
    with config_context(transform_output="pandas"):
-      num_prep = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
+      num_prep = make_pipeline(SimpleImputer(), StandardScaler(), PCA())
       num_preprocessor.fit_transform(X_df)
 
 The following specifies the precedence levels for the three ways to configure
