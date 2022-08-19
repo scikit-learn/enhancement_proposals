@@ -5,7 +5,7 @@ SLEP018: Pandas Output for Transformers with set_output
 =======================================================
 
 :Author: Thomas J. Fan
-:Status: Draft
+:Status: Accepted
 :Type: Standards Track
 :Created: 2022-06-22
 
@@ -22,7 +22,7 @@ Currently, scikit-learn transformers return NumPy ndarrays or SciPy sparse
 matrices. This SLEP proposes adding a ``set_output`` method to configure a
 transformer to output pandas DataFrames::
 
-   scalar = StandardScalar().set_output(transform="pandas")
+   scalar = StandardScaler().set_output(transform="pandas")
    scalar.fit(X_df)
 
    # X_trans_df is a pandas DataFrame
@@ -37,20 +37,26 @@ sparse data, e.g. ``OneHotEncoder(sparse=True)``, then ``transform`` will raise 
 ``ValueError`` if ``set_output(transform="pandas")``. Dealing with sparse output
 might be the scope of another future SLEP.
 
-For a pipeline, calling ``set_output`` on the pipeline will configure all steps
-in the pipeline::
+For a pipeline, calling ``set_output`` will configure all inner transformers and
+does not configure non-transformers. This enables the following workflow::
 
-   num_prep = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
-   num_preprocessor.set_output(transform="pandas")
+   log_reg = make_pipeline(SimpleImputer(), StandardScaler(), LogisticRegression())
+   log_reg.set_output(transform="pandas")
+
+   # All transformers return DataFrames during fit
+   log_reg.fit(X_df, y)
 
    # X_trans_df is a pandas DataFrame
-   X_trans_df = num_preprocessor.fit_transform(X_df)
+   X_trans_df = log_reg[:-1].transform(X_df)
 
    # X_trans_df is again a pandas DataFrame
-   X_trans_df = num_preprocessor[0].transform(X_df)
+   X_trans_df = log_reg[0].transform(X_df)
+
+   # The classifier contains the feature names in
+   log_reg[-1].feature_names_in_
 
 Meta-estimators that support ``set_output`` are required to configure all inner
-transformer by calling ``set_output``. Specifically all fitted and non-fitted
+transformers by calling ``set_output``. Specifically all fitted and non-fitted
 inner transformers must be configured with ``set_output``. This enables
 ``transform``'s output to be a DataFrame before and after the meta-estimator is
 fitted. If an inner transformer does not define ``set_output``, then an error is
@@ -74,7 +80,7 @@ manager::
 
    from sklearn import config_context
    with config_context(transform_output="pandas"):
-      num_prep = make_pipeline(SimpleImputer(), StandardScalar(), PCA())
+      num_prep = make_pipeline(SimpleImputer(), StandardScaler(), PCA())
       num_preprocessor.fit_transform(X_df)
 
 The following specifies the precedence levels for the three ways to configure
@@ -117,8 +123,9 @@ A list of issues discussing Pandas output are: `#14315
 <https://github.com/scikit-learn/scikit-learn/pull/20100>`__, and `#23001
 <https://github.com/scikit-learn/scikit-learn/issueas/23001>`__. This SLEP
 proposes configuring the output to be pandas because it is the DataFrame library
-that is most widely used and requested by users. The ``set_output`` can be
-extended to support support additional DataFrame libraries in the future.
+that is most widely used and requested by users. The ``set_output`` API can be
+extended to support additional DataFrame libraries and sparse data formats in
+the future.
 
 References and Footnotes
 ------------------------
