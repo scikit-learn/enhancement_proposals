@@ -11,7 +11,7 @@ SLEP007: Feature names, their generation and the API
 :Vote opened: 2021-10-26
 :Vote closed: 2021-11-29
 
-Implemented with `v1.0.0 <https://scikit-learn.org/stable/whats_new/v1.0.html#id7>`__.
+Implemented with `v1.1.0 <https://scikit-learn.org/stable/auto_examples/release_highlights/plot_release_highlights_1_1_0.html#get-feature-names-out-available-in-all-transformers>`__.
 
 Abstract
 ########
