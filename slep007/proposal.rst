@@ -5,11 +5,13 @@ SLEP007: Feature names, their generation and the API
 ====================================================
 
 :Author: Adrin Jalali
-:Status: Accepted
+:Status: Final
 :Type: Standards Track
 :Created: 2019-04
 :Vote opened: 2021-10-26
 :Vote closed: 2021-11-29
+
+Implemented with `v1.0.0 <https://scikit-learn.org/stable/whats_new/v1.0.html#id7>`__.
 
 Abstract
 ########
