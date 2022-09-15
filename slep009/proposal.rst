@@ -5,10 +5,13 @@ SLEP009: Keyword-only arguments
 ===============================
 
 :Author: Adrin Jalali
-:Status: Accepted
+:Status: Final
 :Type: Standards Track
 :Created: 2019-07-13
 :Vote opened: 2019-09-11
+
+Implemented with `v0.23 <https://scikit-learn.org/stable/whats_new/v0.23.html#enforcing-keyword-only-arguments>`__
+and `v1.0.0 <https://scikit-learn.org/stable/whats_new/v1.0.html#enforcing-keyword-only-arguments>`__.
 
 Abstract
 ########
