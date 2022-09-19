@@ -43,12 +43,14 @@ Reshama Shaikh [2]_:
 Desired goal
 ~~~~~~~~~~~~
 
-There is a need to: - value non-coding contributions in the project and
-acknowledge all efforts (including those that are not quantified by GitHub
-users' activity) - empower more contributors in effectively being able to
-participate in the projects without giving the security responsibilities of
-tracking code changes to the main branches. These considerations should lead to
-"contribution paths".
+There is a need to:
+
+- value non-coding contributions in the project and acknowledge all efforts,
+  including those that are not quantified by GitHub users' activity
+- empower more contributors in effectively being able to participate in the
+  projects without requiring the security responsibilities of tracking code
+  changes to the main branches. These considerations should lead to
+  "contribution paths".
 
 Hence, we propose to explicit contributions and to define more roles and teams.
 
