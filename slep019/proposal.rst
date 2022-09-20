@@ -7,7 +7,7 @@ SLEP019: Governance Update
 :Author: Julien Jerphanion, Gaël Varoquaux
 :Status: Draft
 :Type: Process
-:Created: 2020-09-12
+:Created: 2022-09-12
 
 Abstract
 --------
