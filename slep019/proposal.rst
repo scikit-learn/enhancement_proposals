@@ -23,7 +23,7 @@ Current state
 
 So far the formal decision process in the scikit-learn project is anchored on by
 a subset of contributors, called Core Developers (also refered to as
-Maintainers).  Their active and consistent contributions are recognized by them:
+Maintainers). Their active and consistent contributions are recognized by them:
 
 - being part of scikit-learn organisation on GitHub
 - receiving “commit rights” to the repository
@@ -32,8 +32,8 @@ Maintainers).  Their active and consistent contributions are recognized by them:
   core-developer, approving a SLEP, etc.)
 
 However, there are a lot of other ways to contribute to the project, whose
-efforts are actually not recognized. To quote Melissa Weber Mendonça [1]_ and
-Reshama Shaikh [2]_:
+efforts are actually not recognized [1]_. To quote Melissa Weber Mendonça [2]_ and
+Reshama Shaikh [3]_:
 
 .. epigraph::
   "When some people join an open source project, they may be asked to contribute
@@ -43,14 +43,14 @@ Reshama Shaikh [2]_:
 Desired goal
 ~~~~~~~~~~~~
 
-There is a need to:
+We need to:
 
 - value non-coding contributions in the project and acknowledge all efforts,
   including those that are not quantified by GitHub users' activity
 - empower more contributors in effectively being able to participate in the
   projects without requiring the security responsibilities of tracking code
-  changes to the main branches. These considerations should lead to
-  "contribution paths".
+  changes to the main branches. These considerations should lead to the
+  diversification of contribution paths [4]_.
 
 Hence, we propose to explicit contributions and to define more roles and teams.
 
@@ -67,7 +67,7 @@ Proposed modifications
 ----------------------
 
 The proposed modification have been informally discussed in monthly meetings,
-namely on April 25th 2022 [3]_ and on September 5th 2022 [4]_ meetings. 
+namely on April 25th 2022 [4]_ and on September 5th 2022 [5]_ meetings. 
 
 New teams
 ~~~~~~~~~
@@ -85,8 +85,8 @@ this restriction would be socially enforced without a specific GitHub mechanism.
 Create a "Recurring Contributors" team on GitHub, which has no specific GitHub
 permissions, and in which we easily add people. The goal of this team is to
 acknowledge people's contributions, by displaying them as part of the
-scikit-learn organization on Github [5]_ on their GitHub profile, and on the
-project's website "About Us" webpage [6]_.
+scikit-learn organization on Github [6]_ on their GitHub profile, and on the
+project's website "About Us" webpage [7]_.
 
 A Contributor is added to the "Recurring Contributor" team after championing by
 three Core contributors (notion of "Core contributors" as defined below).
@@ -111,6 +111,7 @@ wording.
 To give decision power to members of our community responsible for the various
 aspects of the project, we will list the follow teams as "Core" (associated with
 the notion of "Core Contributor"):
+
   - Core Triage
   - Communication Team
   - Core Developers
@@ -122,26 +123,32 @@ Give voting rights beyond to all member of Core Teams.
 Copyright
 ---------
 
-This document has been placed in the public domain [7]_.
+This document has been placed in the public domain [8]_.
 
 References and Footnotes
 ------------------------
 
-.. [1] Contributor experience, diversity and culture in Open Source Projects,
+.. [1] Amanda Casari on ACROSS and Measuring Contributions in OSS, Sustain:
+    https://podcast.sustainoss.org/111 
+
+.. [2] Contributor experience, diversity and culture in Open Source Projects,
     keynote from Melissa Weber Mendonça: https://2022.pycon.de/program/NVBLKH/
 
-.. [2] Reshama Shaikh's quote from Melissa Weber Mendonça' keynote:
+.. [3] Reshama Shaikh's quote from Melissa Weber Mendonça' keynote:
     https://twitter.com/reshamas/status/1513488342767353857
 
-.. [3] Scikit-learn April 25th 2022 Developer meeting notes:
+.. [4] NumPy Newcomer's Hour: an Experiment on Community Building, talk from 
+    Melissa Weber Mendonça: https://www.youtube.com/watch?v=c0XZQbu0xnw
+
+.. [5] Scikit-learn April 25th 2022 Developer meeting notes:
     https://github.com/scikit-learn/administrative/blob/master/meeting_notes/2022-04-25.md
 
-.. [4] Scikit-learn September 5th 2022 Developer meeting notes:
+.. [6] Scikit-learn September 5th 2022 Developer meeting notes:
     https://github.com/scikit-learn/administrative/blob/master/meeting_notes/2022-09-05.md
 
-.. [5] Scikit-learn organisation on GitHub: https://github.com/scikit-learn
+.. [7] Scikit-learn organisation on GitHub: https://github.com/scikit-learn
 
-.. [6] Scikit-learn documentation, About Us:
+.. [8] Scikit-learn documentation, About Us:
     https://scikit-learn.org/stable/about.html
 
-.. [7] Open Publication License: https://www.opencontent.org/openpub/
+.. [9] Open Publication License: https://www.opencontent.org/openpub/
