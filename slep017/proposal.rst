@@ -64,9 +64,12 @@ provided for estimators not inheriting from :obj:`~sklearn.base.BaseEstimator`.
 This shifts the paradigm from ``clone`` being a fixed operation that
 Scikit-learn must be able to perform on an estimator to ``clone`` being a
 behaviour that each Scikit-learn compatible estimator may implement.
+
 Developers that define ``__sklearn_clone__`` are expected to be responsible
-in maintaintaining the fundamental properties of cloning, ordinarily
-through use of ``super().__sklearn_clone__``.
+in maintaintaining the fundamental properties of cloning. Ordinarily, they
+can achieve this through use of ``super().__sklearn_clone__``. Core behaviours,
+such as constructor parameters being preserved through ``clone`` operations,
+can be ensured through estimator checks.
 
 Implementation
 --------------
