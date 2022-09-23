@@ -1,6 +1,6 @@
-==============
-Clone Override
-==============
+==================================================
+Clone Override Protocol with ``__sklearn_clone__``
+==================================================
 
 :Author: Joel Nothman
 :Status: Draft
@@ -16,8 +16,8 @@ previous fitting -- is essential to ensuring estimator configurations are
 reusable across multiple instances in cross validation.
 A centralised implementation of :func:`sklearn.base.clone` regards
 an estimator's constructor parameters as the state that should be copied.
-This proposal allows for an estimator class to perform further operations
-during clone with a ``__sklearn_clone__`` method, which will default to
+This proposal allows for an estimator class to implment custom cloning
+functionality with a ``__sklearn_clone__`` method, which will default to
 the current ``clone`` behaviour.
 
 Detailed description
@@ -48,6 +48,8 @@ Cases where this need has been raised in Scikit-learn development include:
 * ensuring metadata requests are cloned with an estimator
 * ensuring parameter spaces are cloned with an estimator
 * building a simple wrapper that can "freeze" a pre-fitted estimator
+* allowing existing options for using prefitted models in ensembles
+  to work under cloning
 
 The current design also limits the ability for an estimator developer to
 define an exception to the sanity checks (see :issue:`15371`).
@@ -55,15 +57,16 @@ define an exception to the sanity checks (see :issue:`15371`).
 This proposal empowers estimator developers to extend the base implementation
 of ``clone`` by providing a ``__sklearn_clone__`` method, which ``clone`` will
 delegate to when available. The default implementaton will match current
-``clone`` behaviour. It will be provied through
+``clone`` behaviour. It will be provided through
 ``BaseEstimator.__sklearn_clone__`` but also
 provided for estimators not inheriting from :obj:`~sklearn.base.BaseEstimator`.
 
 This shifts the paradigm from ``clone`` being a fixed operation that
 Scikit-learn must be able to perform on an estimator to ``clone`` being a
-behaviour that each Scikit-learn compatible estimator must implement.
-Developers are expected to be responsible in maintaintaining the fundamental
-properties of cloning.
+behaviour that each Scikit-learn compatible estimator may implement.
+Developers that define ``__sklearn_clone__`` are expected to be responsible
+in maintaintaining the fundamental properties of cloning, ordinarily
+through use of ``super().__sklearn_clone__``.
 
 Implementation
 --------------
@@ -85,7 +88,7 @@ No breakage.
 Alternatives
 ------------
 
-Insted of allowing estimators to overwrite the entire clone process,
+Instead of allowing estimators to overwrite the entire clone process,
 the core clone process could be obligatory, with the ability for an
 estimator class to customise additional steps.
 
@@ -106,12 +109,58 @@ Discussion
 :issue:`5080` raised the proposal of polymorphism for ``clone`` as the right
 way to provide an object-oriented API, and as a way to enable the
 implementation of wrappers around estimators for model memoisation and
-freezing.  Objections were based on the notion that ``clone`` has a simple
-contract, and that "extension to it would open the door to violations of that
-contract" [2]_.
-
+freezing.
 The naming of ``__sklearn_clone__`` was further proposed and discussed in
 :issue:`21838`.
+
+Making cloning more flexible either enables or simplifies the design and
+implementation of several features, including wrapping pre-fitted estimators,
+and providing estimator configuration through methods without adding new
+constructor arguments (e.g. through mixins).
+
+Related issues include:
+
+- :issue:`6451`, :issue:`8710`, :issue:`19848`: CalibratedClassifierCV with
+  prefitted base estimator
+- :issue:`7382`: VotingClassifier with prefitted base estimator
+- :issue:`16748`: Stacking estimator with prefitted base estimator
+- :issue:`8370`, :issue:`9464`: generic estimator wrapper for model freezing
+- :issue:`5082`: configuring parameter search spaces
+- :issue:`16079`: configuring the routing of sample-aligned metadata
+- :issue:`16185`: configuring selected parameters to not be deep-copied
+
+Under the incumbent monolithic clone implementation, designing such additional
+per-estimator configuration requires resolving whether to:
+
+- adjust the monolithic ``clone`` to account for the new configuration
+  attributes (an option only available to the Scikit-learn core developer
+  team);
+- add constructor attributes for each new configuration option; or
+- not clone estimator configurations, and accept that some use cases may not
+  be possible.
+
+A more flexible cloning operation provides a simpler pattern for adding new
+configuration options through mixins.
+It should be noted that adding new capabilities to *all* estimators remains
+possible only through modifying the default ``__sklearn_clone__``
+implementation.
+
+There are, however, notable concerns in relation to this proposal.
+Introducing a generic clone handler on each estimator gives a developer
+complete freedom to disregard existing conventions regarding parameter
+setting and construction in Scikit-learn.
+In this vein, objections to :issue:`5080` cited the notion that "``clone``
+has a simple contract," and that "extension to it would open the door to
+violations of that contract" [2]_.
+
+While these objections identify considerable risks, many public libraries
+include developers regularly working around Scikit-learn conventions and
+contracts, in part because developers are backed into a "design corner",
+wherein it is not always obvious how to build an acceptable UX while adhering
+to established conventions; in this case, that everything to be cloned must
+go into ``__init__``.  This proposal paves a road for how developers can
+solve functionality UX limitations in the core library, rather than
+inviting custom workarounds.
 
 References and Footnotes
 ------------------------
