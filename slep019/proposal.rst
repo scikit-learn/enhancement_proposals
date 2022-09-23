@@ -52,7 +52,7 @@ We need to:
   changes to the main branches. These considerations should lead to the
   diversification of contribution paths [4]_.
 
-Hence, we propose to explicit contributions and to define more roles and teams.
+Hence, we propose to explicitly definite Contributions, Roles and Teams.
 
 Limited changes to the governance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
