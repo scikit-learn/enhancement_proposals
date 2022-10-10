@@ -67,12 +67,12 @@ Proposed modifications
 ----------------------
 
 The proposed modification have been informally discussed in monthly meetings,
-namely on April 25th 2022 [4]_ and on September 5th 2022 [5]_ meetings. 
+namely on April 25th 2022 [5]_ and on September 5th 2022 [6]_ meetings.
 
-New teams
-~~~~~~~~~
+Create new Teams
+~~~~~~~~~~~~~~~~
 
-**"Create "Core Triagers" Team"**
+**Core Triagers**
 
 Create a "Core Triagers" team, given commit rights as a way to circumvent
 limitations in Github's permission system's limitation (such as limited rights
@@ -80,31 +80,28 @@ for triage such as being able to edit issues' description). People in this team
 should not push code on upstream nor merge PRs, but they would be trusted and
 this restriction would be socially enforced without a specific GitHub mechanism.
 
-**"Recurring "Contributors" Team**
+**Recurring "Contributors Team**
 
-Create a "Recurring Contributors" team on GitHub, which has no specific GitHub
+Create a Recurring Contributors Team on GitHub, which has no specific GitHub
 permissions, and in which we easily add people. The goal of this team is to
 acknowledge people's contributions, by displaying them as part of the
-scikit-learn organization on Github [6]_ on their GitHub profile, and on the
-project's website "About Us" webpage [7]_.
+scikit-learn organization on Github [7]_ on their GitHub profile, and on the
+project's website "About Us" webpage [8]_.
 
-A Contributor is added to the "Recurring Contributor" team after championing by
-three Core contributors (notion of "Core contributors" as defined below).
+**Experts Team**
 
-**"Create "Experts" Team**
-
-Create a "Experts" team, also without specific GitHub permissions. Core
+Create a Experts Team, also without specific GitHub permissions. Core
 developers can delegate PR approval rights to someone in this team so that the
 PR can be merged with one approval from a Core Developer and one approval from
 the delegated expert.
 
-Beyond Developers: recognize all Contributions
+Beyond Developers: Recognize all Contributions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Define "Contributions" explicitly**
 
 Give more emphasis to the notion of contribution at large (beyond code) in our
-wording. 
+wording.
 
 **Define of "Core Contributors"**
 
@@ -123,13 +120,13 @@ Give voting rights beyond to all member of Core Teams.
 Copyright
 ---------
 
-This document has been placed in the public domain [8]_.
+This document has been placed in the public domain [9]_.
 
 References and Footnotes
 ------------------------
 
 .. [1] Amanda Casari on ACROSS and Measuring Contributions in OSS, Sustain:
-    https://podcast.sustainoss.org/111 
+    https://podcast.sustainoss.org/111
 
 .. [2] Contributor experience, diversity and culture in Open Source Projects,
     keynote from Melissa Weber Mendonça: https://2022.pycon.de/program/NVBLKH/
@@ -137,7 +134,7 @@ References and Footnotes
 .. [3] Reshama Shaikh's quote from Melissa Weber Mendonça' keynote:
     https://twitter.com/reshamas/status/1513488342767353857
 
-.. [4] NumPy Newcomer's Hour: an Experiment on Community Building, talk from 
+.. [4] NumPy Newcomer's Hour: an Experiment on Community Building, talk from
     Melissa Weber Mendonça: https://www.youtube.com/watch?v=c0XZQbu0xnw
 
 .. [5] Scikit-learn April 25th 2022 Developer meeting notes:
