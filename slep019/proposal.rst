@@ -125,10 +125,13 @@ This document has been placed in the public domain [10]_.
 References and Footnotes
 ------------------------
 
-.. [1] Amanda Casari on ACROSS and Measuring Contributions in OSS, Sustain:
-    https://podcast.sustainoss.org/111
+.. [1] J. -G. Young, A. Casari, K. McLaughlin, M. Z. Trujillo, L. Hébert-Dufresne and
+    J. P. Bagrow, "Which contributions count? Analysis of attribution in open source,"
+    2021 IEEE/ACM 18th International Conference on Mining Software Repositories (MSR),
+    2021, pp. 242-253, doi: 10.1109/MSR52588.2021.00036:
+    https://arxiv.org/abs/2103.11007
 
-.. [2] Contributor experience, diversity and culture in Open Source Projects,
+.. [2] Contributor experience, diversity and culture in Open Source Projects:
     keynote from Melissa Weber Mendonça: https://2022.pycon.de/program/NVBLKH/
 
 .. [3] Reshama Shaikh's quote from Melissa Weber Mendonça' keynote:
