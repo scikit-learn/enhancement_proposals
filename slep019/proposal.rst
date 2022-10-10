@@ -32,8 +32,8 @@ Maintainers). Their active and consistent contributions are recognized by them:
   core-developer, approving a SLEP, etc.)
 
 However, there are a lot of other ways to contribute to the project, whose
-efforts are actually not recognized [1]_. To quote Melissa Weber Mendonça [2]_ and
-Reshama Shaikh [3]_:
+efforts are actually not recognized [1]_. To quote Melissa Weber Mendonça [2]_
+and Reshama Shaikh [3]_:
 
 .. epigraph::
   "When some people join an open source project, they may be asked to contribute
@@ -72,28 +72,28 @@ namely on April 25th 2022 [5]_ and on September 5th 2022 [6]_ meetings.
 Create new Teams
 ~~~~~~~~~~~~~~~~
 
-**Core Triagers**
+**Core Triagers Team**
 
-Create a "Core Triagers" team, given commit rights as a way to circumvent
-limitations in Github's permission system's limitation (such as limited rights
-for triage such as being able to edit issues' description). People in this team
-should not push code on upstream nor merge PRs, but they would be trusted and
-this restriction would be socially enforced without a specific GitHub mechanism.
+Create a Core Triagers Team which would be given "Write" permissions on GitHub
+[7]_ to be able to perform triaging tasks, such as editing issues' description.
 
-**Recurring "Contributors Team**
+**Recurring Contributors Team**
 
 Create a Recurring Contributors Team on GitHub, which has no specific GitHub
-permissions, and in which we easily add people. The goal of this team is to
-acknowledge people's contributions, by displaying them as part of the
-scikit-learn organization on Github [7]_ on their GitHub profile, and on the
-project's website "About Us" webpage [8]_.
+permissions, and in which we can easily add people.
+
+The goal of this team is to acknowledge people's contributions, by displaying
+them as part of the scikit-learn organization on GitHub [8]_ on their GitHub
+profile, and on the project's website "About Us" webpage [9]_, whilst giving
+them paths for progression and responsibilities.
 
 **Experts Team**
 
-Create a Experts Team, also without specific GitHub permissions. Core
-developers can delegate PR approval rights to someone in this team so that the
-PR can be merged with one approval from a Core Developer and one approval from
-the delegated expert.
+Create a Experts Team, also without specific GitHub permissions.
+
+Core Developers can delegate PR approval rights to someone in this team so that
+the PR can be merged with one approval from a Core Developers and one approval
+from the delegated Expert.
 
 Beyond Developers: Recognize all Contributions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,15 +103,15 @@ Beyond Developers: Recognize all Contributions
 Give more emphasis to the notion of contribution at large (beyond code) in our
 wording.
 
-**Define of "Core Contributors"**
+**Define the notion of "Core Contributors"**
 
 To give decision power to members of our community responsible for the various
 aspects of the project, we will list the follow teams as "Core" (associated with
 the notion of "Core Contributor"):
 
-  - Core Triage
+  - Core Triagers Team
   - Communication Team
-  - Core Developers
+  - Core Developers Team
 
 **Extend voting rights**
 
@@ -120,7 +120,7 @@ Give voting rights beyond to all member of Core Teams.
 Copyright
 ---------
 
-This document has been placed in the public domain [9]_.
+This document has been placed in the public domain [10]_.
 
 References and Footnotes
 ------------------------
@@ -143,9 +143,12 @@ References and Footnotes
 .. [6] Scikit-learn September 5th 2022 Developer meeting notes:
     https://github.com/scikit-learn/administrative/blob/master/meeting_notes/2022-09-05.md
 
-.. [7] Scikit-learn organisation on GitHub: https://github.com/scikit-learn
+.. [7] Permissions for each role, Repository roles for an organization, GitHub Docs:
+    https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role
 
-.. [8] Scikit-learn documentation, About Us:
+.. [8] Scikit-learn organisation on GitHub: https://github.com/scikit-learn
+
+.. [9] Scikit-learn documentation, About Us:
     https://scikit-learn.org/stable/about.html
 
-.. [9] Open Publication License: https://www.opencontent.org/openpub/
+.. [10] Open Publication License: https://www.opencontent.org/openpub/
