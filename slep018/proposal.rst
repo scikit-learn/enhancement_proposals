@@ -72,7 +72,7 @@ transformers::
    import sklearn
    sklearn.set_config(transform_output="pandas")
 
-The global default configuration is ``"default"`` where the transformer
+The global default configuration is ``"native"`` where the transformer
 determines the output container.
 
 The configuration can also be set locally using the ``config_context`` context
