@@ -40,8 +40,8 @@ and Reshama Shaikh [3]_:
   with tasks that will never get them on a path to any sort of official input,
   such as voting rights."
 
-Desired goal
-~~~~~~~~~~~~
+Desired Goal: incrementally adapt the Governance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We need to:
 
@@ -52,58 +52,29 @@ We need to:
   changes to the main branches. These considerations should lead to the
   diversification of contribution paths [4]_.
 
-Hence, we propose to explicitly define Contributions, Roles and Teams.
+Rather than introducing a fully new fledge structure and Governance, we
+propose getting in a state which allows small incremental changes overtime.
 
-Limited changes to the governance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Proposed changes
+----------------
 
-This SLEP proposes an incremental change to the governance model. It
-acknowledges that more could be done, defining more roles and teams. In the
-spirit of iterations, the idea is to implement a first change to the governance,
-evolve our community accordingly, and later propose new changes based on the
-understanding of the resulting community dynamics.
-
-Proposed modifications
-----------------------
-
-The proposed modification have been informally discussed in monthly meetings,
+Some of the proposed modification have been informally discussed in monthly meetings,
 namely on April 25th 2022 [5]_ and on September 5th 2022 [6]_ meetings.
 
-Create new Teams
-~~~~~~~~~~~~~~~~
-
-**Core Triagers Team**
+Create a Core Triagers Team
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Create a Core Triagers Team which would be given "Write" permissions on GitHub
 [7]_ to be able to perform triaging tasks, such as editing issues' description.
 
-**Recurring Contributors Team**
-
-Create a Recurring Contributors Team on GitHub, which has no specific GitHub
-permissions, and in which we can easily add people.
-
-The goal of this team is to acknowledge people's contributions, by displaying
-them as part of the scikit-learn organization on GitHub [8]_ on their GitHub
-profile, and on the project's website "About Us" webpage [9]_, whilst giving
-them paths for progression and responsibilities.
-
-**Experts Team**
-
-Create a Experts Team, also without specific GitHub permissions.
-
-Core Developers can delegate PR approval rights to someone in this team so that
-the PR can be merged with one approval from a Core Developers and one approval
-from the delegated Expert.
-
-Beyond Developers: Recognize all Contributions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**Define "Contributions" explicitly**
+Define "Contributions" explicitly
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Give more emphasis to the notion of contribution at large (beyond code) in our
 wording.
 
-**Define the notion of "Core Contributors"**
+Define "Core Contributors"
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To give decision power to members of our community responsible for the various
 aspects of the project, we will list the follow teams as "Core" (associated with
@@ -113,14 +84,22 @@ the notion of "Core Contributor"):
   - Communication Team
   - Core Developers Team
 
-**Extend voting rights**
+Extend voting rights
+~~~~~~~~~~~~~~~~~~~~
 
 Give voting rights beyond to all member of Core Teams.
+
+Simplify subsequent changes to the Governance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Subsequent changes to scikit-learn Governance (such as additions and changes
+made to Roles' and Teams' scopes and permissions) won't be subject through SLEPs
+and will only be subject to a Core Contributors' vote.
 
 Copyright
 ---------
 
-This document has been placed in the public domain [10]_.
+This document has been placed in the public domain [8]_.
 
 References and Footnotes
 ------------------------
@@ -149,9 +128,4 @@ References and Footnotes
 .. [7] Permissions for each role, Repository roles for an organization, GitHub Docs:
     https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role
 
-.. [8] Scikit-learn organisation on GitHub: https://github.com/scikit-learn
-
-.. [9] Scikit-learn documentation, About Us:
-    https://scikit-learn.org/stable/about.html
-
-.. [10] Open Publication License: https://www.opencontent.org/openpub/
+.. [8] Open Publication License: https://www.opencontent.org/openpub/
