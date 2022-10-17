@@ -13,7 +13,8 @@ Abstract
 --------
 
 This SLEP proposes updating the Governance to broaden the notion of contribution
-in scikit-learn.
+in scikit-learn and to ease subsequent change to the Governance without requiring
+SLEPs.
 
 Motivation
 ----------
