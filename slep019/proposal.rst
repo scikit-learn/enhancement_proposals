@@ -1,8 +1,8 @@
 .. _slep_019:
 
-===========================
-SLEP019: Governance Update
-===========================
+====================================================================
+SLEP019: Governance Update - Better Recognize Non-Code Contributions
+====================================================================
 
 :Author: Julien Jerphanion, Gaël Varoquaux
 :Status: Accepted
