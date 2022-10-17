@@ -120,12 +120,11 @@ References and Footnotes
 .. [4] NumPy Newcomer's Hour: an Experiment on Community Building, talk from
     Melissa Weber Mendonça: https://www.youtube.com/watch?v=c0XZQbu0xnw
 
-.. [5] Scikit-learn April 25th 2022 Developer meeting notes:
+.. [5] scikit-learn April 25th 2022 Developer meeting notes:
     https://github.com/scikit-learn/administrative/blob/master/meeting_notes/2022-04-25.md
 
-.. [6] Scikit-learn September 5th 2022 Developer meeting notes:
+.. [6] scikit-learn September 5th 2022 Developer meeting notes:
     https://github.com/scikit-learn/administrative/blob/master/meeting_notes/2022-09-05.md
-
 .. [7] Permissions for each role, Repository roles for an organization, GitHub Docs:
     https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role
 
