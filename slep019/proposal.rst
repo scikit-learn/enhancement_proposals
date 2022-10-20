@@ -62,28 +62,34 @@ Proposed changes
 Some of the proposed modification have been informally discussed in monthly meetings,
 namely on April 25th 2022 [5]_ and on September 5th 2022 [6]_ meetings.
 
-Create a Core Triagers Team
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Create a Core Triagers Team which would be given "Write" permissions on GitHub
-[7]_ to be able to perform triaging tasks, such as editing issues' description.
-
 Define "Contributions" explicitly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Give more emphasis to the notion of contribution at large (beyond code) in our
 wording.
 
+Create a Triagers Team
+~~~~~~~~~~~~~~~~~~~~~~
+
+Create a Triagers Team which would be given "Write" permissions on GitHub [7]_ 
+to be able to perform triaging tasks, such as editing issues' description.
+
+
 Define "Core Contributors"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To give decision power to members of our community responsible for the various
-aspects of the project, we will list the follow teams as "Core" (associated with
-the notion of "Core Contributor"):
+aspects of the project, we will list the follow teams as being team
+of "Core Contributors", called "Core Teams":
 
-  - Core Triagers Team
+  - Triagers Team
   - Communication Team
   - Core Developers Team
+
+Contributors are promoted as Core Contributor as part of one of the Core Teams,
+after the proposal of at least another Core Contributor. This promotions
+is effective after a vote on the private mailing list which must last for two
+weeks and which must reach at least two-thirds positive majority of the cast votes.
 
 Extend voting rights
 ~~~~~~~~~~~~~~~~~~~~
