@@ -93,14 +93,25 @@ Give voting rights beyond to all member of Core Teams.
 Simplify subsequent changes to the Governance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Subsequent changes to scikit-learn Governance (such as additions and changes
-made to Roles' and Teams' scopes and permissions) won't be subject through SLEPs
-and will only be subject to a Core Contributors' vote.
+With acceptance of this SLEP, changes to the scikit-learn Governance concerning the
+following aspects will not require being backed by a SLEP in the future:
+
+  - additions and changes to Roles' and Teams' scopes
+  - additions and changes to Roles' and Teams' permissions
+
+Still any changes to scikit-learn Governance (including the ones which will not require
+being back by a SLEP) will still be subject to the decision making process [8]_,
+which includes a Core Contributors' vote.
+
+If subsequent changes to the Governance are proposed through a GitHub Pull Request (PR):
+
+ - a positive vote is cast by approving the PR (i.e. "Approve" review)
+ - a negative vote is cast by requesting changes to the PR (i.e. "Request changes" review)
 
 Copyright
 ---------
 
-This document has been placed in the public domain [8]_.
+This document has been placed in the public domain [9]_.
 
 References and Footnotes
 ------------------------
@@ -128,4 +139,8 @@ References and Footnotes
 .. [7] Permissions for each role, Repository roles for an organization, GitHub Docs:
     https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role
 
-.. [8] Open Publication License: https://www.opencontent.org/openpub/
+.. [8] Decision Making Process, scikit-learn Governance and Decision-Making: 
+    https://scikit-learn.org/dev/governance.html#decision-making-process
+
+.. [9] Open Publication License: https://www.opencontent.org/openpub/
+
