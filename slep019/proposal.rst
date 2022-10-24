@@ -13,8 +13,8 @@ Abstract
 --------
 
 This SLEP proposes updating the Governance to broaden the notion of contribution
-in scikit-learn and to ease subsequent change to the Governance without requiring
-SLEPs.
+in scikit-learn and to ease subsequent related changes to the Governance without
+requiring SLEPs.
 
 Motivation
 ----------
@@ -22,18 +22,19 @@ Motivation
 Current state
 ~~~~~~~~~~~~~
 
-So far the formal decision process in the scikit-learn project is anchored on by
+The formal decision making process of the scikit-learn project is limited to
 a subset of contributors, called Core Developers (also refered to as
 Maintainers). Their active and consistent contributions are recognized by them:
 
 - being part of scikit-learn organisation on GitHub
 - receiving “commit rights” to the repository
-- having their review recognised as authoritative
-- having vote rights for the project direction (promoting a contributor to be a
+- having their Pull Request reviews recognised as authoritative
+- having voting rights for the project direction (promoting a contributor to be a
   core-developer, approving a SLEP, etc.)
 
-However, there are a lot of other ways to contribute to the project, whose
-efforts are actually not recognized [1]_. To quote Melissa Weber Mendonça [2]_
+Core Developers are primarily selected based on their code contributions.
+However, there are a lot of other ways to contribute to the project, and these
+efforts are currently not recognized [1]_. To quote Melissa Weber Mendonça [2]_
 and Reshama Shaikh [3]_:
 
 .. epigraph::
@@ -48,8 +49,8 @@ We need to:
 
 - value non-coding contributions in the project and acknowledge all efforts,
   including those that are not quantified by GitHub users' activity
-- empower more contributors in effectively being able to participate in the
-  projects without requiring the security responsibilities of tracking code
+- empower more contributors to effectively participate in the
+  project without requiring the security responsibilities of tracking code
   changes to the main branches. These considerations should lead to the
   diversification of contribution paths [4]_.
 
@@ -59,8 +60,8 @@ propose getting in a state which allows small incremental changes overtime.
 Proposed changes
 ----------------
 
-Some of the proposed modification have been informally discussed in monthly meetings,
-namely on April 25th 2022 [5]_ and on September 5th 2022 [6]_ meetings.
+Some of the proposed modification have been discussed in the monthly meetings,
+on April 25th 2022 [5]_ and September 5th 2022 [6]_.
 
 Define "Contributions" explicitly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,36 +79,36 @@ to be able to perform triaging tasks, such as editing issues' description.
 Define "Core Contributors"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To give decision power to members of our community responsible for the various
-aspects of the project, we will list the follow teams as being team
-of "Core Contributors", called "Core Teams":
+Establish all members of the following teams as "Core Contributors":
 
   - Triagers Team
   - Communication Team
   - Core Developers Team
 
-Contributors are promoted as Core Contributor as part of one of the Core Teams,
-after the proposal of at least another Core Contributor. This promotions
-is effective after a vote on the private mailing list which must last for two
-weeks and which must reach at least two-thirds positive majority of the cast votes.
+A Contributor is promoted to a Core Contributor after being proposed by at least
+one existing Core Contributor. The proposal must specify which Core Team the
+Contributor will be part of.
+The promotion is effective after a vote on the private Core Contributor mailing
+list which must last for two weeks and which must reach at least two-thirds
+positive majority of the cast votes.
 
 Extend voting rights
 ~~~~~~~~~~~~~~~~~~~~
 
-Give voting rights beyond to all member of Core Teams.
+Give voting rights to all Core Contributors.
 
 Simplify subsequent changes to the Governance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-With acceptance of this SLEP, changes to the scikit-learn Governance concerning the
-following aspects will not require being backed by a SLEP in the future:
+Allow changes to the following aspects of the scikit-learn Governance without
+requiring a SLEP:
 
   - additions and changes to Roles' and Teams' scopes
   - additions and changes to Roles' and Teams' permissions
 
-Still any changes to scikit-learn Governance (including the ones which will not require
-being back by a SLEP) will still be subject to the decision making process [8]_,
-which includes a Core Contributors' vote.
+Any changes to the scikit-learn Governance (including ones which do not require
+being back by a SLEP) will continue to be subject to the decision making process [8]_,
+which includes a vote of the Core Contributors.
 
 If subsequent changes to the Governance are proposed through a GitHub Pull Request (PR):
 
