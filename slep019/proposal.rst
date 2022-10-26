@@ -54,8 +54,9 @@ We need to:
   changes to the main branches. These considerations should lead to the
   diversification of contribution paths [4]_.
 
-Rather than introducing a fully new fledge structure and Governance, we
-propose getting in a state which allows small incremental changes overtime.
+Rather than introducing entirely new structure and Governance, we propose
+changes to the existing ones which allow for small incremental modifications
+over time.
 
 Proposed changes
 ----------------
