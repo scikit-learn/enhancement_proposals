@@ -63,16 +63,16 @@ Proposed changes
 Some of the proposed modification have been discussed in the monthly meetings,
 on April 25th 2022 [5]_ and September 5th 2022 [6]_.
 
-Define "Contributions" explicitly
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Define "Contributions" more broadly
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Give more emphasis to the notion of contribution at large (beyond code) in our
-wording.
+Explicitly define Contributions and emphasize the importance of non-code
+contributions in the Governance structure.
 
-Create a Triagers Team
-~~~~~~~~~~~~~~~~~~~~~~
+Create a Triage
+~~~~~~~~~~~~~~~
 
-Create a Triagers Team which would be given "Write" permissions on GitHub [7]_ 
+Create a Triage Team which would be given "Write" permissions on GitHub [7]_ 
 to be able to perform triaging tasks, such as editing issues' description.
 
 
@@ -81,9 +81,9 @@ Define "Core Contributors"
 
 Establish all members of the following teams as "Core Contributors":
 
-  - Triagers Team
+  - Triage Team
   - Communication Team
-  - Core Developers Team
+  - Development Team
 
 A Contributor is promoted to a Core Contributor after being proposed by at least
 one existing Core Contributor. The proposal must specify which Core Team the
@@ -114,6 +114,10 @@ If subsequent changes to the Governance are proposed through a GitHub Pull Reque
 
  - a positive vote is cast by approving the PR (i.e. "Approve" review)
  - a negative vote is cast by requesting changes to the PR (i.e. "Request changes" review)
+
+In this case, the vote still has to be announced on the Core Contributors' mailing
+list, but the system of Pull Request approvals will replace a vote on the private
+Core Contributors' mailing list.
 
 Copyright
 ---------
