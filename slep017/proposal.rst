@@ -16,7 +16,7 @@ previous fitting -- is essential to ensuring estimator configurations are
 reusable across multiple instances in cross validation.
 A centralised implementation of :func:`sklearn.base.clone` regards
 an estimator's constructor parameters as the state that should be copied.
-This proposal allows for an estimator class to implment custom cloning
+This proposal allows for an estimator class to implement custom cloning
 functionality with a ``__sklearn_clone__`` method, which will default to
 the current ``clone`` behaviour.
 
