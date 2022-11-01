@@ -6,7 +6,7 @@ Clone Override Protocol with ``__sklearn_clone__``
 :Status: Draft
 :Type: Standards Track
 :Created: 2022-03-19
-:Resolution: (required for Accepted | Rejected | Withdrawn)
+:Resolution: Accepted
 
 Abstract
 --------
