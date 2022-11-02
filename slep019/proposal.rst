@@ -92,10 +92,6 @@ Rename "Technical Committee" to "Steering Committee".
 Define the Steering Committee as a subset of Core Contributors rather
 than a subset of Core Developers.
 
-Extend the scope of the Steering Committee from technical decisions by
-including decisions related to the Governance or other substential
-aspects of the project.
-
 Create a Triage Team
 ====================
 
