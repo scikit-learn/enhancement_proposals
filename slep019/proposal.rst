@@ -84,8 +84,8 @@ Define "Contributions" more broadly
 Explicitly define Contributions and emphasize the importance of non-code
 contributions in the Governance structure.
 
-Renew the Technical Committee into a Steering Committee
-=======================================================
+Evolve the Technical Committee into a Steering Committee
+========================================================
 
 Rename "Technical Committee" to "Steering Committee".
 
