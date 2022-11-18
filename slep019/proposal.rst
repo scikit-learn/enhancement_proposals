@@ -8,7 +8,7 @@
    Julien Jerphanion, Gaël Varoquaux
 
 :Status:
-   Accepted
+   Draft
 
 :Type:
    Process
