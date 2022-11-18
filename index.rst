@@ -22,6 +22,7 @@
 
     slep012/proposal
     slep013/proposal
+    slep017/proposal
     slep019/proposal
 
 .. toctree::
