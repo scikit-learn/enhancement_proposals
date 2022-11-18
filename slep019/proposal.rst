@@ -4,17 +4,10 @@
  SLEP019: Governance Update - Recognizing Contributions Beyond Code
 ####################################################################
 
-:Author:
-   Julien Jerphanion, Gaël Varoquaux
-
-:Status:
-   Draft
-
-:Type:
-   Process
-
-:Created:
-   2022-09-12
+:Author: Julien Jerphanion <git@jjerphan.xyz>, Gaël Varoquaux <gael.varoquaux@normalesup.org>
+:Status: Draft
+:Type: Process
+:Created: 2022-09-12
 
 **********
  Abstract
