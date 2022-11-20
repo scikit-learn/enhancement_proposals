@@ -82,8 +82,8 @@ Define "Contributions" more broadly
 Explicitly define Contributions and emphasize the importance of non-code
 contributions in the Governance structure.
 
-New core roles and susequent teams will be defined which members will become
-scikit-learn "Core Contributors":
+New roles and core roles, and susequent teams will be defined.
+Core Team members will become scikit-learn "Core Contributors":
 a Contributor will be promoted to a Core Contributor after being proposed by
 at least one existing Core Contributor. The proposal must specify which
 Core Team the Contributor will be part of. The promotion will be effective
