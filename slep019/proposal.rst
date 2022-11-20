@@ -4,7 +4,8 @@
  SLEP019: Governance Update - Recognizing Contributions Beyond Code
 ####################################################################
 
-:Author: Julien Jerphanion <git@jjerphan.xyz>, Gaël Varoquaux <gael.varoquaux@normalesup.org>
+:Author: Julien Jerphanion <git@jjerphan.xyz>, Gaël Varoquaux <gael.varoquaux@normalesup.org>,
+         Chiara Marmo <marmochiaskl@gmail.com>
 :Status: Draft
 :Type: Process
 :Created: 2022-09-12
@@ -13,9 +14,12 @@
  Abstract
 **********
 
-This SLEP proposes updating the Governance to broaden the notion of
-contribution in scikit-learn and to ease subsequent related changes to
-the Governance without requiring SLEPs.
+This SLEP proposes updating the Governance to broaden the notion of core
+contribution in scikit-learn.
+At this aim, the Technical Committee is renamed as Steering Committee, opening the
+decision process to new to be defined core roles.
+New core roles would be introduced without requiring new SLEPs, to ease subsequent
+related changes to the Governance.
 
 ************
  Motivation
@@ -70,12 +74,24 @@ modifications over time.
 
 Some of the proposed modification have been discussed in the monthly
 meetings, on April 25th 2022 [5]_ and September 5th 2022 [6]_.
+The current version is based on the discussion on the draft version [7]_.  
 
 Define "Contributions" more broadly
 ===================================
 
 Explicitly define Contributions and emphasize the importance of non-code
 contributions in the Governance structure.
+
+New core roles and susequent teams will be defined which members will become
+scikit-learn "Core Contributors":
+a Contributor will be promoted to a Core Contributor after being proposed by
+at least one existing Core Contributor. The proposal must specify which
+Core Team the Contributor will be part of. The promotion will be effective
+after a vote on the private Core Contributor mailing list which must
+last for two weeks and which must reach at least two-thirds positive
+majority of the cast votes.
+
+A Core Contributor may belong to multiple core roles.
 
 Evolve the Technical Committee into a Steering Committee
 ========================================================
@@ -85,28 +101,10 @@ Rename "Technical Committee" to "Steering Committee".
 Define the Steering Committee as a subset of Core Contributors rather
 than a subset of Core Developers.
 
-Create a Triage Team
-====================
-
-Create a Triage Team which would be given "Write" permissions on GitHub
-[7]_ to be able to perform triaging tasks, such as editing issues'
-description.
-
-Define "Core Contributors"
-==========================
-
-Establish all members of the following teams as "Core Contributors":
-
-   -  Triage Team
-   -  Communication Team
-   -  Development Team
-
-A Contributor is promoted to a Core Contributor after being proposed by
-at least one existing Core Contributor. The proposal must specify which
-Core Team the Contributor will be part of. The promotion is effective
-after a vote on the private Core Contributor mailing list which must
-last for two weeks and which must reach at least two-thirds positive
-majority of the cast votes.
+The current members of the Technical Committee [8]_ will ensure the transition for a
+two-years period, starting from the acceptance of this SLEP.
+During the transition period roles which qualified as "Core Contributors" are expected to
+be represented in the Steering Committee by al least one member.
 
 Extend voting rights
 ====================
@@ -185,15 +183,19 @@ This document has been placed in the public domain [9]_.
 
 .. [7]
 
-   Permissions for each role, Repository roles for an organization, GitHub
-   Docs:
-   https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role
+   SLEP019: Governance Update - Recognizing Contributions Beyond Code
+   https://github.com/scikit-learn/enhancement_proposals/pull/74
 
 .. [8]
+
+   scikit-learn Techical Committee
+   https://scikit-learn.org/1.1/governance.html#technical-committee
+
+.. [9]
 
    Decision Making Process, scikit-learn Governance and Decision-Making:
    https://scikit-learn.org/dev/governance.html#decision-making-process
 
-.. [9]
+.. [10]
 
    Open Publication License: https://www.opencontent.org/openpub/
