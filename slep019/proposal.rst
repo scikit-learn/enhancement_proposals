@@ -4,7 +4,8 @@
  SLEP019: Governance Update - Recognizing Contributions Beyond Code
 ####################################################################
 
-:Author: Julien Jerphanion <git@jjerphan.xyz>, Gaël Varoquaux <gael.varoquaux@normalesup.org>,
+:Author: Julien Jerphanion <git@jjerphan.xyz>,
+         Gaël Varoquaux <gael.varoquaux@normalesup.org>,
          Chiara Marmo <marmochiaskl@gmail.com>
 :Status: Draft
 :Type: Process
@@ -14,8 +15,7 @@
  Abstract
 **********
 
-This SLEP proposes updating the Governance to broaden the notion of core
-contribution in scikit-learn.
+This SLEP proposes updating the Governance to broaden the notion of contribution in scikit-learn.
 At this aim, the Technical Committee is renamed as Steering Committee, opening the
 decision process to new to be defined core roles.
 New core roles are allowed to be defined without requiring new SLEPs, to ease subsequent
@@ -82,7 +82,7 @@ Define "Contributions" more broadly
 Explicitly define Contributions and emphasize the importance of non-code
 contributions in the Governance structure.
 
-New roles and core roles, and susequent teams will be defined.
+New roles, core roles, and subsequent teams will be defined.
 Core Team members will become scikit-learn "Core Contributors":
 a Contributor will be promoted to a Core Contributor after being proposed by
 at least one existing Core Contributor. The proposal must specify which
@@ -101,10 +101,11 @@ Rename "Technical Committee" to "Steering Committee".
 Define the Steering Committee as a subset of Core Contributors rather
 than a subset of Core Developers.
 
-The current members of the Technical Committee [8]_ will ensure the transition for a
-two-years period, starting from the acceptance of this SLEP.
-During the transition period roles which qualified as "Core Contributors" are expected to
-be represented in the Steering Committee by al least one member.
+The current members of the Technical Committee [8]_ will ensure the transition
+for a two-years period, starting from the acceptance of this SLEP.
+During the transition period, each role among "Core Contributors" is expected
+to be represented in the Steering Committee by at least one member having this
+role.
 
 Extend voting rights
 ====================
@@ -194,7 +195,7 @@ This document has been placed in the public domain [9]_.
 .. [9]
 
    Decision Making Process, scikit-learn Governance and Decision-Making:
-   https://scikit-learn.org/dev/governance.html#decision-making-process
+   https://scikit-learn.org/stable/governance.html#decision-making-process
 
 .. [10]
 
