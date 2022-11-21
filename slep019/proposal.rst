@@ -123,7 +123,7 @@ without requiring a SLEP:
 
 Any changes to the scikit-learn Governance (including ones which do not
 require being back by a SLEP) will continue to be subject to the
-decision making process [8]_, which includes a vote of the Core
+decision making process [9]_, which includes a vote of the Core
 Contributors.
 
 If subsequent changes to the Governance are proposed through a GitHub
@@ -142,7 +142,7 @@ will replace a vote on the private Core Contributors' mailing list.
  Copyright
 ***********
 
-This document has been placed in the public domain [9]_.
+This document has been placed in the public domain [10]_.
 
 **************************
  References and Footnotes
