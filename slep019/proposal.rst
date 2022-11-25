@@ -74,7 +74,7 @@ modifications over time.
 
 Some of the proposed modification have been discussed in the monthly
 meetings, on April 25th 2022 [5]_ and September 5th 2022 [6]_.
-The current version is based on the discussion on the draft version [7]_.  
+The discussion about the proposal is publicly available [7]_ [8]_.  
 
 Define "Contributions" more broadly
 ===================================
@@ -101,10 +101,10 @@ Rename "Technical Committee" to "Steering Committee".
 Define the Steering Committee as a subset of Core Contributors rather
 than a subset of Core Developers.
 
-The current members of the Technical Committee [8]_ will ensure the transition
-for a two-years period, starting from the acceptance of this SLEP.
-During the transition period, each role among "Core Contributors" is expected
-to be represented in the Steering Committee by at least one member having this
+The current members of the Technical Committee [9]_ will ensure the transition
+for a one-years period, starting from the acceptance of this SLEP.
+During the transition period, each new created role among the "Core Contributors" is
+expected to be represented in the Steering Committee by at least one member having this
 role.
 
 Extend voting rights
@@ -123,7 +123,7 @@ without requiring a SLEP:
 
 Any changes to the scikit-learn Governance (including ones which do not
 require being back by a SLEP) will continue to be subject to the
-decision making process [9]_, which includes a vote of the Core
+decision making process [10]_, which includes a vote of the Core
 Contributors.
 
 If subsequent changes to the Governance are proposed through a GitHub
@@ -142,7 +142,7 @@ will replace a vote on the private Core Contributors' mailing list.
  Copyright
 ***********
 
-This document has been placed in the public domain [10]_.
+This document has been placed in the public domain [11]_.
 
 **************************
  References and Footnotes
@@ -189,14 +189,19 @@ This document has been placed in the public domain [10]_.
 
 .. [8]
 
+   SLEP019: Governance Update - Recognizing Contributions Beyond Code
+   https://github.com/scikit-learn/enhancement_proposals/pull/81
+
+.. [9]
+
    scikit-learn Techical Committee
    https://scikit-learn.org/1.1/governance.html#technical-committee
 
-.. [9]
+.. [10]
 
    Decision Making Process, scikit-learn Governance and Decision-Making:
    https://scikit-learn.org/stable/governance.html#decision-making-process
 
-.. [10]
+.. [11]
 
    Open Publication License: https://www.opencontent.org/openpub/
