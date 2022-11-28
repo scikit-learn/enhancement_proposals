@@ -1,8 +1,8 @@
 .. _slep_004:
 
-================
-Data information
-================
+=========================
+SLEP004: Data information
+=========================
 
 This is a specification to introduce data information (as
 ``sample_weights``) during the computation of an estimator methods
