@@ -6,7 +6,7 @@ Clone Override Protocol with ``__sklearn_clone__``
 :Status: Accepted
 :Type: Standards Track
 :Created: 2022-03-19
-:scikit-learn-Version: 1.2.0
+:scikit-learn-Version: 1.3.0
 :Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/79
 
 Abstract
