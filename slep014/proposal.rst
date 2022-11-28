@@ -5,7 +5,7 @@ SLEP014: Pandas In, Pandas Out
 ==============================
 
 :Author: Thomas J Fan
-:Status: Draft
+:Status: Rejected
 :Type: Standards Track
 :Created: 2020-02-18
 
@@ -32,7 +32,7 @@ together with a pipeline with multiple column names::
     from sklearn.pipeline import make_pipeline
     from sklearn.linear_model import LogisticRegression
 
-    X = pd.DataFrame({'letter': ['a', 'b', 'c'], 
+    X = pd.DataFrame({'letter': ['a', 'b', 'c'],
                       'pet': ['dog', 'snake', 'dog'],
                       'num': [1, 2, 3]})
     y = [0, 0, 1]
@@ -223,7 +223,7 @@ Cons
 
 - ``scikit-learn`` does not require many of the features Dataset provides.
 - Needs to be converted to a DataArray before it can be converted to a numpy array.
-- The `conversion from a pandas DataFrame to a Dataset <http://xarray.pydata.org/en/stable/pandas.html>`_ 
+- The `conversion from a pandas DataFrame to a Dataset <http://xarray.pydata.org/en/stable/pandas.html>`_
   is not lossless. For example, categorical dtypes in a pandas dataframe will
   lose their categorical information when converted to a Dataset.
 - xarray does not have as much adoption as pandas, which increases the learning
