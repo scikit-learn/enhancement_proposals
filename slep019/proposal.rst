@@ -16,8 +16,8 @@
 **********
 
 This SLEP proposes updating the Governance to broaden the notion of contribution in scikit-learn.
-At this aim, the Technical Committee is renamed as Steering Committee, opening the
-decision process to new to be defined core roles.
+To this end, the Technical Committee is renamed to Steering Committee, opening the
+decision process to new, to be defined, core roles.
 New core roles are allowed to be defined without requiring new SLEPs, to ease subsequent
 related changes to the Governance.
 
