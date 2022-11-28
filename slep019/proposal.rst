@@ -194,8 +194,8 @@ This document has been placed in the public domain [11]_.
 
 .. [9]
 
-   scikit-learn Techical Committee
-   https://scikit-learn.org/1.1/governance.html#technical-committee
+   scikit-learn Technical Committee
+   https://scikit-learn.org/1.2/governance.html#technical-committee
 
 .. [10]
 
