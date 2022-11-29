@@ -5,7 +5,7 @@ SLEP015: Feature Names Propagation
 ==================================
 
 :Author: Thomas J Fan
-:Status: Draft
+:Status: Rejected
 :Type: Standards Track
 :Created: 2020-10-03
 
