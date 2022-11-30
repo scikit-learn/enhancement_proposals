@@ -144,7 +144,7 @@ will replace a vote on the private Core Contributors' mailing list.
 Acknowledgment
 **************
 
-We talk the following people who have helped with discussions during the
+We thank the following people who have helped with discussions during the
 development of this SLEP:
 
 - Lucy Liu: https://github.com/lucyleeow
