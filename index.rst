@@ -40,6 +40,7 @@
     :caption: Rejected
 
     slep014/proposal
+    slep015/proposal
 
 .. toctree::
     :maxdepth: 1
