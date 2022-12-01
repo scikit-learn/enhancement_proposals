@@ -150,6 +150,7 @@ development of this SLEP:
 - Lucy Liu: https://github.com/lucyleeow
 - Noa Tamir: https://github.com/noatamir
 - Reshama Shaikh: https://github.com/reshamas
+- Tim Head: https://github.com/betatim
 
 ***********
  Copyright
