@@ -101,11 +101,9 @@ Rename "Technical Committee" to "Steering Committee".
 Define the Steering Committee as a subset of Core Contributors rather
 than a subset of Core Developers.
 
-The current members of the Technical Committee [9]_ will ensure the transition
-for a one-years period, starting from the acceptance of this SLEP.
-During the transition period, each new created role among the "Core Contributors" is
-expected to be represented in the Steering Committee by at least one member having this
-role.
+The Steering Committee will accept members from any of the core contributor teams,
+and after this SLEP is accepted, the definition and formation of core teams such as
+the triage team and the communication team will go ahead.
 
 Extend voting rights
 ====================
