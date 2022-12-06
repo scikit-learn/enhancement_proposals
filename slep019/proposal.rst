@@ -91,7 +91,7 @@ after a vote on the private Core Contributor mailing list which must
 last for two weeks and which must reach at least two-thirds positive
 majority of the cast votes.
 
-A Core Contributor may belong to multiple core roles.
+A Core Contributor may belong to multiple core teams.
 
 Evolve the Technical Committee into a Steering Committee
 ========================================================
