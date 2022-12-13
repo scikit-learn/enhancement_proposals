@@ -5,8 +5,7 @@
 ####################################################################
 
 :Author: Julien Jerphanion <git@jjerphan.xyz>,
-         Gaël Varoquaux <gael.varoquaux@normalesup.org>,
-         Chiara Marmo <marmochiaskl@gmail.com>
+         Gaël Varoquaux <gael.varoquaux@normalesup.org>
 :Status: Draft
 :Type: Process
 :Created: 2022-09-12
