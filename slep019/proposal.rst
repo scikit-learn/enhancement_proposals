@@ -100,7 +100,7 @@ Rename "Technical Committee" to "Steering Committee".
 Define the Steering Committee as a subset of Core Contributors rather
 than a subset of Core Developers.
 
-The Steering Committee will accept members from any of the core contributor teams,
+The Steering Committee shall consist of members from any of the core contributor teams,
 and after this SLEP is accepted, the definition and formation of core teams such as
 the triage team and the communication team will go ahead.
 
