@@ -186,7 +186,7 @@ This document has been placed in the public domain [11]_.
 
 .. [8]
 
-   SLEP019: Governance Update - Recognizing Contributions Beyond Code
+   SLEP019: Governance Update - Recognizing Contributions Beyond Code (version II)
    https://github.com/scikit-learn/enhancement_proposals/pull/81
 
 .. [9]
