@@ -139,6 +139,19 @@ In this case, the vote still has to be announced on the Core
 Contributors' mailing list, but the system of Pull Request approvals
 will replace a vote on the private Core Contributors' mailing list.
 
+
+**************
+Acknowledgment
+**************
+
+We thank the following people who have helped with discussions during the
+development of this SLEP:
+
+- Lucy Liu: https://github.com/lucyleeow
+- Noa Tamir: https://github.com/noatamir
+- Reshama Shaikh: https://github.com/reshamas
+- Tim Head: https://github.com/betatim
+
 ***********
  Copyright
 ***********
