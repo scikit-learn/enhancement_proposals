@@ -3,10 +3,11 @@ SLEP017: Clone Override Protocol with ``__sklearn_clone__``
 ===========================================================
 
 :Author: Joel Nothman
-:Status: Draft
+:Status: Accepted
 :Type: Standards Track
 :Created: 2022-03-19
-:Resolution: (required for Accepted | Rejected | Withdrawn)
+:scikit-learn-Version: 1.3.0
+:Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/79
 
 Abstract
 --------
