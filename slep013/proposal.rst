@@ -5,7 +5,7 @@ SLEP013: ``n_features_out_`` attribute
 ======================================
 
 :Author: Adrin Jalali
-:Status: Accepted
+:Status: Rejected
 :Type: Standards Track
 :Created: 2020-02-12
 

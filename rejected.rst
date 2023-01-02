@@ -1,4 +1,7 @@
 Rejected SLEPs
 ==============
 
-Nothing here
+.. toctree::
+    :maxdepth: 1
+
+    slep013/proposal
