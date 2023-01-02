@@ -1,19 +1,23 @@
  .. _slep_007:
 
-===========================================
-Feature names, their generation and the API
-===========================================
+====================================================
+SLEP007: Feature names, their generation and the API
+====================================================
 
 :Author: Adrin Jalali
-:Status: Under Review
+:Status: Final
 :Type: Standards Track
 :Created: 2019-04
+:Vote opened: 2021-10-26
+:Vote closed: 2021-11-29
+
+Implemented with `v1.1.0 <https://scikit-learn.org/stable/auto_examples/release_highlights/plot_release_highlights_1_1_0.html#get-feature-names-out-available-in-all-transformers>`__.
 
 Abstract
 ########
 
 This SLEP proposes the introduction of the ``feature_names_in_`` attribute for
-all estimators, and the ``feature_names_out_`` attribute for all transformers.
+all estimators, and the ``get_feature_names_out`` method for all transformers.
 We here discuss the generation of such attributes and their propagation through
 pipelines. Since for most estimators there are multiple ways to generate
 feature names, this SLEP does not intend to define how exactly feature names
@@ -72,10 +76,10 @@ However, it's impossible to interpret or even sanity-check the
 correspondence of the coefficients to the input features is basically
 impossible to figure out.
 
-This proposal suggests adding two attributes to fitted estimators:
-``feature_names_in_`` and ``feature_names_out_``, such that in the
+This proposal suggests adding ``feature_names_in_`` attribute and
+``get_feature_names_out`` method to fitted estimators: , such that in the
 abovementioned example ``clf[-1].feature_names_in_`` and
-``clf[-2].feature_names_out_`` will be::
+``clf[-2].get_feature_names_out()`` will be::
 
     ['num__age',
      'num__fare',
@@ -106,31 +110,18 @@ original features:
 - Algorithms that create combinations of a fixed number of features, *e.g.*
   ``PolynomialFeatures``, as opposed to all of
   them where there are many. Note that verbosity considerations and
-  ``verbose_feature_names`` as explained later can apply here.
+  ``verbose_feature_names_out`` as explained later can apply here.
 
 This proposal talks about how feature names are generated and not how they are
 propagated.
-
-verbose_feature_names
-*********************
-
-``verbose_feature_names`` controls the verbosity of the generated feature names
-and it can be ``True`` or ``False``. Alternative solutions could include:
-
-- an integer: fine tuning the verbosity of the generated feature names.
-- a ``callable`` which would give further flexibility to the user to generate
-  user defined feature names.
-
-These alternatives may be discussed and implemented in the future if deemed
-necessary.
 
 Scope
 #####
 
 The API for input and output feature names includes a ``feature_names_in_``
-attribute for all estimators, and a ``feature_names_out_`` attribute for any
+attribute for all estimators, and a ``get_feature_names_out`` method for any
 estimator with a ``transform`` method, *i.e.* they expose the generated feature
-names via the ``feature_names_out_`` attribute.
+names via the ``get_feature_names_out`` method.
 
 Note that this SLEP also applies to `resamplers
 <https://github.com/scikit-learn/enhancement_proposals/pull/15>`_ the same way
@@ -142,19 +133,19 @@ Input Feature Names
 The input feature names are stored in a fitted estimator in a
 ``feature_names_in_`` attribute, and are taken from the given input data, for
 instance a ``pandas`` data frame. This attribute will be ``None`` if the input
-provides no feature names.
+provides no feature names. The ``feature_names_in_`` attribute is a 1d NumPy
+array with object dtype and all elements in the array are strings.
 
 Output Feature Names
 ####################
 
 A fitted estimator exposes the output feature names through the
-``feature_names_out_`` attribute. Here we discuss more in detail how these
-feature names are generated. Since for most estimators there are multiple ways
-to generate feature names, this SLEP does not intend to define how exactly
-feature names are generated for all of them. It is instead a guideline on how
-they could generally be generated. Furthermore, that specific behavior of a
-given estimator may be tuned via the ``verbose_feature_names`` parameter, as
-detailed below.
+``get_feature_names_out`` method. The output of ``get_feature_names_out`` is a
+1d NumPy array with object dtype and all elements in the array are strings. Here
+we discuss more in detail how these feature names are generated. Since for most
+estimators there are multiple ways to generate feature names, this SLEP does not
+intend to define how exactly feature names are generated for all of them. It is
+instead a guideline on how they could generally be generated.
 
 As detailed bellow, some generated output features names are the same or a
 derived from the input feature names. In such cases, if no input feature names
@@ -165,24 +156,19 @@ Feature Selector Transformers
 
 This includes transformers which output a subset of the input features, w/o
 changing them. For example, if a ``SelectKBest`` transformer selects the first
-and the third features, and no names are provided, the ``feature_names_out_``
-will be ``[x0, x2]``.
+and the third features, and no names are provided, the
+``get_feature_names_out`` will be ``[x0, x2]``.
 
 Feature Generating Transformers
 *******************************
 
 The simplest category of transformers in this section are the ones which
-generate a column based on a single given column. The generated output column
-in this case is a sensible transformation of the input feature name. For
-instance, a ``LogTransformer`` can do ``'age' -> 'log(age)'``, and a
-``OneHotEncoder`` could do ``'gender' -> 'gender_female', 'gender_fluid',
-...``. An alternative is to leave the feature names unchanged when each output
-feature corresponds to exactly one input feature. Whether or not to modify the
-feature name, *e.g.* ``log(x0)`` vs. ``x0`` may be controlled via the
-``verbose_feature_names`` to the constructor. The default value of
-``verbose_feature_names`` can be different depending on the transformer. For
-instance, ``StandardScaler`` can have it as ``False``, whereas
-``LogTransformer`` could have it as ``True`` by default.
+generate a column based on a single given column. These would simply
+preserve the input feature names if a single new feature is generated,
+such as in ``StandardScaler``, which would map ``'age'`` to ``'age'``.
+If an input feature maps to multiple new
+features, a postfix is added, so that ``OneHotEncoder`` might map
+``'gender'`` to ``'gender_female'`` ``'gender_fluid'`` etc.
 
 Transformers where each output feature depends on a fixed number of input
 features may generate descriptive names as well. For instance, a
@@ -201,19 +187,14 @@ Meta-Estimators
 Meta estimators can choose to prefix the output feature names given by the
 estimators they are wrapping or not.
 
-By default, ``Pipeline`` adds no prefix, *i.e* its ``feature_names_out_`` is
-the same as the ``feature_names_out_`` of the last step, and ``None`` if the
-last step is not a transformer.
+By default, ``Pipeline`` adds no prefix, *i.e* its ``get_feature_names_out()``
+is the same as the ``get_feature_names_out()`` of the last step, and ``None``
+if the last step is not a transformer.
 
 ``ColumnTransformer`` by default adds a prefix to the output feature names,
 indicating the name of the transformer applied to them. If a column is in the output
 as a part of ``passthrough``, it won't be prefixed since no operation has been
 applied on it.
-
-This is the default behavior, and it can be tuned by constructor parameters if
-the meta estimator allows it. For instance, a ``verbose_feature_names=False``
-may indicate that a ``ColumnTransformer`` should not prefix the generated
-feature names with the name of the step.
 
 Examples
 ########
@@ -222,26 +203,26 @@ Here we include some examples to demonstrate the behavior of output feature
 names::
 
     100 features (no names) -> PCA(n_components=3)
-    feature_names_out_: [pca0, pca1, pca2]
+    get_feature_names_out(): [pca0, pca1, pca2]
 
 
     100 features (no names) -> SelectKBest(k=3)
-    feature_names_out_: [x2, x17, x42]
+    get_feature_names_out(): [x2, x17, x42]
 
 
     [f1, ..., f100] -> SelectKBest(k=3)
-    feature_names_out_: [f2, f17, f42]
+    get_feature_names_out(): [f2, f17, f42]
 
 
     [cat0] -> OneHotEncoder()
-    feature_names_out_: [cat0_cat, cat0_dog, ...]
+    get_feature_names_out(): [cat0_cat, cat0_dog, ...]
 
 
     [f1, ..., f100] -> Pipeline(
                            [SelectKBest(k=30),
                             PCA(n_components=3)]
                        )
-    feature_names_out_: [pca0, pca1, pca2]
+    get_feature_names_out(): [pca0, pca1, pca2]
 
 
     [model, make, numeric0, ..., numeric100] ->
@@ -251,38 +232,58 @@ names::
              ('num', Pipeline(SimpleImputer(), PCA(n_components=3)),
               ['numeric0', ..., 'numeric100'])]
         )
-    feature_names_out_: ['cat_model_100', 'cat_model_200', ...,
-                         'cat_make_ABC', 'cat_make_XYZ', ...,
-                         'num_pca0', 'num_pca1', 'num_pca2']
+    get_feature_names_out(): ['cat_model_100', 'cat_model_200', ...,
+                              'cat_make_ABC', 'cat_make_XYZ', ...,
+                              'num_pca0', 'num_pca1', 'num_pca2']
 
-However, the following examples produce a somewhat redundant feature names,
-and hence the relevance of ``verbose_feature_names=False``::
+However, the following examples produce a somewhat redundant feature names::
 
     [model, make, numeric0, ..., numeric100] ->
         ColumnTransformer([
             ('ohe', OneHotEncoder(), ['model', 'make']),
             ('pca', PCA(n_components=3), ['numeric0', ..., 'numeric100'])
         ])
-    feature_names_out_: ['ohe_model_100', 'ohe_model_200', ...,
-                         'ohe_make_ABC', 'ohe_make_XYZ', ...,
-                         'pca_pca0', 'pca_pca1', 'pca_pca2']
+    get_feature_names_out(): ['ohe_model_100', 'ohe_model_200', ...,
+                              'ohe_make_ABC', 'ohe_make_XYZ', ...,
+                              'pca_pca0', 'pca_pca1', 'pca_pca2']
 
-If desired, the user can remove the prefixes::
+Extensions
+##########
+
+verbose_feature_names_out
+*************************
+
+To provide more control over feature names, we could add a boolean
+``verbose_feature_names_out`` constructor argument to certain transformers.
+The default would reflect the description above, but changes would allow more verbose
+names in some transformers, say having ``StandardScaler`` map ``'age'`` to ``'scale(age)'``.
+
+In case of the ``ColumnTransformer`` example above ``verbose_feature_names_out``
+could remove the estimator names, leading to shorter and less redundant names::
 
     [model, make, numeric0, ..., numeric100] ->
         make_column_transformer(
             (OneHotEncoder(), ['model', 'make']),
             (PCA(n_components=3), ['numeric0', ..., 'numeric100']),
-            verbose_feature_names=False
+            verbose_feature_names_out=False
         )
-    feature_names_out_: ['model_100', 'model_200', ...,
-                         'make_ABC', 'make_XYZ', ...,
-                         'pca0', 'pca1', 'pca2']
+    get_feature_names_out(): ['model_100', 'model_200', ...,
+                              'make_ABC', 'make_XYZ', ...,
+                              'pca0', 'pca1', 'pca2']
+
+Alternative solutions to a boolean flag could include:
+
+- an integer: fine tuning the verbosity of the generated feature names.
+- a ``callable`` which would give further flexibility to the user to generate
+  user defined feature names.
+
+These alternatives may be discussed and implemented in the future if deemed
+necessary.
 
 Backward Compatibility
 ######################
 
 All estimators should implement the ``feature_names_in_`` and
-``feature_names_out_`` API. This is checked in ``check_estimator``, and the
-transition is done with a ``FutureWarning`` for at least two versions to give
-time to third party developers to implement the API.
+``get_feature_names_out()`` API. This is checked in ``check_estimator``, and
+the transition is done with a ``FutureWarning`` for at least two versions to
+give time to third party developers to implement the API.

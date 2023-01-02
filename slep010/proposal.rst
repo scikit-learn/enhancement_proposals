@@ -5,9 +5,11 @@ SLEP010: ``n_features_in_`` attribute
 =====================================
 
 :Author: Nicolas Hug
-:Status: Accepted
+:Status: Final
 :Type: Standards Track
 :Created: 2019-11-23
+
+Implemented with `v0.23 <https://scikit-learn.org/stable/whats_new/v0.23.html?highlight=n_features_in_#id13>`__.
 
 Abstract
 ########
