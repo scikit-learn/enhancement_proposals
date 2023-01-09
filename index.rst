@@ -24,6 +24,7 @@
     slep012/proposal
     slep017/proposal
     slep019/proposal
+    slep020/proposal
 
 .. toctree::
     :maxdepth: 1
