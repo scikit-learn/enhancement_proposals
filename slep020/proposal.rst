@@ -18,11 +18,15 @@ where a vote will also occur in the Pull Request.
 Detailed description
 --------------------
 
-Currently, scikit-learn's `governance document <https://scikit-learn.org/stable/governance.html#decision-making-process>`__
-requires an enhancement proposal to make any changes to the governance
-document. In this SLEP, we propose simplifying the process by allowing governance
-changes through GitHub Pull Requests. A Pull Request approval will count as a
-positive vote, and a "Request Changes" review will count as a negative vote.
+Currently, scikit-learn's governance document [2]_ requires an enhancement
+proposal to make any changes to the governance document. In this SLEP, we
+propose simplifying the process by allowing governance changes through GitHub
+Pull Requests. A Pull Request approval will count as a positive vote, and a
+"Request Changes" review will count as a negative vote. Once the authors are
+happy with the state of the Pull Request, they can call for a vote on the
+mailing list. The voting period starts when it's announced on the mailing list.
+The voting period will remain one month as stated in the current Governance and
+Decision-Making Document [2]_.
 
 Discussion
 ----------
@@ -42,6 +46,8 @@ References and Footnotes
 .. [1] Each SLEP must either be explicitly labeled as placed in the public
    domain (see this SLEP as an example) or licensed under the `Open Publication
    License`_.
+.. [2] `scikit-learn Governance and Decision-Making
+   <https://scikit-learn.org/stable/governance.html#decision-making-process>`__
 
 .. _Open Publication License: https://www.opencontent.org/openpub/
 
