@@ -32,10 +32,14 @@ Discussion
 ----------
 
 Members of the scikit-learn community have discussed changing the governance
-in PRs:
-`enhancement_proposals#74 <https://github.com/scikit-learn/enhancement_proposals/pull/74>`__
-and
-`enhancement_proposals#81 <https://github.com/scikit-learn/enhancement_proposals/pull/81>`__.
+through :ref:`SLEP019 <slep_019>` in following PRs:
+
+1. `enhancement_proposals#74 <https://github.com/scikit-learn/enhancement_proposals/pull/74>`__
+   proposed updating the Governance to broaden the notion of contribution in scikit-learn.
+   The draft was approved and merged on 2022-11-18.
+2. `enhancement_proposals#81 <https://github.com/scikit-learn/enhancement_proposals/pull/81>`__
+   proposed updates to :ref:`SLEP019 <slep_019>`.
+
 :ref:`SLEP019 <slep_019>` also includes the voting change proposed in this SLEP.
 This SLEP's goal is to simplify the process of making governance changes, thus
 enabling the governance structure to evolve more efficiently.
