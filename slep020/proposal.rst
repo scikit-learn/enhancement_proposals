@@ -1,7 +1,7 @@
 .. _slep_020:
 
 ======================================
-SLEP020: Simplifing Governance Changes
+SLEP020: Simplifying Governance Changes
 ======================================
 
 :Author: Thomas J Fan
