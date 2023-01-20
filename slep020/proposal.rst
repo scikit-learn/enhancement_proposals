@@ -8,7 +8,7 @@ SLEP020: Simplifying Governance Changes
 :Status: Accepted
 :Type: Process
 :Created: 2023-01-09
-:Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/###
+:Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/85
 
 Abstract
 --------
