@@ -5,9 +5,10 @@ SLEP020: Simplifying Governance Changes
 =======================================
 
 :Author: Thomas J Fan
-:Status: Draft
+:Status: Accepted
 :Type: Process
 :Created: 2023-01-09
+:Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/85
 
 Abstract
 --------
