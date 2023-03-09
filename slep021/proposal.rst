@@ -59,7 +59,7 @@ References and Footnotes
 .. [1] Each SLEP must either be explicitly labeled as placed in the public
    domain (see this SLEP as an example) or licensed under the `Open Publication
    License`_.
-.. [2] https://github.com/scikit-learn/scikit-learn/pull/25659#pullrequestreview-1330861709
+.. [2] https://github.com/scikit-learn/scikit-learn/issues/20059#issuecomment-869811256
 
 .. _Open Publication License: https://www.opencontent.org/openpub/
 
