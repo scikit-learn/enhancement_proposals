@@ -79,11 +79,48 @@ of the dispersion::
    >>> feature_importances = [est.feature_importances_ for est in cv_results["estimator"]]
    >>> plt.boxplot(feature_importances, labels=X_train.columns)
 
+The second usage is about the model selection. Meta-estimator such as
+:class:`sklearn.model_selection.SelectFromModel` internally use an array of
+length `(n_features,)` to select feature and retrain a model on this subset of
+feature.
+
+By default :class:`sklearn.model_selection.SelectFromModel` relies on the
+estimator to expose `coef_` or `feature_importances_`::
+
+   >>> SelectFromModel(tree).fit(X_train, y_train)  # `tree` exposes `feature_importances_`
+
+For more flexbilibity, a string can be provided::
+
+   >>> linear_model = make_pipeline(StandardScaler(), LogisticRegression())
+   >>> SelectFromModel(
+   ...     linear_model, importance_getter="named_steps.logisticregression.coef_"
+   ... ).fit(X_train, y_train)
+
+:class:`sklearn.model_selection.SelectFromModel` rely by default on
+the estimator to expose a `coef_` or `feature_importances_` attribute. It is
+also possible to provide a string corresponding the attribute name returning
+the feature importance. It allows to deal with estimator embedded inside a
+pipeline, for instance. Finally, a callable taking an estimator and returning
+a NumPy array can also be provided.
+
 Current pitfalls
 ~~~~~~~~~~~~~~~~
 
 Solution
 ~~~~~~~~
+
+Plotting
+~~~~~~~~
+
+Add a new :class:`sklearn.inspection.FeatureImportanceDisplay` class to
+:mod:`sklearn.inspection`. Two methods could be useful for this display: (i)
+:meth:`sklearn.inspection.FeatureImportanceDisplay.from_estimator` to plot a
+a single estimate of feature importance and (ii)
+:meth:`sklearn.inspection.FeatureImportanceDisplay.from_cv_results` to plot a
+an estimate of the feature importance together with the variance.
+
+The display should therefore be aware how to retrieve the feature importance
+given the esimator.
 
 Discussion
 ----------
