@@ -39,10 +39,45 @@ feature importance of a model.
 
 Therefore, this SLEP proposes an API for providing feature importance allowing
 to be flexible to switch between methods and extensible to add new methods. It
-is a follow-up of initial discussions from [2]_.
+is a follow-up of initial discussions from :issue:`20059`.
 
 Current state
 ~~~~~~~~~~~~~
+
+Available methods
+^^^^^^^^^^^^^^^^^
+
+The following methods are available in scikit-learn to provide some feature
+importance:
+
+- The function :func:`sklearn.inspection.permutation_importance`. It requests
+  a fitted estimator and a dataset. Addtional parameters can be provided. The
+  method returns a `Bunch` containing 3 attributes: all decrease in score for
+  all repeatitions, the mean, and the standard deviation across the repeats.
+  This method is therefore estimator agnostic.
+- The linear estimators have a `coef_` attributes once fitted.
+- The decision tree-based estimators have a `feature_importances_` attribute
+  once fitted.
+
+Use cases
+^^^^^^^^^
+
+The first usage of feature importance is to inspect a fitted model. Usually,
+the feature importance will be plotted to visualize the importance of the
+features::
+
+   >>> tree = DecisionTreeClassifier().fit(X_train, y_train)
+   >>> plt.barh(X_train.columns, tree.feature_importances_)
+
+The analysis can be done further by checking the variance of the feature
+importance. :func:`sklearn.inspection.permutation_importance` already provides
+a way to do that since it repeats the computation several time. For the model
+specific feature importance, the user can use cross-validation to get an idea
+of the dispersion::
+
+   >>> cv_results = cross_validate(tree, X_train, y_train, return_estimator=True)
+   >>> feature_importances = [est.feature_importances_ for est in cv_results["estimator"]]
+   >>> plt.boxplot(feature_importances, labels=X_train.columns)
 
 Current pitfalls
 ~~~~~~~~~~~~~~~~
@@ -53,13 +88,15 @@ Solution
 Discussion
 ----------
 
+Issues where some discussions related to feature importance has been discussed:
+:issue:`20059`, :issue:`21170`.
+
 References and Footnotes
 ------------------------
 
 .. [1] Each SLEP must either be explicitly labeled as placed in the public
    domain (see this SLEP as an example) or licensed under the `Open Publication
    License`_.
-.. [2] https://github.com/scikit-learn/scikit-learn/issues/20059#issuecomment-869811256
 
 .. _Open Publication License: https://www.opencontent.org/openpub/
 
