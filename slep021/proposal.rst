@@ -119,11 +119,37 @@ In both cases, it should be better to request the user to be more explicit and
 request to choose a specific method to compute the feature importance for
 inspection or feature selection.
 
+Additionally, `feature_importances_` and `coef_` are statistics derived from
+the training set. We already documented that the reported
+`feature_importances_` will potentially show biases for features used by the
+model to overfit. Thus, it will potentially negatively impact the feature
+selection once used in the :class:`sklearn.model_selection.SelectFromModel`
+meta-estimator.
+
 On an API perspective, the current functionality for feature importance are
 available via functions or attributes, with no common API.
 
 Solution
 ~~~~~~~~
+
+A common API
+^^^^^^^^^^^^
+
+**Proposal 1**: Expose a parameter in `__init__` to select the method to use
+to compute the feature importance. The computation will be done using a method,
+e.g. `get_feature_importance` that could take additional parameters requested
+by the feature importance method. This method could therefore be used
+internally by :class:`sklearn.model_selection.SelectFromModel`.
+
+**Proposal 2**: Create a meta-estimator that takes a model and a method in
+`__init__`. Then, a method `fit` could compute the feature importance given
+some data. Then, the feature importance could be available through a fitted
+attribute `feature_importances_` (or a method?). We could reuse such
+meta-estimator in the :class:`sklearn.model_selection.SelectFromModel`.
+
+Then, we should rely on a common API for the methods computing the feature
+importance. It seems that they should all at least accept a fitted estimator,
+some dataset, and potentially some extra parameters.
 
 Plotting
 ^^^^^^^^
@@ -144,12 +170,18 @@ Discussion
 Issues where some discussions related to feature importance has been discussed:
 :issue:`20059`, :issue:`21170`.
 
+In SHAP package [2]_, the API is similar to the proposal 2. A class `Explainer`
+takes a model, an algorithm, and some additional parameters (that could be
+used by some algorithm). The computation of the Shapley values is done and
+return using the method `shap_values`.
+
 References and Footnotes
 ------------------------
 
 .. [1] Each SLEP must either be explicitly labeled as placed in the public
    domain (see this SLEP as an example) or licensed under the `Open Publication
    License`_.
+.. [2] https://shap.readthedocs.io/en/latest/
 
 .. _Open Publication License: https://www.opencontent.org/openpub/
 
