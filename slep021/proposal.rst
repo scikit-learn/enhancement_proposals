@@ -89,7 +89,7 @@ estimator to expose `coef_` or `feature_importances_`::
 
    >>> SelectFromModel(tree).fit(X_train, y_train)  # `tree` exposes `feature_importances_`
 
-For more flexbilibity, a string can be provided::
+For more flexibility, a string can be provided::
 
    >>> linear_model = make_pipeline(StandardScaler(), LogisticRegression())
    >>> SelectFromModel(
@@ -105,6 +105,22 @@ a NumPy array can also be provided.
 
 Current pitfalls
 ~~~~~~~~~~~~~~~~
+
+On a methodological perspective, scikit-learn does not encourage for good
+practice. Indeed, since it provides a defacto `feature_importances_` attribute
+for the decision tree, it is tempting for user to believe that this method is
+the best one.
+
+In the same spirit, the :class:`sklearn.model_selection.SelectFromModel`
+meta-estimator uses defacto the `feature_importances_` or `coef_` for selecting
+features.
+
+In both cases, it should be better to request the user to be more explicit and
+request to choose a specific method to compute the feature importance for
+inspection or feature selection.
+
+On an API perspective, the current functionality for feature importance are
+available via functions or attributes, with no common API.
 
 Solution
 ~~~~~~~~
