@@ -110,7 +110,7 @@ Solution
 ~~~~~~~~
 
 Plotting
-~~~~~~~~
+^^^^^^^^
 
 Add a new :class:`sklearn.inspection.FeatureImportanceDisplay` class to
 :mod:`sklearn.inspection`. Two methods could be useful for this display: (i)
@@ -120,7 +120,7 @@ a single estimate of feature importance and (ii)
 an estimate of the feature importance together with the variance.
 
 The display should therefore be aware how to retrieve the feature importance
-given the esimator.
+given the estimator.
 
 Discussion
 ----------
