@@ -21,21 +21,16 @@ Motivation
 ~~~~~~~~~~
 
 Data scientists rely on feature importance when inspecting a trained model.
-Feature importance is a measure of how much a feature contributes to the
-prediction and thus gives insights on the model the predictions provided by
-the model.
+However, there is currently not a single algorithm providing **the** feature
+importance. In practice, several algorithms are available, all having their
+pros and cons.
 
-However, there is currently not a single method to compute feature importance.
-All available methods are designed upon axioms or hypotheses that are not
-necessarly respected in practice.
-
-Some work in scikit-learn has been done to provide documentation to highlight
-the limitations of some implemented methods. However, there is currently not
-a common way to expose feature importance in scikit-learn. In addition, for
-some historical reasons, some estimators (e.g. decision tree) provide a single
-feature importance that could be used as the "method-to-use" to analyse the
-model. It is problematic since there is not defacto standard to analyse the
-feature importance of a model.
+In scikit-learn, there are different ways to compute and inspect feature
+importances. Some models, e.g. some tree based models, expose a
+`feature_importances_` attribute upon `fit`, and we also have utilities such as
+the `permutation_importance` function to compute a different type of feature
+importance. There has been some work documenting their limitations, but we have
+not provided a nice API to implement alternatives.
 
 Therefore, this SLEP proposes an API for providing feature importance allowing
 to be flexible to switch between methods and extensible to add new methods. It
@@ -55,7 +50,9 @@ importance:
   method returns a `Bunch` containing 3 attributes: all decrease in score for
   all repeatitions, the mean, and the standard deviation across the repeats.
   This method is therefore estimator agnostic.
-- The linear estimators have a `coef_` attributes once fitted.
+- The linear estimators have a `coef_` attributes once fitted, which is
+  sometimes used their corresponding importance. We documented the limitations
+  when it comes to interpret those coefficients.
 - The decision tree-based estimators have a `feature_importances_` attribute
   once fitted.
 
@@ -79,7 +76,7 @@ of the dispersion::
    >>> feature_importances = [est.feature_importances_ for est in cv_results["estimator"]]
    >>> plt.boxplot(feature_importances, labels=X_train.columns)
 
-The second usage is about the model selection. Meta-estimator such as
+The second usage is about the feature selection. Meta-estimator such as
 :class:`sklearn.model_selection.SelectFromModel` internally use an array of
 length `(n_features,)` to select feature and retrain a model on this subset of
 feature.
@@ -144,12 +141,25 @@ internally by :class:`sklearn.model_selection.SelectFromModel`.
 **Proposal 2**: Create a meta-estimator that takes a model and a method in
 `__init__`. Then, a method `fit` could compute the feature importance given
 some data. Then, the feature importance could be available through a fitted
-attribute `feature_importances_` (or a method?). We could reuse such
-meta-estimator in the :class:`sklearn.model_selection.SelectFromModel`.
+attribute `feature_importances_` or a method `get_feature_importance`. We could
+reuse such meta-estimator in the
+:class:`sklearn.model_selection.SelectFromModel`.
 
 Then, we should rely on a common API for the methods computing the feature
 importance. It seems that they should all at least accept a fitted estimator,
 some dataset, and potentially some extra parameters.
+
+**Proposal 3**: Similarly to the proposal 2 and taking inspiration from the
+SHAP package [2]_, we could create a class `Explainer` providing a
+`get_feature_importance` method given some data.
+
+Currently scikit-learn provides only global feature importance. The previous
+API could be extended by providing a `get_samples_importance` to compute an
+explanation per sample if the given method supports it (e.g. Shapley values).
+
+**Proposal 4**: Create a meta-estimator `FeatureImportanceCalculator` that
+could be passed around plotting displays or to an
+`estimator.get_feature_importance` method.
 
 Plotting
 ^^^^^^^^
