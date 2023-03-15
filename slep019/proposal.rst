@@ -5,7 +5,7 @@
 ####################################################################
 
 :Author: Julien Jerphanion <git@jjerphan.xyz>, Gaël Varoquaux <gael.varoquaux@normalesup.org>
-:Status: Draft
+:Status: Withdrawn
 :Type: Process
 :Created: 2022-09-12
 
@@ -210,3 +210,12 @@ This document has been placed in the public domain [9]_.
 .. [9]
 
    Open Publication License: https://www.opencontent.org/openpub/
+
+
+****
+Note
+****
+
+Since SLEP020 allows us to modify the governance w/o a SLEP requirement, many
+discussions from this SLEP are to be discussed and implemented in consequent
+PRs directly to change the governance, on the main repo.
