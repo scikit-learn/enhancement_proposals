@@ -1,13 +1,31 @@
-.. _slep_011:
+.. _slep_021:
 
 ======================================
-SLEP011: Fixing randomness ambiguities
+SLEP021: Fixing randomness ambiguities
 ======================================
 
-:Author: Nicolas Hug
+:Author: Needs a champion
 :Status: Under review
 :Type: Standards Track
-:Created: 2019-11-27
+:Created: 2020-09-01
+
+.. warning::
+
+    Update from 2023: This SLEP was written a long time ago, when the
+    understanding was that `RandomState` instances are **shared** across
+    clones. `It turns out it's not the case
+    <https://github.com/scikit-learn/scikit-learn/issues/26148>`_ and the
+    instances are instead copied. So a few of the claims made in this SLEP may
+    be slightly confusing. What this SLEP claims is happening for `RandomState`
+    instances is in fact happening only when passing `None`, and `RandomState`
+    instances behave mostly like `int` in CV procedures. Nonetheless, a lot of
+    its content is still relevant.
+
+    Note: this SLEP is a complete re-write of the abandonned `SLEP 11
+    <https://github.com/scikit-learn/enhancement_proposals/pull/24>`_ and
+    proposes a different solution.
+
+
 
 Abstract
 ========
