@@ -1,7 +1,7 @@
-.. _slep_021:
+.. _slep_022:
 
 ======================================
-SLEP021: Fixing randomness ambiguities
+SLEP022: Fixing randomness ambiguities
 ======================================
 
 :Author: Needs a champion
