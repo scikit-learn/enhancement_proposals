@@ -5,7 +5,7 @@ SLEP013: ``n_features_out_`` attribute
 ======================================
 
 :Author: Adrin Jalali
-:Status: Under Review
+:Status: Rejected
 :Type: Standards Track
 :Created: 2020-02-12
 
@@ -21,6 +21,55 @@ Motivation
 Knowing the number of features that a transformer outputs is useful for
 inspection purposes. This is in conjunction with `*SLEP010: ``n_features_in_``*
 <https://scikit-learn-enhancement-proposals.readthedocs.io/en/latest/slep010/proposal.html>`_.
+
+Take the following piece as an example::
+
+    X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
+
+    # We will train our classifier with the following features:
+    # Numeric Features:
+    # - age: float.
+    # - fare: float.
+    # Categorical Features:
+    # - embarked: categories encoded as strings {'C', 'S', 'Q'}.
+    # - sex: categories encoded as strings {'female', 'male'}.
+    # - pclass: ordinal integers {1, 2, 3}.
+
+    # We create the preprocessing pipelines for both numeric and categorical data.
+    numeric_features = ['age', 'fare']
+    numeric_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='median')),
+        ('scaler', StandardScaler())])
+
+    categorical_features = ['embarked', 'sex', 'pclass']
+    categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numeric_transformer, numeric_features),
+            ('cat', categorical_transformer, categorical_features)])
+
+    # Append classifier to preprocessing pipeline.
+    # Now we have a full prediction pipeline.
+    clf = Pipeline(steps=[('preprocessor', preprocessor),
+                          ('classifier', LogisticRegression())])
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+    clf.fit(X_train, y_train)
+
+The user could then inspect the number of features going out from each step::
+
+    # Total number of output features from the `ColumnTransformer`
+    clf[0].n_features_out_
+
+    # Number of features as a result of the numerical pipeline:
+    clf[0].named_transformers_['num'].n_features_out_
+
+    # Number of features as a result of the categorical pipeline:
+    clf[0].named_transformers_['cat'].n_features_out_
 
 Solution
 ########

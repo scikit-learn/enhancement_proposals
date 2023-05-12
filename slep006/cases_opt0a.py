@@ -1,9 +1,8 @@
 import numpy as np
 
-from defs import (accuracy, group_cv, get_scorer, SelectKBest,
+from defs import (GroupKFold, get_scorer, SelectKBest,
                   LogisticRegressionCV, cross_validate,
-                  make_pipeline, X, y, my_groups, my_weights,
-                  my_other_weights)
+                  make_pipeline, X, y, my_groups, my_weights)
 
 # %%
 # Case A: weighted scoring and fitting
@@ -31,7 +30,7 @@ class WrappedGroupCV:
         return self.base_cv.get_n_splits(unwrap_X(X), y, groups=groups)
 
 
-wrapped_group_cv = WrappedGroupCV(group_cv)
+wrapped_group_cv = WrappedGroupCV(GroupKFold())
 
 
 class WrappedLogisticRegressionCV(LogisticRegressionCV):
