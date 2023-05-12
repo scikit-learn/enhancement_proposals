@@ -15,11 +15,13 @@ SLEP021: Fixing randomness ambiguities
     understanding was that `RandomState` instances are **shared** across
     clones. `It turns out it's not the case
     <https://github.com/scikit-learn/scikit-learn/issues/26148>`_ and the
-    instances are instead copied. So a few of the claims made in this SLEP may
-    be slightly confusing. What this SLEP claims is happening for `RandomState`
-    instances is in fact happening only when passing `None`, and `RandomState`
-    instances behave mostly like `int` in CV procedures. Nonetheless, a lot of
-    its content is still relevant.
+    instances are instead copied. So a few of the claims made in this SLEP are
+    wrong, and may be slightly confusing. What this SLEP claims is happening for
+    `RandomState` instances is in fact happening only when passing `None`, and
+    `RandomState` instances behave mostly like `int` in CV procedures.
+
+    Nonetheless, a lot of its content is still relevant. At the very least, the
+    :ref:`key_use_cases` section may help framing discussions.
 
     Note: this SLEP is a complete re-write of the abandonned `SLEP 11
     <https://github.com/scikit-learn/enhancement_proposals/pull/24>`_ and
