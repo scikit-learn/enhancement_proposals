@@ -11,22 +11,16 @@ SLEP022: Fixing randomness ambiguities
 
 .. warning::
 
-    Update from 2023: This SLEP was written a long time ago, when the
-    understanding was that `RandomState` instances are **shared** across
-    clones. `It turns out it's not the case
-    <https://github.com/scikit-learn/scikit-learn/issues/26148>`_ and the
-    instances are instead copied. So a few of the claims made in this SLEP are
-    wrong, and may be slightly confusing. What this SLEP claims is happening for
-    `RandomState` instances is in fact happening only when passing `None`, and
-    `RandomState` instances behave mostly like `int` in CV procedures.
-
-    Nonetheless, a lot of its content is still relevant. At the very least, the
-    :ref:`key_use_cases` section may help framing discussions.
-
     Note: this SLEP is a complete re-write of the abandonned `SLEP 11
     <https://github.com/scikit-learn/enhancement_proposals/pull/24>`_ and
-    proposes a different solution.
+    proposes a **different** solution.
 
+    Play around with `this notebook
+    <https://nbviewer.jupyter.org/gist/NicolasHug/2db607b01482988fa549eb2c8770f79f>`_.
+    which illustrates the proposed solution.
+
+    Please, **please** take some time to read and understand this SLEP
+    before taking part in discussions.
 
 
 Abstract
@@ -79,278 +73,20 @@ SLEP is *not* about:
     The *legacy* design refers to the design as used in the current
     scikit-learn master branch, i.e. `0.24.dev`.
 
-.. note::
-    Since passing `random_state=None` is equivalent to passing the global
-    `RandomState` instance from `numpy`
-    (`random_state=np.random.mtrand._rand`), we will not explicitly mention
-    None in most cases, but everything that applies to instances also applies
-    to using None.
-
 Issues with the legacy design
 =============================
 
-Introduction: a complex mental model
-------------------------------------
+TL;DR: nobody, `not even core devs
+<https://github.com/scikit-learn/scikit-learn/issues/26148>`_, understands how
+randomness works in scikit-learn. We think we do, but we don't.
 
-The rules that dictate how `random_state` impacts the behaviour of estimators
-and CV splitters are seemingly simple: use an int and get the same results
-across calls, use an instance and get different results. Things get however
-much more complicated when these calls to `fit` and `split` are embedded
-within other procedures like CV procedures or meta-estimators.
+There are two key problems, that this SLEP solves:
 
-Users and core devs alike still seem to have a hard time figuring it out.
-Quoting Andreas Müller from `#14042
-<https://github.com/scikit-learn/scikit-learn/issues/14042>`_:
+- Estimators are stateful across calls to `fit()`.
+- Users can't properly control what kind of CV procedure their code is running.
 
-    The current design of random_state is often hard to understand and
-    confusing for users. I think we should rethink how random_state works.
+More details below in :ref:`issues`.
 
-As another empirical evidence, the fact the CV splitters may yield different
-splits across calls recently came as a surprise to a long-time core dev.
-
-At the very least, it should be noted that prior to `#9517
-<https://github.com/scikit-learn/scikit-learn/pull/9517/>`_ (merged in 2018)
-and `#18363 <https://github.com/scikit-learn/scikit-learn/pull/18363>`_ (not
-yet merged as of September 2020), most subtleties related to `random_state`
-were largely under-documented, and it is likely that a lot of users are
-actually oblivious to most pitfalls.
-
-The next sections describe:
-
-- Issues that illustrate how `random_state` implictly affects CV procedures
-  and meta-estimators in insiduous ways.
-- Examples of bugs that `random_state` has caused, which are another sign
-  that the legacy design might be too complex, even for core devs.
-
-Before reading these sections, please make sure to read `#18363
-<https://github.com/scikit-learn/scikit-learn/pull/18363>`_ which provides
-more context, and illustrates some use-cases that will be used here.
-
-.. _estimator_issues:
-
-Estimators: CV procedures and meta-estimators behaviour is implicitly dictated by the base estimator's `random_state`
----------------------------------------------------------------------------------------------------------------------
-
-As described in more details in `#18363
-<https://github.com/scikit-learn/scikit-learn/pull/18363>`_, the following
-lines run two very different cross-validation procedures::
-
-    cross_val_score(RandomForestClassifier(random_state=0), X, y)
-    cross_val_score(RandomForestClassifier(random_state=np.RandomState(0)), X, y)
-
-In the first one, the estimator RNG is the same on each fold and the RF
-selects the same subset of features across folds. In the second one, the
-estimator RNG varies across folds and the random subset of selected features
-will vary. In other words, the CV strategy that `cross_val_score` uses
-implicitly depends on the type of the estimators' `random_state` parameter.
-This is unexpected, since the behaviour of `cross_val_predict` should
-preferably be determined by parameters passed to `cross_val_predict`.
-
-The same is true for any procedure that performs cross-validation (manual CV,
-`GridSearchCV`, etc.). Things are particularly ambiguous in `GridSearchCV`:
-when a RandomState instance is used, a new RNG is used on each fold, **but
-also for each candidate**::
-
-    fold 0: use different RNGs across candidates
-    fold 1: use different RNGs across candidates (different RNGs from fold 0)
-    fold 2: use different RNGs across candidates (different RNGs from folds 0 and 1)
-    etc...
-
-Users might actually expect that the RNG would be different on each fold, but
-still constant across candidates, i.e. something like::
-
-    fold 0: use same RNG for all candidates
-    fold 1: use same RNG for all candidates (different RNG from fold 0)
-    fold 2: use same RNG for all candidates (different RNG from folds 0 and 1)
-    etc...
-
-.. note::
-    This strategy is in fact not even supported right now: neither integers,
-    RandomState instances or None can achieve this.
-
-Unfortunately, there is no way for users to figure out what strategy is used
-until they look at the code. It is not just a documentation problem. The core
-problem here is that **the behaviour of the CV procedure is implicitly
-dictated by the estimator's** `random_state`.
-
-There are similar issues in meta-estimators, like `RFE` or
-`SequentialFeatureSelection`: these are iterative feature selection
-algorithms that will use either *exact* or *statistical* clones at each
-iteration, depending on the estimator's `random_state`. Exact and statistical
-clones lead to two significantly different strategies. Here again, the
-behavior of these meta-estimators **is only implicitly dictated by the
-estimator's** `random_state`.
-
-In addition, since the sub-estimator's `random_state` type dictates the
-strategy, users are bound to one single strategy once the estimator has been
-created: it is for example impossible for an estimator to use a different RNG
-across folds if that estimator was initialized with an integer.
-
-It is unlikely that users have a perfect understanding of these subtleties.
-For users to actually understand how `random_state` impacts the CV procedures
-and meta-estimators, they actually need to know inner details of these: they
-need to know where and when `fit` is called, and also when `clone` is called.
-
-There is a very similar problem with CV splitters as described in the next
-section.
-
-.. _cv_splitters_issues:
-
-CV Splitters: users need to know inner details of CV procedures to avoid erroneous performance comparison
----------------------------------------------------------------------------------------------------------
-
-CV splitters yield different splits every time `split` is called if their
-`random_state` is a RandomState instance. This means that the following code
-doesn't allow fold-to-fold comparison of scores::
-
-    rng = np.random.RandomState(0)
-    cv = KFold(shuffle=True, random_state=rng)
-    estimators = [...]  # the estimators you want to compare
-    scores = {
-                est: cross_val_score(est, X, y, cv=cv)
-                for est in estimators
-    }
-
-Users might not realize it, but **the estimators will be evaluated on
-different splits**, even though they think they've set the random state by
-passing a carefuly crafted instance. This is because `cv.split` was called
-multiple times, yet these calls were hidden inside of `cross_val_score`. On
-top of impossible fold-to-fold comparison, comparing the average scores is
-also not ideal if the number of folds or samples is small.
-
-As a consequence, before users can safely report score comparisons, **they
-need to know how many times** `split` **is called**, which should just be an
-implementation detail. While the above example is already error-prone, things
-get harder in more complex tools like `GridSearchCV`: how are users supposed
-to know that `split` is called only once in `GridSearchCV.fit`?
-
-.. note::
-    This implementation detail about `GridSearchCV.fit` is in fact
-    documented, but only at the very end of the cross-validation `User Guide
-    <https://scikit-learn.org/stable/modules/cross_validation.html#a-note-on-shuffling>`_.
-    It is not documented where it shoud be, that is, in the hyper-parameter
-    tuning User Guide or in the docstrings.
-
-.. note::
-    In `#18363 <https://github.com/scikit-learn/scikit-learn/pull/18363>`_,
-    we recommend users to use integers for CV splitters' `random_state`,
-    effectively making them stateless.
-
-.. note::
-    Fixing how `random_state` is handled in the splitters is one of the
-    entries in the `Roadmap <https://scikit-learn.org/dev/roadmap.html>`_.
-
-.. _bugs:
-
-Bugs
-----
-
-Many bugs have happened over the years because of RandomState instances and
-None. Quoting Andreas Müller from `#14042
-<https://github.com/scikit-learn/scikit-learn/issues/14042>`_:
-
-    There have been countless bugs because of this
-
-("*This*" = RandomState instances and the implied statefulness of the
-estimators).
-
-Bugs caused by estimators statefulness
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-These bugs are often hard to find, and some of them are actual data leaks,
-e.g. `#14034 <https://github.com/scikit-learn/scikit-learn/issues/14034>`_.
-
-They arise because the estimators are stateful across calls to `fit`. Fixing
-them usually involves forcing the estimator to be (at least partially)
-stateless. A classical bug that happened multiple times is that the
-validation set may differ across calls to `fit` in a warm-start + early
-stopping context. For example, `this fix
-<https://github.com/scikit-learn/scikit-learn/pull/14999>`_ is to draw a
-random seed once and to re-use that seed for data splitting when
-early-stopping + warm start is used. It is *not* an obvious bug, nor an
-obvious fix.
-
-Making estimators stateless across calls to `fit` would prevent such bugs to
-happen, and would keep the code-base cleaner.
-
-Bugs caused by splitters statefulness
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-`#18431 <https://github.com/scikit-learn/scikit-learn/pull/18431>`_ is a bug
-introduced in `SequentialFeatureSelection` that perfectly illustrates the
-previous section :ref:`cv_splitters_issues`. The bug was that splitter
-statefulness would lead to comparing average scores of candidates that have
-been evaluated on different splits. Here again, the fix is to enforce
-statelessness of the splitter, e.g.
-`KFolds(5, shuffle=True, random_state=None)` is forbidden.
-
-.. note::
-    This bug was introduced by Nicolas Hug, who is this SLEP's author: it's
-    very easy to let these bugs sneak in, even when you're trying hard not
-    to.
-
-Other potential bugs can happen in the parameter search estimators. When a
-third-party library wants to implement its own parameter search strategy, it
-needs to subclass `BaseSearchCV` and call a built-in function
-`evaluate_candidates(candidates)` once, or multiple times.
-`evaluate_candidates` internally calls `split` once. If
-`evaluate_candidates` is called more than once, this means that **the
-candidate parameters are evaluated on different splits each time**.
-
-This is a quite subtle issue that third-party developers might easily
-overlook. Some core devs (Joel Nothman and Nicolas Hug) kept forgetting and
-re-discovering this issue over and over in the `Successive Halving PR 
-<https://github.com/scikit-learn/scikit-learn/pull/13900>`_.
-
-At the very least, this makes fold-to-fold comparison between candidates
-impossible whenever the search strategy calls `evaluate_candidates` more
-than once. This can however cause bigger bugs in other scenarios, e.g. if we
-implement successive halving + warm start (details ommitted here, you may
-refer to `this issue
-<https://github.com/scikit-learn/scikit-learn/issues/15125>`_).
-
-.. note::
-    In order to prevent any potential future bug and to prevent users from
-    making erroneous comparisons between the candidates scores, the
-    `Successive Halving implementation
-    <https://scikit-learn.org/dev/modules/generated/sklearn.model_selection.HalvingGridSearchCV.html#sklearn.model_selection.HalvingGridSearchCV>`_
-    forbids users from using stateful splitters, just like
-    `SequentialFeatureSelection` (see the note in the docstring for the `cv`
-    parameter).
-
-Other issues
-------------
-
-Fit idempotency isn't respected
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Quoting our `Developer Guidelines
-<https://scikit-learn.org/stable/developers/develop.html#fitting>`_:
-
-    When fit is called, any previous call to fit should be ignored.
-
-This means that ideally, calling `est.fit(X, y)` should yield the same model
-twice. We have a check for that in the `check_estimator()` suite:
-`check_fit_idempotent()`. Clearly, this fit-idempotency property is violated
-when RandomState instances are used.
-
-`clone` 's behaviour is implicit
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Much like CV procedures and meta-estimators, what `clone` returns implicitly
-depends on the estimators' `random_state`: it may return an exact clone or a
-statistical clone. Statistical clones share a common RandomState instance and
-thus are inter-dependent, as detailed in `#18363
-<https://github.com/scikit-learn/scikit-learn/pull/18363>`_. This makes
-debugging harder, among other things. Until `#18363
-<https://github.com/scikit-learn/scikit-learn/pull/18363>`_, the distinction
-between exact and statistical clones had never been documented and was up to
-users to figure out.
-
-.. note::
-    While less user-facing, this issue is actually part of the root cause for
-    the aforementioned issues related to estimators in CV procedures and in
-    meta-estimators.
 
 .. _key_use_cases:
 
@@ -370,20 +106,24 @@ these use-cases in the rest of the document:
   program executions yield different results each time.
 - C. CV procedures where the estimator's RNG is exactly the same on each
   fold. This is useful when one wants to make sure that a given seed will
-  work well on new data (whether users should actually do this is
-  debatable...). This is currently supported by passing an int to the
-  `random_state` parameter of the estimator.
+  work well on their data. This is a legit requirement as long as the user is OK
+  for the estimator to perform well just by chance.  This is currently supported
+  by passing an int
+  **or a `RandomState` instance** to the `random_state` parameter of the
+  estimator.
 - D. CV procedures where the estimator's RNG is different for each fold. This
   is useful to increase the statistical significance of CV results. This is
-  currently supported by passing a RandomState instance or None to the
-  `random_state` parameter of the estimator.
+  currently **only** supported by passing None as the `random_state` parameter
+  of the estimator - and that throws reproducibilty out the window.  **In the
+  legacy design, A and D are incompatible.**
 - E. Obtain *strict* clones, i.e. clones that will yield exactly the same
   results when called on the same data. This is currently supported by
-  calling `clone` if the estimator's `random_state` is an int.
+  calling `clone` if the estimator's `random_state` is an int or a `RandomState`
+  instance.
 - F. Obtain *statistical* clones, i.e. estimators
   that are identical but that will yield different results, even when called
   on the same data. This is currently supported by calling `clone` if
-  the estimator's `random_state` is an instance or None.
+  the estimator's `random_state` is None. **F and A are incompatible.**
 - G. Easily obtain different splits with the same characteristics from a
   splitter. By "same characteristics", we mean same number of splits, same
   choice of stratification, etc. This is useful to implement e.g.
@@ -567,6 +307,12 @@ Drawbacks
 Backward compatibility and possible roadmap for adoption
 --------------------------------------------------------
 
+.. warning::
+
+    I wrote this a long time ago. BC considerations might be easier / looser if
+    we choose to only support this proposal on the new numpy RNG objects. I
+    haven't thought about it in depth.
+
 There are two main changes proposed here:
 
 1. Making estimators and splitters stateless
@@ -676,6 +422,270 @@ somewhat implicit, and making these strategies explicit is one of the main
 goal of this SLEP. It is also easier to document and to expose the different
 possible strategies of a CV procedure when there is a dedicated parameter in
 that procedure.
+
+.. _issues:
+
+Appendix: Issues with the legacy design
+=======================================
+
+
+Introduction: a complex mental model
+------------------------------------
+
+The rules that dictate how `random_state` impacts the behaviour of estimators
+and CV splitters are seemingly simple: use an int or a `RandomState` instance
+and get the same results across calls, use None and get different
+results. Things get however much more complicated when these calls to `fit` and
+`split` are embedded within other procedures like CV procedures or
+meta-estimators.
+
+Users and core devs alike still seem to have a hard time figuring it out.
+Quoting Andreas Müller from `#14042
+<https://github.com/scikit-learn/scikit-learn/issues/14042>`_:
+
+    The current design of random_state is often hard to understand and
+    confusing for users. I think we should rethink how random_state works.
+
+As another empirical evidence, the fact the CV splitters may yield different
+splits across calls recently came as a surprise to a long-time core dev.
+
+At the very least, it should be noted that prior to `#9517
+<https://github.com/scikit-learn/scikit-learn/pull/9517/>`_ (merged in 2018)
+and `#18363 <https://github.com/scikit-learn/scikit-learn/pull/18363>`_ (not
+yet merged as of September 2020), most subtleties related to `random_state`
+were largely under-documented, and it is likely that a lot of users are
+actually oblivious to most pitfalls.
+
+The next sections describe:
+
+- Issues that illustrate how `random_state` implictly affects CV procedures
+  and meta-estimators in insiduous ways.
+- Examples of bugs that `random_state` has caused, which are another sign
+  that the legacy design might be too complex, even for core devs.
+
+Before reading these sections, please make sure to read `#18363
+<https://github.com/scikit-learn/scikit-learn/pull/18363>`_ which provides
+more context, and illustrates some use-cases that will be used here.
+
+.. _estimator_issues:
+
+Estimators: CV procedures and meta-estimators behaviour is implicitly dictated by the base estimator's `random_state`
+---------------------------------------------------------------------------------------------------------------------
+
+As described in more details in `#18363
+<https://github.com/scikit-learn/scikit-learn/pull/18363>`_, the following
+lines run two very different cross-validation procedures::
+
+    cross_val_score(RandomForestClassifier(random_state=0), X, y)
+    cross_val_score(RandomForestClassifier(random_state=np.RandomState(0)), X, y)
+
+In the first one, the estimator RNG is the same on each fold and the RF
+selects the same subset of features across folds. In the second one, the
+estimator RNG varies across folds and the random subset of selected features
+will vary. In other words, the CV strategy that `cross_val_score` uses
+implicitly depends on the type of the estimators' `random_state` parameter.
+This is unexpected, since the behaviour of `cross_val_predict` should
+preferably be determined by parameters passed to `cross_val_predict`.
+
+The same is true for any procedure that performs cross-validation (manual CV,
+`GridSearchCV`, etc.). Things are particularly ambiguous in `GridSearchCV`:
+when None is used, a new RNG is used on each fold, **but
+also for each candidate**::
+
+    fold 0: use different RNGs across candidates
+    fold 1: use different RNGs across candidates (different RNGs from fold 0)
+    fold 2: use different RNGs across candidates (different RNGs from folds 0 and 1)
+    etc...
+
+Users might actually expect that the RNG would be different on each fold, but
+still constant across candidates, i.e. something like::
+
+    fold 0: use same RNG for all candidates
+    fold 1: use same RNG for all candidates (different RNG from fold 0)
+    fold 2: use same RNG for all candidates (different RNG from folds 0 and 1)
+    etc...
+
+.. note::
+    This strategy is in fact not even supported right now: neither integers,
+    RandomState instances or None can achieve this.
+
+Unfortunately, there is no way for users to figure out what strategy is used
+until they look at the code. It is not just a documentation problem. The core
+problem here is that **the behaviour of the CV procedure is implicitly
+dictated by the estimator's** `random_state`.
+
+There are similar issues in meta-estimators, like `RFE` or
+`SequentialFeatureSelection`: these are iterative feature selection
+algorithms that will use either *exact* or *statistical* clones at each
+iteration, depending on the estimator's `random_state`. Exact and statistical
+clones lead to two significantly different strategies. Here again, the
+behavior of these meta-estimators **is only implicitly dictated by the
+estimator's** `random_state`.
+
+In addition, since the sub-estimator's `random_state` type dictates the
+strategy, users are bound to one single strategy once the estimator has been
+created: it is for example impossible for an estimator to use a different RNG
+across folds if that estimator was initialized with an integer.
+
+It is unlikely that users have a perfect understanding of these subtleties.
+For users to actually understand how `random_state` impacts the CV procedures
+and meta-estimators, they actually need to know inner details of these: they
+need to know where and when `fit` is called, and also when `clone` is called.
+
+There is a very similar problem with CV splitters as described in the next
+section.
+
+.. _cv_splitters_issues:
+
+CV Splitters: users need to know inner details of CV procedures to avoid erroneous performance comparison
+---------------------------------------------------------------------------------------------------------
+
+CV splitters yield different splits every time `split` is called if their
+`random_state` is a RandomState instance. This means that the following code
+doesn't allow fold-to-fold comparison of scores::
+
+    rng = np.random.RandomState(0)
+    cv = KFold(shuffle=True, random_state=rng)
+    estimators = [...]  # the estimators you want to compare
+    scores = {
+                est: cross_val_score(est, X, y, cv=cv)
+                for est in estimators
+    }
+
+Users might not realize it, but **the estimators will be evaluated on
+different splits**, even though they think they've set the random state by
+passing a carefuly crafted instance. This is because `cv.split` was called
+multiple times, yet these calls were hidden inside of `cross_val_score`. On
+top of impossible fold-to-fold comparison, comparing the average scores is
+also not ideal if the number of folds or samples is small.
+
+As a consequence, before users can safely report score comparisons, **they
+need to know how many times** `split` **is called**, which should just be an
+implementation detail. While the above example is already error-prone, things
+get harder in more complex tools like `GridSearchCV`: how are users supposed
+to know that `split` is called only once in `GridSearchCV.fit`?
+
+.. note::
+    This implementation detail about `GridSearchCV.fit` is in fact
+    documented, but only at the very end of the cross-validation `User Guide
+    <https://scikit-learn.org/stable/modules/cross_validation.html#a-note-on-shuffling>`_.
+    It is not documented where it shoud be, that is, in the hyper-parameter
+    tuning User Guide or in the docstrings.
+
+.. note::
+    In `#18363 <https://github.com/scikit-learn/scikit-learn/pull/18363>`_,
+    we recommend users to use integers for CV splitters' `random_state`,
+    effectively making them stateless.
+
+.. note::
+    Fixing how `random_state` is handled in the splitters is one of the
+    entries in the `Roadmap <https://scikit-learn.org/dev/roadmap.html>`_.
+
+.. _bugs:
+
+Bugs
+----
+
+Many bugs have happened over the years because of RandomState instances and
+None. Quoting Andreas Müller from `#14042
+<https://github.com/scikit-learn/scikit-learn/issues/14042>`_:
+
+    There have been countless bugs because of this
+
+("*This*" = RandomState instances and the implied statefulness of the
+estimators).
+
+Bugs caused by estimators statefulness
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These bugs are often hard to find, and some of them are actual data leaks,
+e.g. `#14034 <https://github.com/scikit-learn/scikit-learn/issues/14034>`_.
+
+They arise because the estimators are stateful across calls to `fit`. Fixing
+them usually involves forcing the estimator to be (at least partially)
+stateless. A classical bug that happened multiple times is that the
+validation set may differ across calls to `fit` in a warm-start + early
+stopping context. For example, `this fix
+<https://github.com/scikit-learn/scikit-learn/pull/14999>`_ is to draw a
+random seed once and to re-use that seed for data splitting when
+early-stopping + warm start is used. It is *not* an obvious bug, nor an
+obvious fix.
+
+Making estimators stateless across calls to `fit` would prevent such bugs to
+happen, and would keep the code-base cleaner.
+
+Bugs caused by splitters statefulness
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`#18431 <https://github.com/scikit-learn/scikit-learn/pull/18431>`_ is a bug
+introduced in `SequentialFeatureSelection` that perfectly illustrates the
+previous section :ref:`cv_splitters_issues`. The bug was that splitter
+statefulness would lead to comparing average scores of candidates that have
+been evaluated on different splits. Here again, the fix is to enforce
+statelessness of the splitter, e.g.
+`KFolds(5, shuffle=True, random_state=None)` is forbidden.
+
+.. note::
+    This bug was introduced by Nicolas Hug, who is this SLEP's author: it's
+    very easy to let these bugs sneak in, even when you're trying hard not
+    to.
+
+Other potential bugs can happen in the parameter search estimators. When a
+third-party library wants to implement its own parameter search strategy, it
+needs to subclass `BaseSearchCV` and call a built-in function
+`evaluate_candidates(candidates)` once, or multiple times.
+`evaluate_candidates` internally calls `split` once. If
+`evaluate_candidates` is called more than once, this means that **the
+candidate parameters are evaluated on different splits each time**.
+
+This is a quite subtle issue that third-party developers might easily
+overlook. Some core devs (Joel Nothman and Nicolas Hug) kept forgetting and
+re-discovering this issue over and over in the `Successive Halving PR 
+<https://github.com/scikit-learn/scikit-learn/pull/13900>`_.
+
+At the very least, this makes fold-to-fold comparison between candidates
+impossible whenever the search strategy calls `evaluate_candidates` more
+than once. This can however cause bigger bugs in other scenarios, e.g. if we
+implement successive halving + warm start (details ommitted here, you may
+refer to `this issue
+<https://github.com/scikit-learn/scikit-learn/issues/15125>`_).
+
+.. note::
+    In order to prevent any potential future bug and to prevent users from
+    making erroneous comparisons between the candidates scores, the
+    `Successive Halving implementation
+    <https://scikit-learn.org/dev/modules/generated/sklearn.model_selection.HalvingGridSearchCV.html#sklearn.model_selection.HalvingGridSearchCV>`_
+    forbids users from using stateful splitters, just like
+    `SequentialFeatureSelection` (see the note in the docstring for the `cv`
+    parameter).
+
+Other issues
+------------
+
+Fit idempotency isn't respected
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Quoting our `Developer Guidelines
+<https://scikit-learn.org/stable/developers/develop.html#fitting>`_:
+
+    When fit is called, any previous call to fit should be ignored.
+
+This means that ideally, calling `est.fit(X, y)` should yield the same model
+twice. We have a check for that in the `check_estimator()` suite:
+`check_fit_idempotent()`. Clearly, this fit-idempotency property is violated
+when None is used.
+
+`clone` 's behaviour is implicit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Much like CV procedures and meta-estimators, what `clone` returns implicitly
+depends on the estimators' `random_state`: it may return an exact clone or a
+statistical clone.
+
+.. note::
+    While less user-facing, this issue is actually part of the root cause for
+    the aforementioned issues related to estimators in CV procedures and in
+    meta-estimators.
 
 .. References and Footnotes
 .. ------------------------
