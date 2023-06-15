@@ -16,7 +16,7 @@ SLEP022: Fixing randomness ambiguities
     proposes a **different** solution.
 
     Play around with `this notebook
-    <https://nbviewer.jupyter.org/gist/NicolasHug/2db607b01482988fa549eb2c8770f79f>`_.
+    <https://nbviewer.jupyter.org/gist/NicolasHug/2db607b01482988fa549eb2c8770f79f>`_
     which illustrates the proposed solution.
 
     Please, **please** take some time to read and understand this SLEP
