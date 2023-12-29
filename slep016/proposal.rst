@@ -82,19 +82,19 @@ This SLEP proposes to add a methods to estimators that allow the user
 to specify candidates or distributions for local parameters on a specific
 estimator estimator instance::
 
-    svc = LinearSVC(dual=False, max_iter=10000).set_grid(C=C_OPTIONS)
+    svc = LinearSVC(dual=False, max_iter=10000).set_search_grid(C=C_OPTIONS)
     pipe = Pipeline(
         [
             # the reduce_dim stage is populated by the param_grid
             ("reduce_dim", "passthrough"),
             ("classify", svc),
         ]
-    ).set_grid(reduce_dim=[
-        PCA(iterated_power=7).set_grid(n_components=N_FEATURES_OPTIONS),
-        SelectKBest().set_grid(k=N_FEATURES_OPTIONS),
+    ).set_search_grid(reduce_dim=[
+        PCA(iterated_power=7).set_search_grid(n_components=N_FEATURES_OPTIONS),
+        SelectKBest().set_search_grid(k=N_FEATURES_OPTIONS),
     ])
 
-With this use of ``set_grid``, ``GridSearchCV(pipe)`` would not need the
+With this use of ``set_search_grid``, ``GridSearchCV(pipe)`` would not need the
 parameter grid to be specified explicitly. Instead, a recursive descent through
 ``pipe``'s parameters allows it to reconstruct exactly the grid used in the
 example above.
@@ -129,16 +129,19 @@ Implementation
 
 Four public methods will be added to ``BaseEstimator``::
 
-    def set_grid(self, **grid: List[object]):
+    def set_search_grid(self, **grid: List[object]):
         """Sets candidate values for parameters in a search
 
         These candidates are used in grid search when a parameter grid is not
         explicitly specified. They are also used in randomized search in the
-        case where set_distribution has not been used for the corresponding
+        case where set_search_rvs has not been used for the corresponding
         parameter.
 
+        Note that this parameter space has no effect when the estimator's own
+        ``fit`` method is called, but can be used by model selection utilities.
+
         As with :meth:`set_params`, update semantics apply, such that
-        ``set_grid(param1=['a', 'b'], param2=[1, 2]).set_grid(param=['a'])``
+        ``set_search_grid(param1=['a', 'b'], param2=[1, 2]).set_search_grid(param=['a'])``
         will retain the candidates set for ``param2``. To reset the grid,
         each parameter's candidates should be set to ``[]``.
 
@@ -171,7 +174,7 @@ Four public methods will be added to ``BaseEstimator``::
         """
         ...
 
-    def set_distribution(self, **distribution):
+    def set_search_rvs(self, **distribution):
         """Sets candidate values for parameters in a search
 
         These candidates are used in randomized search when a parameter
@@ -180,7 +183,7 @@ Four public methods will be added to ``BaseEstimator``::
         will also be used.
 
         As with :meth:`set_params`, update semantics apply, such that
-        ``set_distribution(param1=['a', 'b'], param2=[1, 2]).set_grid(param=['a'])``
+        ``set_search_rvs(param1=['a', 'b'], param2=[1, 2]).set_search_grid(param=['a'])``
         will retain the candidates set for ``param2``. To reset the grid,
         each parameter's candidates should be set to ``[]``.
 
@@ -208,9 +211,9 @@ Four public methods will be added to ``BaseEstimator``::
         including nested estimators can be constructed in combination with
         `get_params`.
 
-        For parameters where ``set_distribution`` has not been used, but ``set_grid``
+        For parameters where ``set_search_rvs`` has not been used, but ``set_search_grid``
         has been, this will return the corresponding list of values specified in
-        ``set_grid``.
+        ``set_search_grid``.
 
         Returns
         -------
@@ -232,7 +235,7 @@ can overwrite only one parameter's space without redefining everything.
 To facilitate this (in the absence of a polymorphic implementation of clone),
 we might need to store the candidate grids and distributions in a known instance
 attribute, or use a combination of `get_grid`, `get_distribution`, `get_params`
-and `set_grid`, `set_distribution` etc. to perform `clone`.
+and `set_search_grid`, `set_search_rvs` etc. to perform `clone`.
 
 Search estimators in `sklearn.model_selection` will be updated such that the
 currently required `param_grid` and `param_distributions` parameters will now default
@@ -250,9 +253,11 @@ See the implementation of ``build_param_grid`` in Searchgrid [1]_, which applies
 to the grid search case. This algorithm enables the specification of searches
 over components in a pipeline as well as their parameters.
 
-Where the search estimator perfoming the 'extract' algorithm extracts an empty
+If the search estimator perfoming the 'extract' algorithm extracts an empty
 grid or distribution altogether for the given estimator, it should raise a
-``ValueError``, indicative of likely user error.
+`ValueError`, indicative of likely user error.  Note that this allows a step in a
+`Pipeline` to have an empty search space as long as at least one step of that
+`Pipeline` defines a non-empty search space.
 
 Backward compatibility
 ----------------------
@@ -266,7 +271,7 @@ The fundamental change here is to associate parameter search configuration with 
 
 Alternative APIs to do so include:
 
-* Provide a function ``set_grid`` as Searchgrid [1]_ does, which takes an
+* Provide a function ``set_search_grid`` as Searchgrid [1]_ does, which takes an
   estimator instance and a parameter space, and sets a private
   attribute on the estimator object. This avoids cluttering the estimator's
   method namespace.
@@ -288,22 +293,16 @@ Alternative APIs to do so include:
   grids. This has similar benefits and downsides as `GridFactory`, while avoiding
   introducing a new API and instead relying on plain old Python dicts.
   Having multiple distinct dict-based representations of parameter spaces is
-  likely to confuse users.
 
-Another questionable design is the separation of ``set_grid`` and ``set_distribution``.
-These could be combined into a single method (``set_search_space``?), such that
+Another questionable design is the separation of ``set_search_grid`` and ``set_search_rvs``.
+These could be combined into a single method, such that
 :class:`~sklearn.model_selection.GridSearchCV` rejects a call to `fit` where `rvs`
 appear. This would make it harder to predefine search spaces that could be used
 for either exhaustive or randomised searches, which may be a use case in Auto-ML.
 
-The design of using a keyword argument for each parameter in ``set_grid``
-encourages succinctness but reduces extensibility.
-For example, we could design the API to require a single call per parameter::
-
-  est.set_grid('alpha', [.1, 1, 10]).set_grid('l1_ratio', [.2, .4, .6., .8])
-
-This design would allow further parameters to be added to `set_grid` to enrich
-the use of this data, including whether or not it is intended for randomised search.
+Another possible consideration is whether `set_search_grid` should update rather than
+replace the existing search space, to allow for incremental construction. This is likely
+to confuse users more than help.
 
 Discussion
 ----------
