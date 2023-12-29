@@ -228,7 +228,9 @@ The current distribution and grid values will be stored in a private
 attribute on the estimator, and ``get_grid`` may simply return this value,
 or an empty dict if undefined, while ``get_distribution`` will combine the
 stored parameter distributions with ``get_grid`` values.
-The attribute will be undefined by default upon construction of the estimator.
+The attribute will be undefined by default upon construction of the estimator,
+though in the future we could consider default grids being specified for
+some estimator classes.
 
 Parameter spaces should be copied in :ojb:`sklearn.base.clone`, so that a user
 can overwrite only one parameter's space without redefining everything.
@@ -262,7 +264,11 @@ grid or distribution altogether for the given estimator, it should raise a
 Backward compatibility
 ----------------------
 
-No concerns
+Where the user specifies an explicit grid, but one is also stored on the estimator
+using `set_search_grid`, we will adopt legacy behaviour, and search with the
+explicitly provided grid, maintaining backwards compatibility, and allowing a
+manual override of the new behaviour.  This behavior will be made clear in the
+docuemntation of parameters like `param_grid` and `param_distributions`.
 
 Alternatives
 ------------
@@ -300,9 +306,9 @@ These could be combined into a single method, such that
 appear. This would make it harder to predefine search spaces that could be used
 for either exhaustive or randomised searches, which may be a use case in Auto-ML.
 
-Another possible consideration is whether `set_search_grid` should update rather than
-replace the existing search space, to allow for incremental construction. This is likely
-to confuse users more than help.
+Another possible alternative is to have `set_search_grid` update rather than
+replace the existing search space, to allow for incremental construction. This is
+likely to confuse users more than help.
 
 Discussion
 ----------
