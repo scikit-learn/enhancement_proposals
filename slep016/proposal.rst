@@ -271,11 +271,24 @@ Alternative APIs to do so include:
   attribute on the estimator object. This avoids cluttering the estimator's
   method namespace.
 * Provide a `GridFactory` (see :issue:`21784`) which allows the user to
-  construct a mapping from atomic estimator instances to their search spaces.
+  construct a mapping from atomic estimator instances (and potentially estimator
+  classes as a fallback) to their search spaces.
   Aside from not cluttering the estimator's namespace, this may have
   theoretical benefit in allowing the user to construct multiple search spaces
   for the same composite estimator. There are no known use cases for this
-  benefit.
+  benefit. This approach cannot retain the parameter space for a cloned estimator,
+  potentially leading to surprising behavior.
+* In the vein of `GridFactory`, but without a new object-oriented API:
+  Provide a helper function which takes a mapping of estimator instances
+  (and perhaps classes as a fall-back) to a shallow parameter search space, and
+  transforms it into a traditional parameter grid.
+  This helper function could be public, or else this instance-space mapping would
+  become a new, *additional* way of specifying a parameter grid to `*SearchCV`.
+  Inputs in this format would automatically be converted to traditional parameter
+  grids. This has similar benefits and downsides as `GridFactory`, while avoiding
+  introducing a new API and instead relying on plain old Python dicts.
+  Having multiple distinct dict-based representations of parameter spaces is
+  likely to confuse users.
 
 Another questionable design is the separation of ``set_grid`` and ``set_distribution``.
 These could be combined into a single method (``set_search_space``?), such that
