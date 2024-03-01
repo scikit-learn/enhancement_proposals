@@ -127,7 +127,7 @@ some related issues and PRs: :issue:`4863`, :issue:`7574`, :issue:`8433`,
 :issue:`14338`, :issue:`14531`, :issue:`16118`, :issue:`18507`, :issue:`18748`,
 :issue:`18773`, :issue:`20127`, :issue:`20668`, :issue:`23156`, :issue:`24524`,
 :issue:`25187`, :issue:`26395`, :issue:`26494`, :issue:`26532`, :pr:`1171`, :pr:`3817`,
-:pr:` 8317`, :pr:`16925`, :pr:`22000`.
+:pr:`8317`, :pr:`16925`, :pr:`22000`.
 
 References and Footnotes
 ------------------------
