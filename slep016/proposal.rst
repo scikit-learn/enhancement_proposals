@@ -305,10 +305,9 @@ These could be combined into a single method, such that
 :class:`~sklearn.model_selection.GridSearchCV` rejects a call to `fit` where `rvs`
 appear. This would make it harder to predefine search spaces that could be used
 for either exhaustive or randomised searches, which may be a use case in Auto-ML.
-
-Another possible alternative is to have `set_search_grid` update rather than
-replace the existing search space, to allow for incremental construction. This is
-likely to confuse users more than help.
+That is, if we had a single set_search_space, an AutoML library that is set up to call it
+would have to choose between setting RVs and grids. But this presumes a lot about how an
+AutoML library using this API might look.
 
 Discussion
 ----------
