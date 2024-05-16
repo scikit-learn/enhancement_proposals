@@ -185,6 +185,18 @@ takes a model, an algorithm, and some additional parameters (that could be
 used by some algorithm). The computation of the Shapley values is done and
 return using the method `shap_values`.
 
+Related issues
+--------------
+
+Some discussions happened in the past. In this section, we aggregate all issues
+related to this topic:
+
+- :issue:`15132`: proposal to add `feature_importances_` into the
+  `HistGradientBoosting` classifier and regressor models.
+- :issue:`18223`: proposal to implement the PIMP feature importance.
+- :issue:`18603`: implement OOB permutation importance for `RandomForest`.
+- :issue:`21170`: implement variable importances for linear models.
+
 References and Footnotes
 ------------------------
 
