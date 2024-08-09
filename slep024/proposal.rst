@@ -1,67 +1,51 @@
 .. _slep_024:
 
-==============================
-SLEP Template and Instructions
-==============================
+===========================================================================
+SLEP024: Guideline for external contributions to the scikit-learn blog post
+===========================================================================
 
-:Author: <list of authors' real names and optionally, email addresses>
-:Status: <Draft | Active | Accepted | Deferred | Rejected | Withdrawn |
-         Final | Superseded>
-:Type: <Standards Track | Process>
-:Created: <date created on, in yyyy-mm-dd format>
-:Resolution: <url> (required for Accepted | Rejected | Withdrawn)
+:Author: Guillaume Lemaitre, François Goupil
+:Status: Draft
+:Type: Standards Track
+:Created: 2024-08-09
 
 Abstract
 --------
 
-The abstract should be a short description of what the SLEP will achieve.
-
+This SLEP proposes some guidelines for writing and reviewing external contributions
+to the scikit-learn blog post.
 
 Detailed description
 --------------------
 
-This section describes the need for the SLEP. It should describe the
-existing problem that it is trying to solve and why this SLEP makes the
-situation better. It should include examples of how the new functionality
-would be used and perhaps some use cases.
+Scikit-learn has a blog post available at the following URL:
+https://blog.scikit-learn.org/. Since its origin, the blog post is used to relay
+information related to diverse subject such as sprints, interviews of contributors,
+collaborations, and technical content.
 
+When it comes to technical content, up to now, the content is only limited to the
+scikit-learn library. However, the scikit-learn community is going beyond the
+library itself and had developed compatible tools for years. As an example, the
+scikit-learn-contrib repository [2]_ is hosting a collection of tools which are not
+part of the main library but are still compatible with scikit-learn.
 
-Implementation
---------------
+This SLEP proposes to extend the scope of the technical content of the blog post to
+accept contributions in link with the scikit-learn ecosystem but not limited to the
+scikit-learn library itself. However, it is necessary to define some guidelines to
+manage expectations of contributors and readers.
 
-This section lists the major steps required to implement the SLEP.  Where
-possible, it should be noted where one step is dependent on another, and which
-steps may be optionally omitted.  Where it makes sense, each  step should
-include a link related pull requests as the implementation progresses.
+Here, we define the guidelines for external contributions that should be used to
+write and review external contributions to the scikit-learn blog post.
 
-Any pull requests or developmt branches containing work on this SLEP should
-be linked to from here.  (A SLEP does not need to be implemented in a single
-pull request if it makes sense to implement it in discrete phases).
+Guidelines
+----------
 
-
-Backward compatibility
-----------------------
-
-This section describes the ways in which the SLEP breaks backward
-compatibility.
-
-
-Alternatives
-------------
-
-If there were any alternative solutions to solving the same problem, they
-should be discussed here, along with a justification for the chosen
-approach.
-
+TODO
 
 Discussion
 ----------
 
-This section may just be a bullet list including links to any discussions
-regarding the SLEP:
-
-- This includes links to mailing list threads or relevant GitHub issues.
-
+TODO
 
 References and Footnotes
 ------------------------
@@ -70,8 +54,9 @@ References and Footnotes
    domain (see this SLEP as an example) or licensed under the `Open
    Publication License`_.
 
-.. _Open Publication License: https://www.opencontent.org/openpub/
+.. [2] `scikit-learn-contrib repository <https://github.com/scikit-learn-contrib>`__
 
+.. _Open Publication License: https://www.opencontent.org/openpub/
 
 Copyright
 ---------
