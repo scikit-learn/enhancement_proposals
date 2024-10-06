@@ -22,7 +22,6 @@
     :maxdepth: 1
     :caption: Under review
 
-    slep012/proposal
     slep017/proposal
     slep019/proposal
 
@@ -40,6 +39,7 @@
     :maxdepth: 1
     :caption: Rejected
 
+    slep012/proposal
     slep013/proposal
     slep014/proposal
     slep015/proposal
