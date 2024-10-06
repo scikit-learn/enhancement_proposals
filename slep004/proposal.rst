@@ -4,6 +4,11 @@
 SLEP004: Data information
 =========================
 
+:Author: Nicolas Hug
+:Status: Withdrawn (superseded by :ref:`SLEP006 <slep_006>`)
+:Type: Standards Track
+:Created: 2018-12-12
+
 This is a specification to introduce data information (as
 ``sample_weights``) during the computation of an estimator methods
 (``fit``, ``score``, ...) based on the different discussion proposes on
