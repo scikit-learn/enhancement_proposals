@@ -1,0 +1,214 @@
+.. _slep_021:
+
+==================================================
+SLEP021: Unified API to compute feature importance
+==================================================
+
+:Author: Thomas J Fan, Guillaume Lemaitre
+:Status: Draft
+:Type: Standards Track
+:Created: 2023-03-09
+
+Abstract
+--------
+
+This SLEP proposes a common API for computing feature importance.
+
+Detailed description
+--------------------
+
+Motivation
+~~~~~~~~~~
+
+Data scientists rely on feature importance when inspecting a trained model.
+However, there is currently not a single algorithm providing **the** feature
+importance. In practice, several algorithms are available, all having their
+pros and cons.
+
+In scikit-learn, there are different ways to compute and inspect feature
+importances. Some models, e.g. some tree based models, expose a
+`feature_importances_` attribute upon `fit`, and we also have utilities such as
+the `permutation_importance` function to compute a different type of feature
+importance. There has been some work documenting their limitations, but we have
+not provided a nice API to implement alternatives.
+
+Therefore, this SLEP proposes an API for providing feature importance allowing
+to be flexible to switch between methods and extensible to add new methods. It
+is a follow-up of initial discussions from :issue:`20059`.
+
+Current state
+~~~~~~~~~~~~~
+
+Available methods
+^^^^^^^^^^^^^^^^^
+
+The following methods are available in scikit-learn to provide some feature
+importance:
+
+- The function :func:`sklearn.inspection.permutation_importance`. It requests
+  a fitted estimator and a dataset. Addtional parameters can be provided. The
+  method returns a `Bunch` containing 3 attributes: all decrease in score for
+  all repeatitions, the mean, and the standard deviation across the repeats.
+  This method is therefore estimator agnostic.
+- The linear estimators have a `coef_` attributes once fitted, which is
+  sometimes used their corresponding importance. We documented the limitations
+  when it comes to interpret those coefficients.
+- The decision tree-based estimators have a `feature_importances_` attribute
+  once fitted.
+
+Use cases
+^^^^^^^^^
+
+The first usage of feature importance is to inspect a fitted model. Usually,
+the feature importance will be plotted to visualize the importance of the
+features::
+
+   >>> tree = DecisionTreeClassifier().fit(X_train, y_train)
+   >>> plt.barh(X_train.columns, tree.feature_importances_)
+
+The analysis can be done further by checking the variance of the feature
+importance. :func:`sklearn.inspection.permutation_importance` already provides
+a way to do that since it repeats the computation several time. For the model
+specific feature importance, the user can use cross-validation to get an idea
+of the dispersion::
+
+   >>> cv_results = cross_validate(tree, X_train, y_train, return_estimator=True)
+   >>> feature_importances = [est.feature_importances_ for est in cv_results["estimator"]]
+   >>> plt.boxplot(feature_importances, labels=X_train.columns)
+
+The second usage is about the feature selection. Meta-estimator such as
+:class:`sklearn.model_selection.SelectFromModel` internally use an array of
+length `(n_features,)` to select feature and retrain a model on this subset of
+feature.
+
+By default :class:`sklearn.model_selection.SelectFromModel` relies on the
+estimator to expose `coef_` or `feature_importances_`::
+
+   >>> SelectFromModel(tree).fit(X_train, y_train)  # `tree` exposes `feature_importances_`
+
+For more flexibility, a string can be provided::
+
+   >>> linear_model = make_pipeline(StandardScaler(), LogisticRegression())
+   >>> SelectFromModel(
+   ...     linear_model, importance_getter="named_steps.logisticregression.coef_"
+   ... ).fit(X_train, y_train)
+
+:class:`sklearn.model_selection.SelectFromModel` rely by default on
+the estimator to expose a `coef_` or `feature_importances_` attribute. It is
+also possible to provide a string corresponding the attribute name returning
+the feature importance. It allows to deal with estimator embedded inside a
+pipeline, for instance. Finally, a callable taking an estimator and returning
+a NumPy array can also be provided.
+
+Current pitfalls
+~~~~~~~~~~~~~~~~
+
+On a methodological perspective, scikit-learn does not encourage for good
+practice. Indeed, since it provides a defacto `feature_importances_` attribute
+for the decision tree, it is tempting for user to believe that this method is
+the best one.
+
+In the same spirit, the :class:`sklearn.model_selection.SelectFromModel`
+meta-estimator uses defacto the `feature_importances_` or `coef_` for selecting
+features.
+
+In both cases, it should be better to request the user to be more explicit and
+request to choose a specific method to compute the feature importance for
+inspection or feature selection.
+
+Additionally, `feature_importances_` and `coef_` are statistics derived from
+the training set. We already documented that the reported
+`feature_importances_` will potentially show biases for features used by the
+model to overfit. Thus, it will potentially negatively impact the feature
+selection once used in the :class:`sklearn.model_selection.SelectFromModel`
+meta-estimator.
+
+On an API perspective, the current functionality for feature importance are
+available via functions or attributes, with no common API.
+
+Solution
+~~~~~~~~
+
+A common API
+^^^^^^^^^^^^
+
+**Proposal 1**: Expose a parameter in `__init__` to select the method to use
+to compute the feature importance. The computation will be done using a method,
+e.g. `get_feature_importance` that could take additional parameters requested
+by the feature importance method. This method could therefore be used
+internally by :class:`sklearn.model_selection.SelectFromModel`.
+
+**Proposal 2**: Create a meta-estimator that takes a model and a method in
+`__init__`. Then, a method `fit` could compute the feature importance given
+some data. Then, the feature importance could be available through a fitted
+attribute `feature_importances_` or a method `get_feature_importance`. We could
+reuse such meta-estimator in the
+:class:`sklearn.model_selection.SelectFromModel`.
+
+Then, we should rely on a common API for the methods computing the feature
+importance. It seems that they should all at least accept a fitted estimator,
+some dataset, and potentially some extra parameters.
+
+**Proposal 3**: Similarly to the proposal 2 and taking inspiration from the
+SHAP package [2]_, we could create a class `Explainer` providing a
+`get_feature_importance` method given some data.
+
+Currently scikit-learn provides only global feature importance. The previous
+API could be extended by providing a `get_samples_importance` to compute an
+explanation per sample if the given method supports it (e.g. Shapley values).
+
+**Proposal 4**: Create a meta-estimator `FeatureImportanceCalculator` that
+could be passed around plotting displays or to an
+`estimator.get_feature_importance` method.
+
+Plotting
+^^^^^^^^
+
+Add a new :class:`sklearn.inspection.FeatureImportanceDisplay` class to
+:mod:`sklearn.inspection`. Two methods could be useful for this display: (i)
+:meth:`sklearn.inspection.FeatureImportanceDisplay.from_estimator` to plot a
+a single estimate of feature importance and (ii)
+:meth:`sklearn.inspection.FeatureImportanceDisplay.from_cv_results` to plot a
+an estimate of the feature importance together with the variance.
+
+The display should therefore be aware how to retrieve the feature importance
+given the estimator.
+
+Discussion
+----------
+
+Issues where some discussions related to feature importance has been discussed:
+:issue:`20059`, :issue:`21170`.
+
+In SHAP package [2]_, the API is similar to the proposal 2. A class `Explainer`
+takes a model, an algorithm, and some additional parameters (that could be
+used by some algorithm). The computation of the Shapley values is done and
+return using the method `shap_values`.
+
+Related issues
+--------------
+
+Some discussions happened in the past. In this section, we aggregate all issues
+related to this topic:
+
+- :issue:`15132`: proposal to add `feature_importances_` into the
+  `HistGradientBoosting` classifier and regressor models.
+- :issue:`18223`: proposal to implement the PIMP feature importance.
+- :issue:`18603`: implement OOB permutation importance for `RandomForest`.
+- :issue:`21170`: implement variable importances for linear models.
+
+References and Footnotes
+------------------------
+
+.. [1] Each SLEP must either be explicitly labeled as placed in the public
+   domain (see this SLEP as an example) or licensed under the `Open Publication
+   License`_.
+.. [2] https://shap.readthedocs.io/en/latest/
+
+.. _Open Publication License: https://www.opencontent.org/openpub/
+
+
+Copyright
+---------
+
+This document has been placed in the public domain [1]_.
