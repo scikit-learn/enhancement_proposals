@@ -1,7 +1,7 @@
 .. _slep_025:
 
 =========================================
-SLEP025: Killing Accuracy in Scikit-Learn
+SLEP025: Losing Accuracy in Scikit-Learn
 =========================================
 
 :Author: Christian Lorentzen
