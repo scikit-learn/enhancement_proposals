@@ -1,8 +1,8 @@
 .. _slep_025:
 
-=========================================
-SLEP025: Losing Accuracy in Scikit-Learn
-=========================================
+==============================================
+SLEP025: Losing Accuracy in Scikit-Learn Score
+==============================================
 
 :Author: Christian Lorentzen
 :Status: Draft
@@ -23,7 +23,7 @@ Motivation
 As it stands, *accuracy* is the most used metric for classifiers in scikit-learn. This
 is manifest in `classifier.score(..)` which applies accuracy. While the original goal
 might have been to provide a score method that works for all classifiers, the actual
-implication was the blind usage, without critical thinking, of the accuracy score.
+implication has been the blind usage, without critical thinking, of the accuracy score.
 This has mislead many researchers and users because accuracy is well known for its
 severe deficiencies: To the point, it is not a *strictly proper scoring rule* and
 scikit-learn's implementation hard-coded a probability threshold of 50% into it.
@@ -39,21 +39,38 @@ The solution is a multi-step approach:
 
 1. Introduce the new keyword ``scoring`` to the ``score`` method. The default for
    classifiers is ``scoring="accuracy"``, for regressors ``scoring="r2"``.
-2. Deprecate the default ``"accuracy"``.
-3. Set a new default.
+2. Deprecate the default ``"accuracy"`` for classifiers.
+3. At the same time, set a new default for classifiers: ``"d2_brier_score"``.
 
-There are three questions with this approach:
+There are two main questions with this approach:
 
 a. The time frame of the deprecation period. Should it be longer than the usual 2 minor
    releases? Should step 1 and 2 happen in the same minor release?
-b. What is the new default scoring parameter in step 3? Possibilities are
-   - D2 Brier score, which is basically the same as R2 for regressors.
-   - The objective function of the estimator, i.e. the penalized log loss for
-     ``LogisticRegression``.
-
+b. What is the new default scoring parameter in step 3?
    The fact that different scoring metrics focus on different things, i.e. ``predict``
    vs. ``predict_proba``, and not all classifiers provide ``predict_proba`` complicates
    a unified choice.
+   Possibilities are
+   - D2 Brier score, ``"d2_brier_score"``, which is basically the same as R2 for regressors.
+   - The objective function of the estimator, i.e. the penalized log loss for
+     ``LogisticRegression``.
+
+Proposals:
+
+a. Use a 4 minor release deprecation period which amounts to 2 years.
+   Reasoning: It is a deprecation that is doable within the current deprecation
+   habit of minor releases. It should be longer than the usual 2 minor releases.
+   A major release just because of such a deprecation is not very attractive (or
+   marketable).
+b. Use D2 Brier score.
+   Reasoning: Scores will be compared among different models. Therefore, the model
+   specific loss is not suitable.
+   Note that the Brier score and hence also the D2 Brier score are strictly consistent
+   scoring functions (or strictly proper scoring rules) for the probability predictions
+   with ``predict_proba``. At the same time, Brier score returns a valid score even
+   for ``predict``, in constrast to log loss (which returns infinity for false
+   certainty). On top, this would result in classifiers and regressors having the same
+   score (it's just a different name), returning values in the range [0, 1].
 
 Backward compatibility
 ----------------------
@@ -64,6 +81,8 @@ scikit-learn releases.
 Alternatives
 ------------
 
+Removing
+^^^^^^^^
 An alternative is to remove the ``score`` method altogether. Scoring metrics are well
 available in scikit-learn, see ``sklearn.metric`` module and [2]_. The advantages of
 removing ``score`` are:
@@ -75,9 +94,23 @@ removing ``score`` are:
 
 Disadvantages:
 
-- Disruption of the API.
+- Disruption of the API
+- Very likely a major release for something not very marketable.
 - More imports required and a bit longer code as compared to just
   ``my_estimator.score(X, y)``.
+
+Keep status quo
+^^^^^^^^^^^^^^^
+
+Advantages:
+
+- No change or breaking things for users
+- No ressources bound
+
+Disadvantages:
+- No change for users
+- Bad practice is continued
+- Bad sign: scikit-learn community is unable to rectify serious grievance
 
 Discussion
 ----------
