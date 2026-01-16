@@ -8,6 +8,7 @@
 :Status: Withdrawn
 :Type: Process
 :Created: 2022-09-12
+:Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/87
 
 **********
  Abstract
