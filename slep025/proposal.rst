@@ -40,7 +40,7 @@ The solution is a multi-step approach:
 1. Introduce the new keyword ``scoring`` to the ``score`` method. The default for
    classifiers is ``scoring="accuracy"``, for regressors ``scoring="r2"``.
 2. Deprecate the default ``"accuracy"`` for classifiers.
-3. At the same time, set a new default for classifiers: ``"d2_brier_score"``.
+3. After the release cycle, set a new default for classifiers: ``"d2_brier_score"``.
 
 There are two main questions with this approach:
 
@@ -57,7 +57,8 @@ b. What is the new default scoring parameter in step 3?
 
 Proposals:
 
-a. Use a 4 minor release deprecation period which amounts to 2 years.
+a. Use a 4 minor release deprecation period which amounts to 2 year and do step 1 and 2
+   at the same time (in the same release).
    Reasoning: It is a deprecation that is doable within the current deprecation
    habit of minor releases. It should be longer than the usual 2 minor releases.
    A major release just because of such a deprecation is not very attractive (or
