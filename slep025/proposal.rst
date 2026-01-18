@@ -13,20 +13,22 @@ SLEP025: Losing Accuracy in Scikit-Learn Score
 Abstract
 --------
 
-This SLEP proposes to rectify the default ``score`` method. Currently, the ease of
-``classifier.score(X, y)`` favors the use of *accuracy*, which has many well known
-deficiencies. This SLEP changes the default scoring method.
+This SLEP proposes to rectify the default ``score`` method for scikit-learn
+classifiers. Currently, the ease of ``classifier.score(X, y)`` favors the use of
+*accuracy*, which has many well known deficiencies. This SLEP changes the default
+scoring method.
 
 Motivation
 ----------
 
 As it stands, *accuracy* is the most used metric for classifiers in scikit-learn. This
-is manifest in `classifier.score(..)` which applies accuracy. While the original goal
+is manifest in ``classifier.score(..)`` which applies accuracy. While the original goal
 might have been to provide a score method that works for all classifiers, the actual
 implication has been the blind usage, without critical thinking, of the accuracy score.
 This has mislead many researchers and users because accuracy is well known for its
 severe deficiencies: To the point, it is not a *strictly proper scoring rule* and
-scikit-learn's implementation hard-coded a probability threshold of 50% into it.
+scikit-learn's implementation hard-coded a probability threshold of 50% into it by
+relying on ``predict``.
 
 This situation calls for a correction. Ideally, scikit-learn provides good defaults
 or fosters a conscious decision by users, e.g. by forcing engagement with the subject,
@@ -51,27 +53,33 @@ b. What is the new default scoring parameter in step 3?
    vs. ``predict_proba``, and not all classifiers provide ``predict_proba`` complicates
    a unified choice.
    Possibilities are
-   - D2 Brier score, ``"d2_brier_score"``, which is basically the same as R2 for regressors.
-   - The objective function of the estimator, i.e. the penalized log loss for
+   - D2 Brier score, ``"d2_brier_score"``, which is basically the same as R2 for
+     regressors,
+   - the objective function of the estimator, i.e. the penalized log loss for
      ``LogisticRegression``.
 
 Proposals:
 
-a. Use a 4 minor release deprecation period which amounts to 2 year and do step 1 and 2
-   at the same time (in the same release).
+a. Use a deprecation period of 4 instead of 2 minor releases which amounts to 2 years
+   and do step 1 and 2 at the same time (in the same release).
    Reasoning: It is a deprecation that is doable within the current deprecation
-   habit of minor releases. It should be longer than the usual 2 minor releases.
+   habit of minor releases. It should be longer than the usual 2 minor releases because
+   of it's big impact.
    A major release just because of such a deprecation is not very attractive (or
    marketable).
 b. Use D2 Brier score.
    Reasoning: Scores will be compared among different models. Therefore, the model
    specific loss is not suitable.
-   Note that the Brier score and hence also the D2 Brier score are strictly consistent
-   scoring functions (or strictly proper scoring rules) for the probability predictions
-   with ``predict_proba``. At the same time, Brier score returns a valid score even
-   for ``predict``, in constrast to log loss (which returns infinity for false
-   certainty). On top, this would result in classifiers and regressors having the same
+   Note that the Brier score and hence also the D2 Brier score are strictly proper
+   scoring rules (or strictly consistent scoring functions) for the probability
+   predictions with ``predict_proba``. At the same time, Brier score returns a valid
+   score even for ``predict`` (in case a classifier has no ``predict_proba``), in
+   constrast to log loss (which returns infinity for false certainty). On top, this
+   would result in classifiers and regressors having the same
    score (it's just a different name), returning values in the range [0, 1].
+   Note that the D2 Brier score as a skill score (a relavitve score to a baseline) is
+   invariant under a multiplicative factor, e.g. specified by ``scale_by_half``. It is
+   given by ``MSE(model predictions) / MSE(mean of data)``.
 
 Backward compatibility
 ----------------------
@@ -95,7 +103,7 @@ removing ``score`` are:
 
 Disadvantages:
 
-- Disruption of the API
+- Disruption of the API.
 - Very likely a major release for something not very marketable.
 - More imports required and a bit longer code as compared to just
   ``my_estimator.score(X, y)``.
@@ -111,7 +119,7 @@ Advantages:
 Disadvantages:
 - No change for users
 - Bad practice is continued
-- Bad sign: scikit-learn community is unable to rectify serious grievance
+- Bad signal: scikit-learn community is unable to rectify serious grievance
 
 Discussion
 ----------
