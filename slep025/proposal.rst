@@ -76,10 +76,10 @@ b. Use D2 Brier score.
    score even for ``predict`` (in case a classifier has no ``predict_proba``), in
    constrast to log loss (which returns infinity for false certainty). On top, this
    would result in classifiers and regressors having the same
-   score (it's just a different name), returning values in the range [0, 1].
+   score (it's just a different name), returning values in the range [-inf, 1].
    Note that the D2 Brier score as a skill score (a relavitve score to a baseline) is
    invariant under a multiplicative factor, e.g. specified by ``scale_by_half``. It is
-   given by ``MSE(model predictions) / MSE(mean of data)``.
+   given by ``1 - MSE(model predictions) / MSE(mean of data)``.
 
 Backward compatibility
 ----------------------
