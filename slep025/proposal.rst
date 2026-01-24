@@ -5,10 +5,10 @@ SLEP025: Losing Accuracy in Scikit-Learn Score
 ==============================================
 
 :Author: Christian Lorentzen
-:Status: Draft
+:Status: Rejected
 :Type: Standards Track
 :Created: 2025-12-07
-:Resolution: TODO <url> (required for Accepted | Rejected | Withdrawn)
+:Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/98
 
 Abstract
 --------
