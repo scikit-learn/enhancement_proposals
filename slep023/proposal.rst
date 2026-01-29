@@ -152,7 +152,7 @@ Performance
 ~~~~~~~~~~~
 
 It's inevitable that callbacks will have a performance cost, especially when called
-within cython nogil code. The most important thing is to make sure is that when no
+within cython nogil code. The most important thing is to make sure that when no
 callbacks are registered the performance is not affected (not acquiring the GIL for
 instance).
 
