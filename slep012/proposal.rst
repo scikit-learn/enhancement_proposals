@@ -5,7 +5,7 @@ SLEP012: ``InputArray``
 =======================
 
 :Author: Adrin jalali
-:Status: Draft
+:Status: Withdrawn (superseded by :ref:`SLEP007 <slep_007>` and :ref:`SLEP018 <slep_018>`)
 :Type: Standards Track
 :Created: 2019-12-20
 
