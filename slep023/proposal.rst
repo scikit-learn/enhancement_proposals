@@ -73,7 +73,7 @@ Callbacks must implement the following protocol::
 
     class Callback(Protocol):
         def on_fit_begin(self, estimator)
-        def on_fit_task_end(self, estimator, context, **kargs)
+        def on_fit_task_end(self, estimator, context, **kwargs)
         def on_fit_end(self, estimator, context)
 
 The `on_fit_begin` hook is called at the beginning of `fit` and can be used to
