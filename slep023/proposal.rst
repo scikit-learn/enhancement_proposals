@@ -103,7 +103,7 @@ To add callback support to an estimator, scikit-learn provides three components:
   beginning of `fit` and can be accessed as the `_callback_fix_ctx` of the estimator.
 
   It exposes three methods responsible for calling the hooks of the registered
-  callbacks: `evel_on_fit_begin`, `evel_on_fit_task_end` and `eval_on_fit_end`. In
+  callbacks: `eval_on_fit_begin`, `eval_on_fit_task_end` and `eval_on_fit_end`. In
   addition, it exposes a `propagate_callbacks` method to propagate callbacks from a
   meta-estimator to its inner estimators. Finally it exposes a `subcontext` method to
   create a `CallbackContext` instance for a subtask.
