@@ -42,7 +42,7 @@ Public interfaces
 -----------------
 
 This sections describes the proposed public interfaces for the callback API. They are
-divided into three substets which target different kind of users: the end users of
+divided into three subsets which target different kind of users: the end users of
 scikit-learn, the third-party developers implementing custom estimators and the
 third-party developers implementing custom callbacks.
 
