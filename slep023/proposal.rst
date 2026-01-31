@@ -83,6 +83,26 @@ task performed during `fit`. Usually tasks correspond to iterations of loops dur
 `fit` and nested loops correspond to nested tasks, but in general a task can be any
 unit of work defined by the estimator.
 
+The `**kwargs` parameters receives all the information provided by the estimator about
+the state of the fitting process at this task. Possible keys are:
+
+- "data": a dictionary containing the training and validation data.
+
+- "stopping_criterion": a float. Usually iterations stop when
+  `stopping_criterion <= tol`.
+
+- "tol": a float. Tolerance for the stopping criterion.
+
+- "from_reconstruction_attributes": an estimator instance that is ready to predict,
+  transform, etc ... estimator as if the fit stopped at the end of this task.
+
+- "fit_state": a dictionary containing model specific quantities updated during fit.
+  This is not meant to be used by generic callbacks but by a callback designed for a
+  specific estimator instead.
+
+Note that all these keys are optional and that estimators are not required to provide
+all of them and within a single estimator different tasks may provide different keys.
+
 The `context` parameter is an instance of `CallbackContext`, which provides information
 about the current state of the computation, described in more details below.
 
@@ -107,6 +127,10 @@ To add callback support to an estimator, scikit-learn provides three components:
   addition, it exposes a `propagate_callbacks` method to propagate callbacks from a
   meta-estimator to its inner estimators. Finally it exposes a `subcontext` method to
   create a `CallbackContext` instance for a subtask.
+
+  The `CallbackContext` instance also exposes attributes that provide information about
+  the task being executed and its position in the hierarchy of tasks that callbacks can
+  use to adapt their behavior.
 
 A typical implementation of callback support in an estimator would look like this::
 
