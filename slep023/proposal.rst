@@ -101,7 +101,7 @@ the state of the fitting process at this task. Possible keys are:
   specific estimator instead.
 
 Note that all these keys are optional and that estimators are not required to provide
-all of them and within a single estimator different tasks may provide different keys.
+all of them. Different tasks may provide different keys within a single estimator.
 
 The `context` parameter is an instance of `CallbackContext`, which provides information
 about the current state of the computation, described in more details below.
