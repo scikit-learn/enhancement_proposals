@@ -166,8 +166,15 @@ Parallelism
 
 Many scikit-learn estimators use multiprocessing or multithreading which can make the
 design of callbacks more complex, because callbacks don't share their state between
-processes. The file system or `multiprocessing.Manager` objects  for instance should be
+processes. The file system or `multiprocessing.Manager` objects for instance should be
 used to overcome this issue.
+
+Additional dependencies
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Some callbacks may require additional dependencies (e.g. `rich` for progress bars).
+Such dependencies must be optional and only imported when the corresponding callback is
+used, similarly to the display objects.
 
 Implementation
 --------------
