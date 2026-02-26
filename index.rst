@@ -23,6 +23,7 @@
     :caption: Under review
 
     slep017/proposal
+    slep026/proposal
 
 .. toctree::
     :maxdepth: 1
