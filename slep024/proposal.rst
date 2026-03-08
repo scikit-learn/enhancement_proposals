@@ -56,14 +56,13 @@ and the scikit-learn ecosystem. However, we want the blog to be a place of quali
 content which encourages a thriving open-source ecosystem, and which to avoid it being
 flooded by advertising or special interests.
 
-Criteria for accepting a contributed blog post
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+General criteria for accepting a contributed blog post
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To accept an external contribution, the blog post should be related to the scikit-learn
 ecosystem.
 
-When it comes to presenting a compatible tool, the criteria are the
-following:
+When it comes to presenting **a compatible tool**, the guidelines are the following:
 
 - The tool should be compatible with scikit-learn.
 - The tools used in the blog need to be under an OSI approved or similar license.
@@ -71,7 +70,7 @@ following:
 - The tool should have a clear documentation.
 - The tool should be well tested.
 
-More generally, even for content not presenting a tool, the following criteria apply:
+More generally, even for content not presenting a tool, the following guidelines apply:
 
 - The content should adhere to our code of conduct standards.
 - The content should not be advertisement for a commercial endeavor (see below)
