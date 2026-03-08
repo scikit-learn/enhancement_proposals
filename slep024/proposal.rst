@@ -15,6 +15,11 @@ Abstract
 This SLEP proposes some guidelines for writing and reviewing external contributions
 to the scikit-learn blog post.
 
+The motivation is this SLEP is to increasingly open up the scikit-learn blog for
+external contribution. Editorial guidelines are difficult to build. The goal of this
+SLEP is not to give all the details (they can be refined on the blog website), but the
+general guiding lines.
+
 Detailed description
 --------------------
 
@@ -51,11 +56,13 @@ and the scikit-learn ecosystem. However, we want the blog to be a place of quali
 content which encourages a thriving open-source ecosystem, and which to avoid it being
 flooded by advertising or special interests.
 
-Inclusion criteria
-^^^^^^^^^^^^^^^^^^
+Criteria for accepting a contributed blog post
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To accept an external contribution, the blog post should be related to the scikit-learn
-ecosystem. When it comes to presenting a compatible tool, the criteria are the
+ecosystem.
+
+When it comes to presenting a compatible tool, the criteria are the
 following:
 
 - The tool should be compatible with scikit-learn.
@@ -63,6 +70,9 @@ following:
 - The tool should be actively maintained.
 - The tool should have a clear documentation.
 - The tool should be well tested.
+
+More generally, even for content not presenting a tool, the following criteria apply:
+
 - The content should adhere to our code of conduct standards.
 - The content should not be advertisement for a commercial endeavor (see below)
 - Claims should, as much as possible, backed by authoritative sources or reproducible
