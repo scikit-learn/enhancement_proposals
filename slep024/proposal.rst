@@ -4,7 +4,7 @@
 SLEP024: Guideline for external contributions to the scikit-learn blog post
 ===========================================================================
 
-:Author: Guillaume Lemaitre, François Goupil
+:Author: Guillaume Lemaitre, François Goupil, Gaël Varoquaux
 :Status: Draft
 :Type: Standards Track
 :Created: 2024-08-09
@@ -21,12 +21,13 @@ Detailed description
 Scikit-learn has a blog post available at the following URL:
 https://blog.scikit-learn.org/. Since its origin, the blog post is used to relay
 information related to diverse subject such as sprints, interviews of contributors,
-collaborations, and technical content.
+collaborations, and technical content. Hosting quality content on the scikit-learn blog
+increases the visibility of scikit-learn and we should foster it.
 
-When it comes to technical content, up to now, the content is only limited to the
-scikit-learn library. However, the scikit-learn community is going beyond the
+Technical content limited to the scikit-learn library is natural on the blog.
+However, the scikit-learn community goes beyond the
 library itself and had developed compatible tools for years. As an example, the
-scikit-learn-contrib repository [2]_ is hosting a collection of tools which are not
+scikit-learn-contrib repository [2]_ hosts a collection of tools which are not
 part of the main library but are still compatible with scikit-learn.
 
 This SLEP proposes to extend the scope of the technical content of the blog post to
@@ -34,7 +35,7 @@ accept contributions in link with the scikit-learn ecosystem but not limited to 
 scikit-learn library itself. However, it is necessary to define some guidelines to
 manage expectations of contributors and readers.
 
-Here, we define the guidelines for external contributions that should be used to
+Here, we define the **guidelines for external contributions** that should be used to
 write and review external contributions to the scikit-learn blog post.
 
 Guidelines
@@ -44,6 +45,12 @@ In this section, we provide a set of guidelines to ease the discussions when rev
 external contributions to the scikit-learn blog post. It should help both the authors
 and the reviewers.
 
+**Philosophy**: the scikit-learn blog lives because people take the effort of writing
+posts. These contributions are welcomed to produce quality content on machine learning
+and the scikit-learn ecosystem. However, we want the blog to be a place of quality
+content which encourages a thriving open-source ecosystem, and which to avoid it being
+flooded by advertising or special interests.
+
 Inclusion criteria
 ^^^^^^^^^^^^^^^^^^
 
@@ -52,11 +59,29 @@ ecosystem. When it comes to presenting a compatible tool, the criteria are the
 following:
 
 - The tool should be compatible with scikit-learn.
-- The tool should be under an open-source license.
+- The tools used in the blog need to be under an OSI approved or similar license.
 - The tool should be actively maintained.
 - The tool should have a clear documentation.
 - The tool should be well tested.
-- The tool should not be a commercial product or serve advertisement for a company.
+- The content should adhere to our code of conduct standards.
+- The content should not be advertisement for a commercial endeavor (see below)
+- Claims should, as much as possible, backed by authoritative sources or reproducible
+  code (see below)
+
+Note that there will be an element of human judgment in applying these inclusion
+criteria.
+
+Commercial links
+^^^^^^^^^^^^^^^^
+
+A blog article  should not be on a commercial product or serve advertisement for a
+company. Likewise the content of the post should be limited to the tool at hand, rather
+than using the tool to advertise a commercial ecosystem / tool.
+
+However, organizations that financially sponsor the project by hiring (near-)full-time
+core contributors can use the scikit-learn blog to advertise open-source resources
+related to scikit-learn in their own name as long as the relationship to the
+scikit-learn project is made explicit in the blog post.
 
 Reproducibility requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
