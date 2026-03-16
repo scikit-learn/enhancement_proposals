@@ -119,20 +119,20 @@ To add callback support to an estimator, scikit-learn provides three components:
   - `_init_callback_context`, to create the root callback context for the estimator
     and setup the callbacks for the estimator.
 
-- a `with_fit_callbacks` decorator that the estimator should use to decorate the
-  `fit` method. It runs `fit` in a try-finally block to ensure that callbacks are
-  properly torn down no matter what happens during `fit`.
+- a `with_callbacks` decorator that the estimator should use to decorate the `fit`
+  method. It runs `fit` in a try-finally block to ensure that callbacks are properly
+  torn down no matter what happens during `fit`.
 
 A typical implementation of callback support in an estimator would look like this:
 
 .. code-block:: python
 
     from sklearn.base import BaseEstimator
-    from sklearn.callback import CallbackSupportMixin, with_fit_callbacks
+    from sklearn.callback import CallbackSupportMixin, with_callbacks
 
     class MyEstimator(CallbackSupportMixin, BaseEstimator):
 
-        @with_fit_callbacks
+        @with_callbacks
         def fit(self, X, y):
             callback_ctx = self._init_callback_context(
                 task_name="fit", max_subtasks=self.n_iter
