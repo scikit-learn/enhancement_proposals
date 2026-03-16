@@ -109,7 +109,8 @@ To add callback support to an estimator, scikit-learn provides three components:
 
   When a callback is evaluated for a given task, it receives the corresponding context
   which exposes attributes that provide information about the task being executed to be
-  used by the callback to adapt its behavior.
+  used by the callback to adapt its behavior. It also receives all the information that
+  the estimator is able to provide about the state of the fitting process at this task.
 
 - a `CallbackSupportMixin` class that the estimator should inherit from. This mixin
   exposes the following methods:
@@ -141,7 +142,9 @@ A typical implementation of callback support in an estimator would look like thi
             for i in range(self.n_iter):
                 subcontext = callback_ctx.subcontext(
                     task_name=f"iteration {i}", task_id=i
-                ).eval_on_fit_task_begin()
+                ).eval_on_fit_task_begin(
+                  data={"X_train": X, "y_train": y},
+                )
 
                 # <computation part of the estimator>
 
@@ -162,8 +165,8 @@ Callbacks must implement the following protocol:
 
     class FitCallback(Protocol):
         def setup(self, context): ...
-        def on_fit_task_begin(self, context, **kwargs): ...
-        def on_fit_task_end(self, context, **kwargs): ...
+        def on_fit_task_begin(self, context, *, data=None, metadata=None, fitted_estimator=None): ...
+        def on_fit_task_end(self, context, *, data=None, metadata=None, fitted_estimator=None): ...
         def teardown(self, context): ...
 
 The `setup` and `teardown` hooks are called at the beginning and end of `fit` and should
@@ -171,9 +174,9 @@ be used to setup and tear down the callback for the estimator. The `on_fit_task_
 and `on_fit_task_end` hooks are called at the beginning and end of each task performed
 during `fit`, including the root task.
 
-The extra keyword arguments received by the `on_fit_task_begin` and `on_fit_task_end`
-hooks contain all the information provided by the estimator about the state of the
-fitting process at this task. The possible keys are:
+The keyword arguments received by the `on_fit_task_begin` and `on_fit_task_end`
+hooks contain all the available information provided by the estimator about the state of
+the fitting process at this task:
 
 - "data": a dictionary containing the training and validation data.
 
@@ -183,8 +186,8 @@ fitting process at this task. The possible keys are:
 - "fitted_estimator": an estimator instance that is ready to predict, transform, etc.
   as if `fit` stopped at the end of this task.
 
-Note that estimators are not required to provide all of them and within a single
-estimator different tasks may provide different subsets of these keys.
+Note that some estimators may not be able to provide all of these information for every
+task.
 
 Auto-propagated callbacks must implement a small extension of this protocol:
 
