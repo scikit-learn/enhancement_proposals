@@ -187,7 +187,8 @@ the fitting process at this task:
   as if `fit` stopped at the end of this task.
 
 Note that some estimators may not be able to provide all of these information for every
-task.
+task. That list is likely to be extended in the future so callbacks hooks should be
+tolerant to missing keys.
 
 Auto-propagated callbacks must implement a small extension of this protocol:
 
