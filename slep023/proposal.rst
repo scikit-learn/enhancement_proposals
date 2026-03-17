@@ -82,8 +82,9 @@ registered on the outermost meta-estimator:
     from sklearn.callbacks import EarlyStopping, ProgressBar
 
     clf = LogisticRegression().set_callbacks(EarlyStopping())
-    clf = GridSearchCV(clf, param_grid).set_callbacks(ProgressBar())
-    clf.fit(X, y)
+    gs = GridSearchCV(clf, param_grid)
+    gs.set_callbacks(ProgressBar(max_propagation_depth=1))
+    gs.fit(X, y)
 
 Callback support in estimators
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,25 +138,26 @@ A typical implementation of callback support in an estimator would look like thi
             callback_ctx = self._init_callback_context(
                 task_name="fit", max_subtasks=self.n_iter
             )
-            callback_ctx.call_on_fit_task_begin()
+            callback_ctx.call_on_fit_task_begin(X=X, y=y)
 
             for i in range(self.n_iter):
-                subcontext = callback_ctx.subcontext(
+                callback_subctx = callback_ctx.subcontext(
                     task_name=f"iteration {i}", task_id=i
                 ).call_on_fit_task_begin(X=X, y=y)
 
                 # <computation part of the estimator>
 
-                subcontext.call_on_fit_task_end(X=X, y=y)
+                callback_subctx.call_on_fit_task_end(X=X, y=y)
 
-            callback_ctx.call_on_fit_task_end()
+            callback_ctx.call_on_fit_task_end(X=X, y=y)
 
             return self
 
 The callback protocol
 ~~~~~~~~~~~~~~~~~~~~~
 
-Callbacks must implement the following protocol:
+Callbacks must implement the following
+`protocol<https://typing.python.org/en/latest/spec/protocol.html>`_:
 
 .. code-block:: python
 
