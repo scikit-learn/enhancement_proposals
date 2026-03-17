@@ -101,13 +101,13 @@ To add callback support to an estimator, scikit-learn provides three components:
 
   The `CallbackContext` class exposes the following methods:
 
-  - `eval_on_fit_task_begin`, to evaluate the callbacks at the beginning of the task.
-  - `eval_on_fit_task_end`, to evaluate the callbacks at the end of the task.
+  - `call_on_fit_task_begin`, to call the callbacks at the beginning of the task.
+  - `call_on_fit_task_end`, to call the callbacks at the end of the task.
   - `subcontext`, to create a child `CallbackContext` for a subtask.
   - `propagate_callbacks`, to propagate the callback context and the auto-propagated
     callbacks from a meta-estimator to its sub-estimators.
 
-  When a callback is evaluated for a given task, it receives the corresponding context
+  When a callback is called for a given task, it receives the corresponding context
   which exposes attributes that provide information about the task being executed to be
   used by the callback to adapt its behavior. It also receives all the information that
   the estimator is able to provide about the state of the fitting process at this task.
@@ -137,22 +137,18 @@ A typical implementation of callback support in an estimator would look like thi
             callback_ctx = self._init_callback_context(
                 task_name="fit", max_subtasks=self.n_iter
             )
-            callback_ctx.eval_on_fit_task_begin()
+            callback_ctx.call_on_fit_task_begin()
 
             for i in range(self.n_iter):
                 subcontext = callback_ctx.subcontext(
                     task_name=f"iteration {i}", task_id=i
-                ).eval_on_fit_task_begin(
-                  data={"X_train": X, "y_train": y},
-                )
+                ).call_on_fit_task_begin(X=X, y=y)
 
                 # <computation part of the estimator>
 
-                subcontext.eval_on_fit_task_end(
-                    data={"X_train": X, "y_train": y},
-                )
+                subcontext.call_on_fit_task_end(X=X, y=y)
 
-            callback_ctx.eval_on_fit_task_end()
+            callback_ctx.call_on_fit_task_end()
 
             return self
 
@@ -165,8 +161,8 @@ Callbacks must implement the following protocol:
 
     class FitCallback(Protocol):
         def setup(self, context): ...
-        def on_fit_task_begin(self, context, *, data=None, metadata=None, fitted_estimator=None): ...
-        def on_fit_task_end(self, context, *, data=None, metadata=None, fitted_estimator=None): ...
+        def on_fit_task_begin(self, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
+        def on_fit_task_end(self, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
         def teardown(self, context): ...
 
 The `setup` and `teardown` hooks are called at the beginning and end of `fit` and should
@@ -178,17 +174,18 @@ The keyword arguments received by the `on_fit_task_begin` and `on_fit_task_end`
 hooks contain all the available information provided by the estimator about the state of
 the fitting process at this task:
 
-- "data": a dictionary containing the training and validation data.
+- "X": the training data.
+
+- "y": the training target.
 
 - "metadata": a dictionary containing training and validation metadata, e.g. sample
-  weights.
+  weights, `X_val`, `y_val`, etc.
 
 - "fitted_estimator": an estimator instance that is ready to predict, transform, etc.
   as if `fit` stopped at the end of this task.
 
-Note that some estimators may not be able to provide all of these information for every
-task. That list is likely to be extended in the future so callbacks hooks should be
-tolerant to missing keys.
+Note that some estimators may not be able to provide values for all of these keys for
+every task.
 
 Auto-propagated callbacks must implement a small extension of this protocol:
 
@@ -211,11 +208,11 @@ estimators and meta-estimators.
 Protocol extensions
 ~~~~~~~~~~~~~~~~~~~
 
-To keep the scope of this SLEP reasonable, it only considers callbacks evaluated during
+To keep the scope of this SLEP reasonable, it only considers callbacks called during
 `fit` but the API could be extended to other methods (e.g. `predict` or `transform`) or
 unbound functions (e.g. `cross_validate`) in the future.
 PR `#33404<https://github.com/scikit-learn/scikit-learn/pull/33404>`_ for instance
-proposes a new protocol for callback evaluation in unbound functions.
+proposes a new protocol for callback support in unbound functions.
 
 Task granularity
 ~~~~~~~~~~~~~~~~
