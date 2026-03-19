@@ -19,30 +19,30 @@ Motivation
 ----------
 
 The current scikit-learn API provides a very limited way for users to inspect the steps
-of the training process (`fit`) of an estimator, even less a composition of several
-estimators and meta-estimators. Setting a verbosity level provides some information and
-only a few estimators expose public attributes containing some information accumulated
-during training (e.g. `HistGradientBoostingClassifier.train_score_`), and that's pretty
-much it.
+of the training process (`fit`) of an estimator, and even less so when several
+estimators and meta-estimators are composed. Setting a verbosity level provides some
+information and only a few estimators expose public attributes containing some
+information accumulated during training
+(e.g. `HistGradientBoostingClassifier.train_score_`), and that's pretty much it.
 
 Some use cases that have been requested many times on the scikit-learn issue tracker
 which are not possible to achieve with the current API are for instance progress bars,
 structured logging, metric monitoring, snapshots, etc. A callback API could also provide
 a generic and consistent API for early stopping, which is currently implemented
 differently in only a few estimators. For such widely requested features, scikit-learn
-will provide builtin callbacks, but users would also be able to implement their own
+will provide built-in callbacks, but users would also be able to implement their own
 callbacks for less common use cases.
 
-By providing a way to gather information during the training process, effectivley making
-scikit-learn implementation of machine learning algorithms more transparent, the
-callback API would also bring a lot of value for educational, testing and debugging
+By providing a way to gather information during the training process, effectively making
+the scikit-learn implementation of machine learning algorithms more transparent, the
+callback API would also bring a lot of value for educational, testing, and debugging
 purposes.
 
 Public interfaces
 -----------------
 
-This sections describes the proposed public interfaces for the callbacks. They are
-divided into three subsets which target different kinds of users:
+This section describes the proposed public interfaces for callbacks. They are divided
+into three subsets which target different kinds of users:
 
 - the end users of scikit-learn
 - the scikit-learn and third-party developers implementing estimators
@@ -51,12 +51,12 @@ divided into three subsets which target different kinds of users:
 Using callbacks
 ~~~~~~~~~~~~~~~
 
-Callbacks are objects that can be registered to an estimator to be called at specific
+Callbacks are objects that can be registered on an estimator to be called at specific
 points during fit, gathering information about the training process. scikit-learn
-provides a set of builtin callbacks for common use cases, exposed in the
+provides a set of built-in callbacks for common use cases, exposed in the
 `sklearn.callback` module.
 
-Callbacks can be registered to an estimator using its `set_callbacks` method:
+Callbacks can be registered on an estimator using its `set_callbacks` method:
 
 .. code-block:: python
 
@@ -93,7 +93,7 @@ To add callback support to an estimator, scikit-learn provides three components:
 
 - `CallbackContext`: a class that is used to manage the callbacks during fit.
   Instances of this class represent contexts of tasks being executed, where tasks are
-  unit of work defined by the estimator. There is one `CallbackContext` for each task.
+  units of work defined by the estimator. There is one `CallbackContext` for each task.
   Tasks (and therefore callback contexts) have a natural tree structure, where each task
   can be decomposed into subtasks and so on, with the root task being the whole fit
   task. Usually tasks correspond to iterations of loops during fit and nested loops
@@ -116,9 +116,9 @@ To add callback support to an estimator, scikit-learn provides three components:
 - `CallbackSupportMixin`: a class that the estimator should inherit from. This mixin
   exposes the following methods:
 
-  - `set_callbacks`, to register callbacks to the estimator.
+  - `set_callbacks`, to register callbacks on the estimator.
   - `_init_callback_context`, to create the root callback context for the estimator
-    and setup the callbacks for the estimator.
+    and set up the callbacks for the estimator.
 
 - `with_callbacks`: a decorator that the estimator should use to decorate the fit
   method. It runs fit in a try-finally block to ensure that callbacks are properly
@@ -168,7 +168,7 @@ Callbacks must implement the following
         def teardown(self, context): ...
 
 The `setup` and `teardown` hooks are called at the beginning and end of fit and should
-be used to setup and tear down the callback for the estimator. The `on_fit_task_begin`
+be used to set up and tear down the callback for the estimator. The `on_fit_task_begin`
 and `on_fit_task_end` hooks are called at the beginning and end of each task performed
 during fit, including the root task.
 
@@ -203,9 +203,8 @@ the callback to.
 Example traces of hook calls
 ----------------------------
 
-This section provides examples of traces of callback hook calls in different scenarios.
-First let's consider the case where a callback is registered on an estimator that has a
-single level of iterations:
+This section gives example traces of callback hook calls in different scenarios. First,
+consider a callback registered on an estimator with a single level of iterations:
 
 .. code-block:: python
 
@@ -224,9 +223,9 @@ single level of iterations:
     teardown by MaxIterEstimator for fit
 
 It doesn't matter whether `MyCallback` is auto-propagated or not since there is no
-sub-estimator to propagate it to in that case. Then, let's consider the case where the
-estimator from the previous example is used in a meta-estimator that fits clones of its
-sub-estimator for different cross-validation folds:
+sub-estimator to propagate it to in that case. Next, consider the case where the
+estimator from the previous example is wrapped in a meta-estimator that fits clones of
+that sub-estimator for different cross-validation folds:
 
 .. code-block:: python
 
@@ -252,15 +251,15 @@ sub-estimator for different cross-validation folds:
     on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
     teardown by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
 
-The trace is similar to the first example except that it is repeated for each fold. In
-particular the setup and tear down are performed for each fit of the sub-estimator.
-Finally, let's consider the same composition but with an auto-propagated callback
-registered on the meta-estimator:
+The trace is similar to the first example, except that it is repeated for each fold. In
+particular, the `setup` and `teardown` hooks are called for every fit of the
+sub-estimator clone. Finally, consider the same composition with an auto-propagated
+callback registered on the meta-estimator:
 
 .. code-block:: python
 
     >>> estimator = MyEstimator(n_iter=10)
-    >>> MyEstimatorCV(estimator, cv=5).set_callbacks(MyAutoPropagatedCallback()).fit(X, y)
+    >>> MetaEstimatorCV(estimator, cv=5).set_callbacks(MyAutoPropagatedCallback()).fit(X, y)
     setup by MetaEstimatorCV for fit
     on_fit_task_begin by MetaEstimatorCV for fit
     on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
@@ -271,18 +270,18 @@ registered on the meta-estimator:
     on_fit_task_end by MaxIterEstimator for iteration 9
     on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
     ...  # folds 1 to 3
-    on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
+    on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
     on_fit_task_begin by MaxIterEstimator for iteration 0
     on_fit_task_end by MaxIterEstimator for iteration 0
     ...  # iterations 1 to 8
     on_fit_task_begin by MaxIterEstimator for iteration 9
     on_fit_task_end by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
+    on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
     on_fit_task_end by MetaEstimatorCV for fit
     teardown by MetaEstimatorCV for fit
 
 This time, the callback hooks are also called for the tasks of the meta-estimator. Note
-that the setup and tear down are performed only once, by the meta-estimator.
+that the `setup` and `teardown` hooks are called only once, by the meta-estimator.
 
 Considerations
 --------------
@@ -297,23 +296,23 @@ Protocol extensions
 To keep the scope of this SLEP reasonable, it only considers callbacks called during
 fit but the API could be extended to other methods (e.g. `predict` or `transform`) or
 unbound functions (e.g. `cross_validate`) in the future.
-PR `#33404 <https://github.com/scikit-learn/scikit-learn/pull/33404>`__ for instance
+PR `#33404 <https://github.com/scikit-learn/scikit-learn/pull/33404>`__, for instance,
 proposes a new protocol for callback support in unbound functions.
 
 Task granularity
 ~~~~~~~~~~~~~~~~
 
 The smallest task granularity considered in this SLEP is tasks dealing with the full
-dataset. For instance the `on_fit_task_end` hook is called at the end of a loop
-iterating over the full dataset but not at the end of each step of such loop. A smaller
-granularity would not allow the same level of flexibility.
+dataset. For instance, the `on_fit_task_end` hook is called at the end of a loop
+iterating over the full dataset but not at the end of each step of such a loop. A
+smaller granularity would not allow the same level of flexibility.
 
 Performance
 ~~~~~~~~~~~
 
 It's inevitable that callbacks will have a performance cost, especially when called
-within cython nogil code. The most important thing is to make sure that when no
-callbacks are registered the performance is not affected (not acquiring the GIL for
+within Cython nogil code. The most important thing is to make sure that when no
+callbacks are registered, the performance is not affected (not acquiring the GIL for
 instance).
 
 Moreover, some information given to the hooks might be expensive to compute but is not
@@ -334,7 +333,7 @@ Non-callback-aware meta-estimators
 
 Callbacks can be registered on estimators that are passed to meta-estimators or unbound
 functions that do not support callbacks. In this case, callbacks should not break the
-workflow but might not provide full value and perform their work sub-optimally.
+workflow but might not provide full value and may perform suboptimally.
 
 Additional dependencies
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -348,7 +347,7 @@ Implementation
 
 An implementation of this SLEP is being developed in the `callbacks` feature branch.
 PR `#33322 <https://github.com/scikit-learn/scikit-learn/pull/33322>`__ keeps an updated
-diff againt the `main` branch. It currently contains the callback framework and the
+diff against the `main` branch. It currently contains the callback framework and the
 progress bar callback.
 
 Discussion
