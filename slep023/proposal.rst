@@ -167,7 +167,8 @@ Callbacks must implement the following
         def on_fit_task_end(self, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
         def teardown(self, context): ...
 
-The `setup` and `teardown` hooks are called at the beginning and end of fit and should
+The 4 protocol members are referred to as callback hooks in the rest of this SLEP. The
+`setup` and `teardown` hooks are called at the beginning and end of fit and should
 be used to set up and tear down the callback for the estimator. The `on_fit_task_begin`
 and `on_fit_task_end` hooks are called at the beginning and end of each task performed
 during fit, including the root task.
@@ -212,13 +213,11 @@ consider a callback registered on an estimator with a single level of iterations
     >>> estimator.fit(X, y)
     setup by MaxIterEstimator for fit
     on_fit_task_begin by MaxIterEstimator for fit
-    on_fit_task_begin by MaxIterEstimator for iteration 0
-    on_fit_task_end by MaxIterEstimator for iteration 0
-    on_fit_task_begin by MaxIterEstimator for iteration 1
-    on_fit_task_end by MaxIterEstimator for iteration 1
-    ...  # iterations 2 to 8
-    on_fit_task_begin by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for iteration 9
+        on_fit_task_begin by MaxIterEstimator for iteration 0
+        on_fit_task_end by MaxIterEstimator for iteration 0
+        ...  # iterations 1 to 8
+        on_fit_task_begin by MaxIterEstimator for iteration 9
+        on_fit_task_end by MaxIterEstimator for iteration 9
     on_fit_task_end by MaxIterEstimator for fit
     teardown by MaxIterEstimator for fit
 
@@ -233,21 +232,21 @@ that sub-estimator for different cross-validation folds:
     >>> MetaEstimatorCV(estimator, cv=5).fit(X, y)
     setup by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
     on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
-    on_fit_task_begin by MaxIterEstimator for iteration 0
-    on_fit_task_end by MaxIterEstimator for iteration 0
-    ...  # iterations 1 to 8
-    on_fit_task_begin by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for iteration 9
+        on_fit_task_begin by MaxIterEstimator for iteration 0
+        on_fit_task_end by MaxIterEstimator for iteration 0
+        ...  # iterations 1 to 8
+        on_fit_task_begin by MaxIterEstimator for iteration 9
+        on_fit_task_end by MaxIterEstimator for iteration 9
     on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
     teardown by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
     ...  # folds 1 to 3
     setup by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
     on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
-    on_fit_task_begin by MaxIterEstimator for iteration 0
-    on_fit_task_end by MaxIterEstimator for iteration 0
-    ...  # iterations 1 to 8
-    on_fit_task_begin by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for iteration 9
+        on_fit_task_begin by MaxIterEstimator for iteration 0
+        on_fit_task_end by MaxIterEstimator for iteration 0
+        ...  # iterations 1 to 8
+        on_fit_task_begin by MaxIterEstimator for iteration 9
+        on_fit_task_end by MaxIterEstimator for iteration 9
     on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
     teardown by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
 
@@ -262,21 +261,21 @@ callback registered on the meta-estimator:
     >>> MetaEstimatorCV(estimator, cv=5).set_callbacks(MyAutoPropagatedCallback()).fit(X, y)
     setup by MetaEstimatorCV for fit
     on_fit_task_begin by MetaEstimatorCV for fit
-    on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
-    on_fit_task_begin by MaxIterEstimator for iteration 0
-    on_fit_task_end by MaxIterEstimator for iteration 0
-    ...  # iterations 1 to 8
-    on_fit_task_begin by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
-    ...  # folds 1 to 3
-    on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
-    on_fit_task_begin by MaxIterEstimator for iteration 0
-    on_fit_task_end by MaxIterEstimator for iteration 0
-    ...  # iterations 1 to 8
-    on_fit_task_begin by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
+        on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
+            on_fit_task_begin by MaxIterEstimator for iteration 0
+            on_fit_task_end by MaxIterEstimator for iteration 0
+            ...  # iterations 1 to 8
+            on_fit_task_begin by MaxIterEstimator for iteration 9
+            on_fit_task_end by MaxIterEstimator for iteration 9
+        on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
+        ...  # folds 1 to 3
+        on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
+            on_fit_task_begin by MaxIterEstimator for iteration 0
+            on_fit_task_end by MaxIterEstimator for iteration 0
+            ...  # iterations 1 to 8
+            on_fit_task_begin by MaxIterEstimator for iteration 9
+            on_fit_task_end by MaxIterEstimator for iteration 9
+        on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
     on_fit_task_end by MetaEstimatorCV for fit
     teardown by MetaEstimatorCV for fit
 
@@ -299,13 +298,26 @@ unbound functions (e.g. `cross_validate`) in the future.
 PR `#33404 <https://github.com/scikit-learn/scikit-learn/pull/33404>`__, for instance,
 proposes a new protocol for callback support in unbound functions.
 
+The setup and teardown hooks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `setup` and `teardown` hooks are not absolutely necessary at the time of writing
+since `on_fit_task_begin` and `on_fit_task_end` are also called at the beginning and end
+of fit as well, so they could in principle be used to set up and tear down the callback.
+The main motivations for including them are:
+
+- in anticipation for future extensions of the protocol to other methods than fit;
+- to separate technical concerns of resource management from semantic concerns related
+  to reacting to specific events during fit.
+
 Task granularity
 ~~~~~~~~~~~~~~~~
 
 The smallest task granularity considered in this SLEP is tasks dealing with the full
 dataset. For instance, the `on_fit_task_end` hook is called at the end of a loop
 iterating over the full dataset but not at the end of each step of such a loop. A
-smaller granularity would not allow the same level of flexibility.
+smaller granularity would not allow the same level of flexibility and consistency across
+estimators.
 
 Performance
 ~~~~~~~~~~~
