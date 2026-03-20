@@ -167,7 +167,7 @@ Callbacks must implement the following
         def on_fit_task_end(self, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
         def teardown(self, context): ...
 
-The 4 protocol members are referred to as callback hooks in the rest of this SLEP. The
+The 4 protocol methods are referred to as callback hooks in the rest of this SLEP. The
 `setup` and `teardown` hooks are called at the beginning and end of fit and should
 be used to set up and tear down the callback for the estimator. The `on_fit_task_begin`
 and `on_fit_task_end` hooks are called at the beginning and end of each task performed
