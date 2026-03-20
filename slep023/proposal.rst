@@ -5,9 +5,10 @@ SLEP023: Callback API
 =====================
 
 :Author: Jérémie du Boisberranger
-:Status: Draft
+:Status: Accepted
 :Type: Standards Track
 :Created: 2024-03-01
+:Resolution: https://github.com/scikit-learn/enhancement_proposals/pull/103
 
 Abstract
 --------
