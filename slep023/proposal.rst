@@ -138,18 +138,18 @@ A typical implementation of callback support in an estimator would look like thi
             callback_ctx = self._init_callback_context(
                 task_name="fit", max_subtasks=self.n_iter
             )
-            callback_ctx.call_on_fit_task_begin(X=X, y=y)
+            callback_ctx.call_on_fit_task_begin(estimator=self,X=X, y=y)
 
             for i in range(self.n_iter):
                 callback_subctx = callback_ctx.subcontext(
                     task_name=f"iteration {i}", task_id=i
-                ).call_on_fit_task_begin(X=X, y=y)
+                ).call_on_fit_task_begin(estimator=self, X=X, y=y)
 
                 # <computation part of the estimator>
 
-                callback_subctx.call_on_fit_task_end(X=X, y=y)
+                callback_subctx.call_on_fit_task_end(estimator=self, X=X, y=y)
 
-            callback_ctx.call_on_fit_task_end(X=X, y=y)
+            callback_ctx.call_on_fit_task_end(estimator=self, X=X, y=y)
 
             return self
 
