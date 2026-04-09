@@ -83,7 +83,7 @@ criteria.
 Commercial links
 ^^^^^^^^^^^^^^^^
 
-A blog article  should not be on a commercial product or serve advertisement for a
+A blog article should not be on a commercial product or serve advertisement for a
 company. Likewise the content of the post should be limited to the tool at hand, rather
 than using the tool to advertise a commercial ecosystem / tool.
 
