@@ -139,18 +139,18 @@ A typical implementation of callback support in an estimator would look like thi
             callback_ctx = self._init_callback_context(
                 task_name="fit", max_subtasks=self.n_iter
             )
-            callback_ctx.call_on_fit_task_begin(X=X, y=y)
+            callback_ctx.call_on_fit_task_begin(estimator=self,X=X, y=y)
 
             for i in range(self.n_iter):
                 callback_subctx = callback_ctx.subcontext(
                     task_name=f"iteration {i}", task_id=i
-                ).call_on_fit_task_begin(X=X, y=y)
+                ).call_on_fit_task_begin(estimator=self, X=X, y=y)
 
                 # <computation part of the estimator>
 
-                callback_subctx.call_on_fit_task_end(X=X, y=y)
+                callback_subctx.call_on_fit_task_end(estimator=self, X=X, y=y)
 
-            callback_ctx.call_on_fit_task_end(X=X, y=y)
+            callback_ctx.call_on_fit_task_end(estimator=self, X=X, y=y)
 
             return self
 
@@ -163,10 +163,10 @@ Callbacks must implement the following
 .. code-block:: python
 
     class FitCallback(Protocol):
-        def setup(self, context): ...
-        def on_fit_task_begin(self, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
-        def on_fit_task_end(self, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
-        def teardown(self, context): ...
+        def setup(self, estimator, context): ...
+        def on_fit_task_begin(self, estimator, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
+        def on_fit_task_end(self, estimator, context, *, X=None, y=None, metadata=None, fitted_estimator=None): ...
+        def teardown(self, estimator, context): ...
 
 The 4 protocol methods are referred to as callback hooks in the rest of this SLEP. The
 `setup` and `teardown` hooks are called at the beginning and end of fit and should
@@ -212,15 +212,15 @@ consider a callback registered on an estimator with a single level of iterations
 
     >>> estimator = MyEstimator(n_iter=10).set_callbacks(MyCallback())
     >>> estimator.fit(X, y)
-    setup by MaxIterEstimator for fit
-    on_fit_task_begin by MaxIterEstimator for fit
-        on_fit_task_begin by MaxIterEstimator for iteration 0
-        on_fit_task_end by MaxIterEstimator for iteration 0
+    setup by MyEstimator for fit
+    on_fit_task_begin by MyEstimator for fit
+        on_fit_task_begin by MyEstimator for iteration 0
+        on_fit_task_end by MyEstimator for iteration 0
         ...  # iterations 1 to 8
-        on_fit_task_begin by MaxIterEstimator for iteration 9
-        on_fit_task_end by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for fit
-    teardown by MaxIterEstimator for fit
+        on_fit_task_begin by MyEstimator for iteration 9
+        on_fit_task_end by MyEstimator for iteration 9
+    on_fit_task_end by MyEstimator for fit
+    teardown by MyEstimator for fit
 
 It doesn't matter whether `MyCallback` is auto-propagated or not since there is no
 sub-estimator to propagate it to in that case. Next, consider the case where the
@@ -231,25 +231,25 @@ that sub-estimator for different cross-validation folds:
 
     >>> estimator = MyEstimator(n_iter=10).set_callbacks(MyCallback())
     >>> MetaEstimatorCV(estimator, cv=5).fit(X, y)
-    setup by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
-    on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
-        on_fit_task_begin by MaxIterEstimator for iteration 0
-        on_fit_task_end by MaxIterEstimator for iteration 0
+    setup by MyEstimator for fit (MetaEstimatorCV fold 0)
+    on_fit_task_begin by MyEstimator for fit (MetaEstimatorCV fold 0)
+        on_fit_task_begin by MyEstimator for iteration 0
+        on_fit_task_end by MyEstimator for iteration 0
         ...  # iterations 1 to 8
-        on_fit_task_begin by MaxIterEstimator for iteration 9
-        on_fit_task_end by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
-    teardown by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
+        on_fit_task_begin by MyEstimator for iteration 9
+        on_fit_task_end by MyEstimator for iteration 9
+    on_fit_task_end by MyEstimator for fit (MetaEstimatorCV fold 0)
+    teardown by MyEstimator for fit (MetaEstimatorCV fold 0)
     ...  # folds 1 to 3
-    setup by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
-    on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
-        on_fit_task_begin by MaxIterEstimator for iteration 0
-        on_fit_task_end by MaxIterEstimator for iteration 0
+    setup by MyEstimator for fit (MetaEstimatorCV fold 4)
+    on_fit_task_begin by MyEstimator for fit (MetaEstimatorCV fold 4)
+        on_fit_task_begin by MyEstimator for iteration 0
+        on_fit_task_end by MyEstimator for iteration 0
         ...  # iterations 1 to 8
-        on_fit_task_begin by MaxIterEstimator for iteration 9
-        on_fit_task_end by MaxIterEstimator for iteration 9
-    on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
-    teardown by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
+        on_fit_task_begin by MyEstimator for iteration 9
+        on_fit_task_end by MyEstimator for iteration 9
+    on_fit_task_end by MyEstimator for fit (MetaEstimatorCV fold 4)
+    teardown by MyEstimator for fit (MetaEstimatorCV fold 4)
 
 The trace is similar to the first example, except that it is repeated for each fold. In
 particular, the `setup` and `teardown` hooks are called for every fit of the
@@ -262,21 +262,21 @@ callback registered on the meta-estimator:
     >>> MetaEstimatorCV(estimator, cv=5).set_callbacks(MyAutoPropagatedCallback()).fit(X, y)
     setup by MetaEstimatorCV for fit
     on_fit_task_begin by MetaEstimatorCV for fit
-        on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
-            on_fit_task_begin by MaxIterEstimator for iteration 0
-            on_fit_task_end by MaxIterEstimator for iteration 0
+        on_fit_task_begin by MyEstimator for fit (MetaEstimatorCV fold 0)
+            on_fit_task_begin by MyEstimator for iteration 0
+            on_fit_task_end by MyEstimator for iteration 0
             ...  # iterations 1 to 8
-            on_fit_task_begin by MaxIterEstimator for iteration 9
-            on_fit_task_end by MaxIterEstimator for iteration 9
-        on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 0)
+            on_fit_task_begin by MyEstimator for iteration 9
+            on_fit_task_end by MyEstimator for iteration 9
+        on_fit_task_end by MyEstimator for fit (MetaEstimatorCV fold 0)
         ...  # folds 1 to 3
-        on_fit_task_begin by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
-            on_fit_task_begin by MaxIterEstimator for iteration 0
-            on_fit_task_end by MaxIterEstimator for iteration 0
+        on_fit_task_begin by MyEstimator for fit (MetaEstimatorCV fold 4)
+            on_fit_task_begin by MyEstimator for iteration 0
+            on_fit_task_end by MyEstimator for iteration 0
             ...  # iterations 1 to 8
-            on_fit_task_begin by MaxIterEstimator for iteration 9
-            on_fit_task_end by MaxIterEstimator for iteration 9
-        on_fit_task_end by MaxIterEstimator for fit (MetaEstimatorCV fold 4)
+            on_fit_task_begin by MyEstimator for iteration 9
+            on_fit_task_end by MyEstimator for iteration 9
+        on_fit_task_end by MyEstimator for fit (MetaEstimatorCV fold 4)
     on_fit_task_end by MetaEstimatorCV for fit
     teardown by MetaEstimatorCV for fit
 
