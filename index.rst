@@ -17,12 +17,12 @@
     slep017/proposal
     slep018/proposal
     slep020/proposal
+    slep023/proposal
 
 .. toctree::
     :maxdepth: 1
     :caption: Under review
 
-    slep017/proposal
     slep026/proposal
 
 .. toctree::

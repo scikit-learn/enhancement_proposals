@@ -52,7 +52,8 @@ b. What is the new default scoring parameter in step 3?
    The fact that different scoring metrics focus on different things, i.e. ``predict``
    vs. ``predict_proba``, and not all classifiers provide ``predict_proba`` complicates
    a unified choice.
-   Possibilities are
+   Possibilities are:
+
    - D2 Brier score, ``"d2_brier_score"``, which is basically the same as R2 for
      regressors,
    - the objective function of the estimator, i.e. the penalized log loss for
