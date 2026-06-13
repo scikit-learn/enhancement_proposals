@@ -89,6 +89,9 @@ interpretation in terms of variances.
 --------------------
 
 1. Using R2 for quantile regression. Note that ``QuantileRegressor.score`` computes R2.
+   Hint: This is bad practice because R2, like squared error, are optimized by the
+   expected value while here one clearly wants a score that is optimized by the
+   corresponding quantile.
 2. Using a summary score like R2 or AUC with ``LeaveOneOut``, see
    https://github.com/scikit-learn/scikit-learn/issues/5097.
    A score is best computable per single sample/observation,
@@ -231,12 +234,6 @@ CV tool                     parameter       score used        comment
 ``LearningCurveDisplay``    ``score_name``  default ``None``  ``None`` means estimator's ``score`` method
 ``ValidationCurveDisplay``  ``score_name``  default ``None``  ``None`` means estimator's ``score`` method
 ==========================  ==============  ================  ===========================================
-
-==========================  ==========================  ================  ===========================================
-meta data routing           method/attribute/parameter  score used        comment
-==========================  ==========================  ================  ===========================================
-TODO
-==========================  ==========================  ================  ===========================================
 
 
 4. Solution
